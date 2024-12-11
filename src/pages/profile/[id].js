@@ -1,5 +1,6 @@
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/NavBar";
+//import ProfilePicturesForm from "@/components/register/ProfilePicturesForm";
 import { CustomButton } from "@/components/CustomUi";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const [meetingInterest, setMeetingInterest] = useState("");
   const [hobbies, setHobbies] = useState([]);
   const [aboutMe, setAboutMe] = useState("");
+  const [avatar, setAvatars] = useState("");
 
   const router = useRouter();
   const id = router.query;
@@ -55,14 +57,41 @@ export default function ProfilePage() {
     }
   };
 
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    const newAvatars = { ...avatar };
+
+    // ตรวจสอบว่าอัปโหลดไฟล์มากกว่า 5 ไฟล์หรือไม่
+    files.forEach((file, index) => {
+      const uniqueId = Date.now() + index;
+      if (Object.keys(newAvatars).length < 5) {
+        newAvatars[uniqueId] = file;
+      }
+    });
+
+    setAvatars(newAvatars);
+  };
+
+  // กดลบรูปภาพ
+  const handleRemoveImage = (event, avatarKey) => {
+    event.preventDefault();
+
+    // สร้างสำเนาของ avatars และลบ avatar ที่ต้องการ
+    const updatedAvatars = { ...avatar };
+    delete updatedAvatars[avatarKey]; // ลบ avatar ตาม avatarKey
+
+    // อัปเดต state โดยการใช้สำเนาที่แก้ไขแล้ว
+    setAvatars(updatedAvatars);
+  };
+
   // เมื่อเปิดหน้าเว็บให้ function getProfileData ทำงาน
   useEffect(() => {
     getUsers();
   }, [id]);
 
   return (
-    <div>
-      <nav className="nav-bar-section">
+    <>
+      <nav className="nav-bar-section w-full">
         <NavBar />
       </nav>
       <main className="info-section">
@@ -281,6 +310,67 @@ export default function ProfilePage() {
               </label>
             </div>
 
+            {/* Picture upload */}
+            <div className="upload-picture">
+              <form
+                className="w-full max-w-4xl space-y-4"
+                encType="multipart/form-data"
+              >
+                <h1 className="mb-4 text-2xl text-[24px] font-bold leading-[30px] tracking-[-2%] text-second-500">
+                  Profile pictures
+                </h1>
+
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <label className="form-control">
+                    <span className="label-text">Upload at least 2 photos</span>
+                  </label>
+                </div>
+                <div className="mx-auto flex h-auto w-full flex-wrap gap-4 rounded-lg border-gray-300 px-0 lg:w-[931px]">
+                  {Object.keys(avatar).map((avatarKey, index) => (
+                    <div
+                      key={avatarKey}
+                      className="relative h-[120px] w-[120px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-gray-300 sm:h-[140px] sm:w-[140px] lg:h-[167px] lg:w-[167px]"
+                    >
+                      <img
+                        src={URL.createObjectURL(avatar[avatarKey])}
+                        alt={`profile-${avatarKey}`}
+                        className="h-full w-full rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={(event) => handleRemoveImage(event, avatarKey)}
+                        className="absolute right-[-5px] top-[-10px] flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xl text-white hover:bg-red-700"
+                      >
+                        x
+                      </button>
+                    </div>
+                  ))}
+                  {Object.keys(avatar).length < 5 && (
+                    <div className="relative h-[120px] w-[120px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-gray-300 sm:h-[140px] sm:w-[140px] lg:h-[167px] lg:w-[167px]">
+                      <label
+                        htmlFor="upload"
+                        className="flex h-full w-full items-center justify-center text-sm text-gray-500"
+                      >
+                        {Object.keys(avatar).length === 0 ? (
+                          <span>คลิกเพื่อเลือกไฟล์</span>
+                        ) : (
+                          <span>เลือกไฟล์ใหม่</span>
+                        )}
+                        <input
+                          id="upload"
+                          name="avatar"
+                          type="file"
+                          placeholder="Enter last name here"
+                          onChange={handleFileChange}
+                          className="absolute z-10 h-full w-full cursor-pointer opacity-0"
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </form>
+            </div>
+
             {/* Button: Delete account desktop */}
             <div className="delete-account hidden lg:flex lg:justify-end">
               <button
@@ -406,6 +496,6 @@ export default function ProfilePage() {
       <footer className="footer-section">
         <Footer />
       </footer>
-    </div>
+    </>
   );
 }
