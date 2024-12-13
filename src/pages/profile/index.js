@@ -10,9 +10,10 @@ import axios from "axios";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
-  const [getUserData, setGetUserData] = useState({});
+  //const [getUserData, setGetUserData] = useState({});
   const [name, setName] = useState("");
-  const [birth, setBirth] = useState("");
+  const [age, setAge] = useState("");
+  //const [birth, setBirth] = useState("");
   const [location, setLocation] = useState("");
   const [city, setCity] = useState("");
   const [username, setUsername] = useState("");
@@ -23,37 +24,54 @@ export default function ProfilePage() {
   const [meetingInterest, setMeetingInterest] = useState("");
   const [hobbies, setHobbies] = useState([]);
   const [aboutMe, setAboutMe] = useState("");
+  const [image, setImage] = useState("");
   const [avatar, setAvatars] = useState("");
 
   const router = useRouter();
-  const id = router.query;
 
   // ดึงข้อมูล users โดยระบุ id
-  const getUsers = async () => {
-    //const token = localStorage.getItem("token");
-    //const userData = jwtDecode(token);
-    //console.log(token);
-
+  const getUsersById = async () => {
     try {
+      //const token = localStorage.get("token");
+      //const userDataFromToken = jwtDecode(token);
+
+      const { id } = {
+        id: 7,
+        name: "Tong",
+        sexual_preference: "Female",
+        image_profile: [
+          "https://res.cloudinary.com/dg2ehb6zy/image/upload/v1733841816/test/pic/yoeapgceodompzxkul96.jpg",
+          "https://res.cloudinary.com/dg2ehb6zy/image/upload/v1733841817/test/pic/h77b5cosenizmriqoopd.jpg",
+        ],
+        iat: 1733975459,
+        exp: 1733979059,
+      };
+
       const result = await axios.get(
         `http://localhost:3000/api/users/profile/${id}`,
       );
-      const test = JSON.parse(result.data.name || "[]");
-      console.log(test);
-      setGetUserData(result.data);
-      // setName(result.data.name);
-      // setBirth(result.data.birth); //
-      // setLocation(result.data.location);
-      // setCity(result.data.city);
-      // setUsername(result.data.username);
-      // setEmail(result.data.email); //
-      // setSexIdentity(result.data.sex); //
-      // setSexPref(result.data.sex); //
-      // setRacialPref(result.data.racial); //
-      // setMeetingInterest(result.data.meeting); //
-      // setAboutMe(result.data.aboutme); //
-    } catch (error) {
-      console.log(error);
+
+      const fetchDate = new Date(result.data.date_of_birth)
+        .toISOString()
+        .split("T")[0];
+
+      // เก็บค่าของ result ไว้ใน state
+      setDate(fetchDate);
+      setName(result.data.name);
+      setAge(result.data.age);
+      setLocation(result.data.location);
+      setCity(result.data.city);
+      setEmail(result.data.email);
+      setUsername(result.data.username);
+      setSexIdentity(result.data.gender);
+      setSexPref(result.data.sexual_preference);
+      setRacialPref(result.data.racial_preference);
+      setMeetingInterest(result.data.meeting_interest);
+      setAboutMe(result.data.about_me);
+
+      console.log(result);
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -86,8 +104,8 @@ export default function ProfilePage() {
 
   // เมื่อเปิดหน้าเว็บให้ function getProfileData ทำงาน
   useEffect(() => {
-    getUsers();
-  }, [id]);
+    getUsersById();
+  }, []);
 
   return (
     <>
@@ -128,7 +146,17 @@ export default function ProfilePage() {
                     className="modal overflow-y-auto"
                   >
                     <div className="">
-                      <PreviewProfile />
+                      <PreviewProfile
+                        name={name}
+                        age={age}
+                        city={city}
+                        location={location}
+                        sexIdentity={sexIdentity}
+                        sexPref={sexPref}
+                        racialPref={racialPref}
+                        meetingInterest={meetingInterest}
+                        aboutMe={aboutMe}
+                      />
                     </div>
                   </dialog>
                   <CustomButton
@@ -157,9 +185,7 @@ export default function ProfilePage() {
                       type="date"
                       name="date"
                       value={date}
-                      onChange={(event) => {
-                        setDate(event.target.value);
-                      }}
+                      onChange={(e) => setDate(e.target.value)}
                       className="input input-bordered h-12 w-full rounded-[8px] border-[1px] border-fourth-400 py-3 pl-3 pr-4 lg:w-full"
                     />
                   </label>
@@ -170,6 +196,8 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 lg:w-full"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                     />
                   </label>
                 </div>
@@ -181,7 +209,7 @@ export default function ProfilePage() {
                     </span>
                     <select className="select select-bordered h-12 w-full border-fourth-400">
                       <option disabled selected>
-                        Bangkok
+                        {city}
                       </option>
                       <option>Songkhla</option>
                       <option>Chiangmai</option>
@@ -193,7 +221,7 @@ export default function ProfilePage() {
                     </span>
                     <select className="select select-bordered h-12 w-full border-fourth-400">
                       <option disabled selected>
-                        Thailand
+                        {location}
                       </option>
                       <option>Japan</option>
                       <option>China</option>
@@ -210,6 +238,7 @@ export default function ProfilePage() {
                       type="text"
                       placeholder="name@website.com"
                       className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 placeholder-fourth-900"
+                      value={email}
                       disabled
                     />
                   </label>
@@ -221,6 +250,8 @@ export default function ProfilePage() {
                       type="text"
                       placeholder="At least 6 character"
                       className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 placeholder-fourth-900"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                     />
                   </label>
                 </div>
@@ -241,10 +272,10 @@ export default function ProfilePage() {
                     </span>
                     <select className="select select-bordered h-12 w-full border-fourth-400">
                       <option disabled selected>
-                        Female
+                        {sexPref}
                       </option>
-                      <option>Male</option>
-                      <option>LGBTQ+</option>
+                      {/* <option>Male</option>
+                      <option>LGBTQ+</option> */}
                     </select>
                   </label>
                   <label className="sexual-identities-section flex w-full flex-col gap-1 lg:order-1">
@@ -253,10 +284,10 @@ export default function ProfilePage() {
                     </span>
                     <select className="select select-bordered h-12 w-full border-fourth-400">
                       <option disabled selected>
-                        Male
+                        {sexIdentity}
                       </option>
-                      <option>Female</option>
-                      <option>LGBTQ+</option>
+                      {/* <option>Female</option>
+                      <option>LGBTQ+</option> */}
                     </select>
                   </label>
                 </div>
@@ -268,9 +299,9 @@ export default function ProfilePage() {
                     </span>
                     <select className="select select-bordered h-12 w-full border-fourth-400">
                       <option disabled selected>
-                        Friends
+                        {meetingInterest}
                       </option>
-                      <option>Others</option>
+                      {/* <option>Others</option> */}
                     </select>
                   </label>
                   <label className="racial-preferences-section flex w-full flex-col gap-1 lg:order-1">
@@ -279,10 +310,10 @@ export default function ProfilePage() {
                     </span>
                     <select className="select select-bordered h-12 w-full border-fourth-400">
                       <option disabled selected>
-                        Asian
+                        {racialPref}
                       </option>
-                      <option>Chinese</option>
-                      <option>Japanese</option>
+                      {/* <option>Chinese</option>
+                      <option>Japanese</option> */}
                     </select>
                   </label>
                 </div>
@@ -306,6 +337,8 @@ export default function ProfilePage() {
                   type="text"
                   placeholder="Write something about yourself"
                   className="h-28 w-full rounded-[8px] border border-fourth-400 px-4 pb-14 placeholder-fourth-900"
+                  value={aboutMe}
+                  onChange={(e) => setAboutMe(e.target.value)}
                 />
               </label>
             </div>
@@ -408,6 +441,11 @@ export default function ProfilePage() {
                       <CustomButton
                         buttonType="primary"
                         className="w-[125px] text-base font-bold"
+                        onClick={() =>
+                          document
+                            .getElementById("delete-confirm-desktop")
+                            .close()
+                        }
                       >
                         No, I don't
                       </CustomButton>
@@ -437,7 +475,17 @@ export default function ProfilePage() {
               className="modal overflow-y-auto"
             >
               <div className="w-full">
-                <PreviewProfile />
+                <PreviewProfile
+                  name={name}
+                  age={age}
+                  city={city}
+                  location={location}
+                  sexIdentity={sexIdentity}
+                  sexPref={sexPref}
+                  racialPref={racialPref}
+                  meetingInterest={meetingInterest}
+                  aboutMe={aboutMe}
+                />
               </div>
             </dialog>
 
@@ -484,6 +532,9 @@ export default function ProfilePage() {
                   <CustomButton
                     buttonType="primary"
                     className="text-base font-bold"
+                    onClick={() =>
+                      document.getElementById("delete-confirm-mobile").close()
+                    }
                   >
                     No, I don't
                   </CustomButton>

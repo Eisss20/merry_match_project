@@ -6,7 +6,7 @@ import { IoHeart } from "react-icons/io5";
 import { HobbyBlog } from "../HobbyBlog";
 import { useRouter } from "next/navigation";
 
-export function PreviewProfile() {
+export function PreviewProfile(props) {
   const router = useRouter();
 
   return (
@@ -69,16 +69,16 @@ export function PreviewProfile() {
               <header className="head-section flex flex-col gap-3 lg:gap-2">
                 <div className="name-age flex flex-row gap-4">
                   <h2 className="text-5xl font-extrabold text-fourth-900">
-                    Jon Snow
+                    {props.name}
                   </h2>
                   <h2 className="text-5xl font-extrabold text-fourth-700">
-                    26
+                    {props.age}
                   </h2>
                 </div>
                 <div className="location flex flex-row gap-4">
                   <FaLocationDot className="h-6 w-6 text-primary-200" />
                   <span className="text-xl font-semibold text-fourth-700">
-                    Bangkok, Thailand
+                    {props.city}, {props.location}
                   </span>
                 </div>
               </header>
@@ -90,7 +90,7 @@ export function PreviewProfile() {
                     Sexual identities
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    Male
+                    {props.sexIdentity}
                   </span>
                 </label>
                 <label className="sexual-preferences flex flex-row gap-2 py-[6px]">
@@ -98,7 +98,7 @@ export function PreviewProfile() {
                     Sexual preferences
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    Female
+                    {props.sexPref}
                   </span>
                 </label>
                 <label className="racial-preferences flex flex-row gap-2 py-[6px]">
@@ -106,7 +106,7 @@ export function PreviewProfile() {
                     Racial preferences
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    Asian
+                    {props.racialPref}
                   </span>
                 </label>
                 <label className="meeting-interests flex flex-row gap-2 py-[6px]">
@@ -114,7 +114,7 @@ export function PreviewProfile() {
                     Meeting interests
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    Friends
+                    {props.meetingInterest}
                   </span>
                 </label>
               </div>
@@ -123,7 +123,7 @@ export function PreviewProfile() {
               <div className="about-me flex flex-col gap-3 lg:gap-4">
                 <h4 className="text-2xl font-bold text-fourth-900">About me</h4>
                 <span className="text-base font-normal text-fourth-900">
-                  I know nothing...but you
+                  {props.aboutMe}
                 </span>
               </div>
 
