@@ -5,17 +5,18 @@ import { CustomButton } from "@/components/CustomUi";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PreviewProfile } from "@/components/profile/PreviewProfile";
-import axios from "axios";
+import axios, { all } from "axios";
 //import { jwtDecode } from "jwt-decode";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
-  //const [getUserData, setGetUserData] = useState({});
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
-  //const [birth, setBirth] = useState("");
   const [location, setLocation] = useState("");
+  const [allLocation, setAllLocation] = useState([]);
   const [city, setCity] = useState("");
+  const [allCity, setAllCity] = useState([]);
+  const [filterCity, setFilterCity] = useState([]);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [sexIdentity, setSexIdentity] = useState("");
@@ -26,8 +27,70 @@ export default function ProfilePage() {
   const [aboutMe, setAboutMe] = useState("");
   const [image, setImage] = useState("");
   const [avatar, setAvatars] = useState("");
+  const [allGender, setAllGender] = useState([]);
+  const [allMeeting, setAllMeeting] = useState([]);
+  const [allRacial, setAllRacial] = useState([]);
 
   const router = useRouter();
+
+  // console.log("State sexPref", sexPref);
+  // console.log("State sexIdentity", sexIdentity);
+  // console.log("State meetingInterest", meetingInterest);
+  // console.log("State racialPref", racialPref);
+
+  // ดึง racial
+  const getRacial = async () => {
+    try {
+      const result = await axios.get(`api/racials`);
+
+      setAllRacial(result.data);
+      // console.log("Racial response", result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ดึง meeting interest
+  const getMeetingInterest = async () => {
+    try {
+      const result = await axios.get(`api/meetings`);
+
+      setAllMeeting(result.data);
+      // console.log("Meeting response", result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ดึง gender
+  const getGender = async () => {
+    try {
+      const result = await axios.get(`api/genders`);
+
+      setAllGender(result.data);
+      // console.log("Gender response", result.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ดึง city และ location
+  const getAddress = async () => {
+    try {
+      const result = await axios.get(`/api/address`);
+
+      setAllCity(result.data.cities);
+      setAllLocation(
+        result.data.locations.map((loc) => ({
+          value: loc.location_id,
+          label: loc.location_name,
+        })),
+      );
+      //console.log("Address response", result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // ดึงข้อมูล users โดยระบุ id
   const getUsersById = async () => {
@@ -69,9 +132,9 @@ export default function ProfilePage() {
       setMeetingInterest(result.data.meeting_interest);
       setAboutMe(result.data.about_me);
 
-      console.log(result);
-    } catch (e) {
-      console.log(e);
+      // console.log("User data response", result);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -106,6 +169,40 @@ export default function ProfilePage() {
   useEffect(() => {
     getUsersById();
   }, []);
+
+  // เมื่อเปิดหน้าเว็บให้ function getAddress ทำงาน
+  useEffect(() => {
+    getAddress();
+  }, []);
+
+  // เมื่อเปิดหน้าเว็บให้ function getGender ทำงาน
+  useEffect(() => {
+    getGender();
+  }, []);
+
+  // เมื่อเปิดหน้าเว็บให้ function getMeetingInterest ทำงาน
+  useEffect(() => {
+    getMeetingInterest();
+  }, []);
+
+  // เมื่อเปิดหน้าเว็บให้ function getRacial ทำงาน
+  useEffect(() => {
+    getRacial();
+  }, []);
+
+  // เมื่อเปิดหน้าเว็บให้ทำการ filter location กับ city ให้สัมพันธ์กัน
+  useEffect(() => {
+    if (location) {
+      const filteredCities = allCity.filter(
+        (city) => city.location_name === location,
+      );
+      setFilterCity(filteredCities);
+      // console.log("Location", location);
+      // console.log("Filter City", filteredCities);
+    } else {
+      setFilterCity([]);
+    }
+  }, [location, allCity]);
 
   return (
     <>
@@ -207,24 +304,41 @@ export default function ProfilePage() {
                     <span className="text-base font-normal text-utility-second">
                       City
                     </span>
-                    <select className="select select-bordered h-12 w-full border-fourth-400">
-                      <option disabled selected>
-                        {city}
-                      </option>
-                      <option>Songkhla</option>
-                      <option>Chiangmai</option>
+                    <select
+                      className="select select-bordered h-12 w-full border-fourth-400"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    >
+                      <option value="">{city}</option>
+                      {filterCity
+                        .filter((cityItem) => cityItem.city_name !== city)
+                        .map((cityItem) => (
+                          <option
+                            key={cityItem.city_id}
+                            value={cityItem.city_name}
+                          >
+                            {cityItem.city_name}
+                          </option>
+                        ))}
                     </select>
                   </label>
                   <label className="location-section flex w-full flex-col gap-1 lg:order-1">
                     <span className="text-base font-normal text-utility-second">
                       Location
                     </span>
-                    <select className="select select-bordered h-12 w-full border-fourth-400">
-                      <option disabled selected>
-                        {location}
-                      </option>
-                      <option>Japan</option>
-                      <option>China</option>
+                    <select
+                      className="select select-bordered h-12 w-full border-fourth-400"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <option value="">{location}</option>
+                      {allLocation
+                        .filter((loc) => loc.label !== location)
+                        .map((loc) => (
+                          <option key={loc.value} value={loc.label}>
+                            {loc.label}
+                          </option>
+                        ))}
                     </select>
                   </label>
                 </div>
@@ -270,24 +384,38 @@ export default function ProfilePage() {
                     <span className="text-base font-normal text-utility-second">
                       Sexual preferences
                     </span>
-                    <select className="select select-bordered h-12 w-full border-fourth-400">
-                      <option disabled selected>
-                        {sexPref}
-                      </option>
-                      {/* <option>Male</option>
-                      <option>LGBTQ+</option> */}
+                    <select
+                      className="select select-bordered h-12 w-full border-fourth-400"
+                      value={sexPref}
+                      onChange={(e) => setSexPref(e.target.value)}
+                    >
+                      <option value="">{sexPref}</option>
+                      {allGender
+                        .filter((gen) => gen.gender_name !== sexPref)
+                        .map((gen) => (
+                          <option key={gen.gender_id} value={gen.gender_name}>
+                            {gen.gender_name}
+                          </option>
+                        ))}
                     </select>
                   </label>
                   <label className="sexual-identities-section flex w-full flex-col gap-1 lg:order-1">
                     <span className="text-base font-normal text-utility-second">
                       Sexual identities
                     </span>
-                    <select className="select select-bordered h-12 w-full border-fourth-400">
-                      <option disabled selected>
-                        {sexIdentity}
-                      </option>
-                      {/* <option>Female</option>
-                      <option>LGBTQ+</option> */}
+                    <select
+                      className="select select-bordered h-12 w-full border-fourth-400"
+                      value={sexIdentity}
+                      onChange={(e) => setSexIdentity(e.target.value)}
+                    >
+                      <option value="">{sexIdentity}</option>
+                      {allGender
+                        .filter((gen) => gen.gender_name !== sexIdentity)
+                        .map((gen) => (
+                          <option key={gen.gender_id} value={gen.gender_name}>
+                            {gen.gender_name}
+                          </option>
+                        ))}
                     </select>
                   </label>
                 </div>
@@ -297,23 +425,44 @@ export default function ProfilePage() {
                     <span className="text-base font-normal text-utility-second">
                       Meeting interests
                     </span>
-                    <select className="select select-bordered h-12 w-full border-fourth-400">
-                      <option disabled selected>
-                        {meetingInterest}
-                      </option>
-                      {/* <option>Others</option> */}
+                    <select
+                      className="select select-bordered h-12 w-full border-fourth-400"
+                      value={meetingInterest}
+                      onChange={(e) => setMeetingInterest(e.target.value)}
+                    >
+                      <option value="">{meetingInterest}</option>
+                      {allMeeting
+                        .filter((meet) => meet.meeting_name !== meetingInterest)
+                        .map((meet) => (
+                          <option
+                            key={meet.meeting_interest_id}
+                            value={meet.meeting_name}
+                          >
+                            {meet.meeting_name}
+                          </option>
+                        ))}
                     </select>
                   </label>
                   <label className="racial-preferences-section flex w-full flex-col gap-1 lg:order-1">
                     <span className="text-base font-normal text-utility-second">
                       Racial preferences
                     </span>
-                    <select className="select select-bordered h-12 w-full border-fourth-400">
-                      <option disabled selected>
-                        {racialPref}
-                      </option>
-                      {/* <option>Chinese</option>
-                      <option>Japanese</option> */}
+                    <select
+                      className="select select-bordered h-12 w-full border-fourth-400"
+                      value={racialPref}
+                      onChange={(e) => setRacialPref(e.target.value)}
+                    >
+                      <option value="">{racialPref}</option>
+                      {allRacial
+                        .filter((racial) => racial.racial_name !== racialPref)
+                        .map((racial) => (
+                          <option
+                            key={racial.racial_id}
+                            value={racial.racial_name}
+                          >
+                            {racial.racial_name}
+                          </option>
+                        ))}
                     </select>
                   </label>
                 </div>
