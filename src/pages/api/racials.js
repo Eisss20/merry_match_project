@@ -4,14 +4,14 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
       const results = await connectionPool.query(
-        "SELECT gender_id, gender_name FROM gender",
+        "SELECT racial_id, racial_name FROM racial_identity",
       );
 
       return res.status(200).json(results.rows);
     } catch (error) {
       console.log(error);
       return res.status(500).json({
-        message: "Server could not get gender list because database connection",
+        message: "Server could not get racial list because database connection",
       });
     }
   }
