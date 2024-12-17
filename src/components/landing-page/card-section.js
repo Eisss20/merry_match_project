@@ -6,7 +6,7 @@ export default function CardSection() {
       description: "Lorem ipsum is a placeholder text",
     },
     {
-      emoji: "😁",
+      emoji: "",
       title: "Explore and find the one you like",
       description: "Lorem ipsum is a placeholder text",
     },

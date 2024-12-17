@@ -8,7 +8,6 @@ import WhyMerrySection from "@/components/landing-page/whymarry";
 export default function Homepage() {
   return (
     <>
-
 <NavBar/>
  <HeaderSection/>
 <WhyMerrySection/>
