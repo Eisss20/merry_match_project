@@ -15,7 +15,7 @@ export default function HeaderSection() {
         <div className="absolute -left-[0.5rem] top-[4rem] hidden h-10 w-10 rounded-full bg-second-700 lg:block"></div>
         <div className="absolute right-[4rem] top-[25rem] hidden h-10 w-10 rounded-full bg-second-800 lg:block"></div>
         <div className="absolute right-[5.7rem] top-[25.9rem] hidden rounded-full lg:block">
-          😄
+         
         </div>
         <div className="absolute right-[11rem] top-[28.5rem] hidden h-2 w-2 rounded-full bg-third-600 lg:block"></div>
 
