@@ -1,12 +1,12 @@
 export default function CardSection() {
   const steps = [
     {
-      emoji: "😎",
+      emoji: "",
       title: "Upload your cool picture",
       description: "Lorem ipsum is a placeholder text",
     },
     {
-      emoji: "😁",
+      emoji: "",
       title: "Explore and find the one you like",
       description: "Lorem ipsum is a placeholder text",
     },
