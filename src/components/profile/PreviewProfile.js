@@ -3,11 +3,33 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import { IoArrowForwardOutline } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
 import { IoHeart } from "react-icons/io5";
+import { useState, useEffect } from "react";
 import { HobbyBlog } from "../HobbyBlog";
 import { useRouter } from "next/navigation";
 
-export function PreviewProfile(props) {
+export function PreviewProfile({
+  name,
+  age,
+  city,
+  location,
+  sexIdentity,
+  sexPref,
+  racialPref,
+  meetingInterest,
+  aboutMe,
+  hobby,
+}) {
+  const [hobbyList, setHobbyList] = useState([]);
+
   const router = useRouter();
+
+  // เช็คค่าว่า props hobby ที่รับมาเป็น Array หรือไม่
+  useEffect(() => {
+    if (Array.isArray(hobby)) {
+      setHobbyList(hobby);
+    }
+  }, [hobby]); //ถ้า hobby มีการเปลี่ยนแปลง useEffect จะทำงาน
+  // console.log("hobbylist", hobbyList);
 
   return (
     <>
@@ -69,16 +91,16 @@ export function PreviewProfile(props) {
               <header className="head-section flex flex-col gap-3 lg:gap-2">
                 <div className="name-age flex flex-row gap-4">
                   <h2 className="text-5xl font-extrabold text-fourth-900">
-                    {props.name}
+                    {name}
                   </h2>
                   <h2 className="text-5xl font-extrabold text-fourth-700">
-                    {props.age}
+                    {age}
                   </h2>
                 </div>
                 <div className="location flex flex-row gap-4">
                   <FaLocationDot className="h-6 w-6 text-primary-200" />
                   <span className="text-xl font-semibold text-fourth-700">
-                    {props.city}, {props.location}
+                    {city}, {location}
                   </span>
                 </div>
               </header>
@@ -90,7 +112,7 @@ export function PreviewProfile(props) {
                     Sexual identities
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    {props.sexIdentity}
+                    {sexIdentity}
                   </span>
                 </label>
                 <label className="sexual-preferences flex flex-row gap-2 py-[6px]">
@@ -98,7 +120,7 @@ export function PreviewProfile(props) {
                     Sexual preferences
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    {props.sexPref}
+                    {sexPref}
                   </span>
                 </label>
                 <label className="racial-preferences flex flex-row gap-2 py-[6px]">
@@ -106,7 +128,7 @@ export function PreviewProfile(props) {
                     Racial preferences
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    {props.racialPref}
+                    {racialPref}
                   </span>
                 </label>
                 <label className="meeting-interests flex flex-row gap-2 py-[6px]">
@@ -114,7 +136,7 @@ export function PreviewProfile(props) {
                     Meeting interests
                   </span>
                   <span className="text-base font-normal text-fourth-700">
-                    {props.meetingInterest}
+                    {meetingInterest}
                   </span>
                 </label>
               </div>
@@ -123,7 +145,7 @@ export function PreviewProfile(props) {
               <div className="about-me flex flex-col gap-3 lg:gap-4">
                 <h4 className="text-2xl font-bold text-fourth-900">About me</h4>
                 <span className="text-base font-normal text-fourth-900">
-                  {props.aboutMe}
+                  {aboutMe}
                 </span>
               </div>
 
@@ -133,9 +155,11 @@ export function PreviewProfile(props) {
                   Hobbies and Interests
                 </h4>
                 <div className="hobby-list flex flex-row gap-3">
-                  <HobbyBlog />
-                  <HobbyBlog />
-                  <HobbyBlog />
+                  {hobbyList.map((option) => {
+                    return (
+                      <HobbyBlog key={option.value} hobbyName={option.label} />
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -1,12 +1,12 @@
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/NavBar";
-//import ProfilePicturesForm from "@/components/register/ProfilePicturesForm";
+import HobbiesProfilePage from "@/components/profile/HobbySection";
 import { CustomButton } from "@/components/CustomUi";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PreviewProfile } from "@/components/profile/PreviewProfile";
 import axios, { all } from "axios";
-//import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
@@ -30,13 +30,19 @@ export default function ProfilePage() {
   const [allGender, setAllGender] = useState([]);
   const [allMeeting, setAllMeeting] = useState([]);
   const [allRacial, setAllRacial] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
   const router = useRouter();
 
-  // console.log("State sexPref", sexPref);
-  // console.log("State sexIdentity", sexIdentity);
-  // console.log("State meetingInterest", meetingInterest);
-  // console.log("State racialPref", racialPref);
+  const handleUpdateOptions = (options) => {
+    setSelectedOptions(options); // รับค่าจากไฟล์ HobbySection และอัปเดตที่นี่
+  };
+  // console.log("select from hobbysection", selectedOptions);
+
+  // update keyword hobby
+  const updateHobbies = (selectedOptions) => {
+    setHobbies(selectedOptions);
+  };
 
   // ดึง racial
   const getRacial = async () => {
@@ -94,25 +100,26 @@ export default function ProfilePage() {
 
   // ดึงข้อมูล users โดยระบุ id
   const getUsersById = async () => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     try {
-      //const token = localStorage.get("token");
-      //const userDataFromToken = jwtDecode(token);
+      const token = localStorage.getItem("token");
+      const { id } = jwtDecode(token);
 
-      const { id } = {
-        id: 7,
-        name: "Tong",
-        sexual_preference: "Female",
-        image_profile: [
-          "https://res.cloudinary.com/dg2ehb6zy/image/upload/v1733841816/test/pic/yoeapgceodompzxkul96.jpg",
-          "https://res.cloudinary.com/dg2ehb6zy/image/upload/v1733841817/test/pic/h77b5cosenizmriqoopd.jpg",
-        ],
-        iat: 1733975459,
-        exp: 1733979059,
-      };
+      // const { id } = {
+      //   id: 7,
+      //   name: "Tong",
+      //   sexual_preference: "Female",
+      //   image_profile: [
+      //     "https://res.cloudinary.com/dg2ehb6zy/image/upload/v1733841816/test/pic/yoeapgceodompzxkul96.jpg",
+      //     "https://res.cloudinary.com/dg2ehb6zy/image/upload/v1733841817/test/pic/h77b5cosenizmriqoopd.jpg",
+      //   ],
+      //   iat: 1733975459,
+      //   exp: 1733979059,
+      // };
 
-      const result = await axios.get(
-        `http://localhost:3000/api/users/profile/${id}`,
-      );
+      const result = await axios.get(`${apiBaseUrl}/api/users/profile/${id}`);
+
+      // console.log("result from get", result.data);
 
       const fetchDate = new Date(result.data.date_of_birth)
         .toISOString()
@@ -131,6 +138,8 @@ export default function ProfilePage() {
       setRacialPref(result.data.racial_preference);
       setMeetingInterest(result.data.meeting_interest);
       setAboutMe(result.data.about_me);
+      // setHobbies(result.data.hobbies);
+      // setHobbyId(result.data.hobbies_id);
 
       // console.log("User data response", result);
     } catch (error) {
@@ -197,8 +206,6 @@ export default function ProfilePage() {
         (city) => city.location_name === location,
       );
       setFilterCity(filteredCities);
-      // console.log("Location", location);
-      // console.log("Filter City", filteredCities);
     } else {
       setFilterCity([]);
     }
@@ -227,7 +234,6 @@ export default function ProfilePage() {
                   <CustomButton
                     buttonType="secondary"
                     customStyle="w-[162px] text-base font-bold"
-                    //onClick={() => router.push("/profile/preview-profile")}
                     onClick={() =>
                       document
                         .getElementById("preview-profile-desktop")
@@ -253,6 +259,7 @@ export default function ProfilePage() {
                         racialPref={racialPref}
                         meetingInterest={meetingInterest}
                         aboutMe={aboutMe}
+                        hobby={selectedOptions}
                       />
                     </div>
                   </dialog>
@@ -467,15 +474,24 @@ export default function ProfilePage() {
                   </label>
                 </div>
 
-                <label className="hobbies-section flex w-full flex-col gap-1">
+                {/* <label className="hobbies-section flex w-full flex-col gap-1">
                   <span className="text-base font-normal text-utility-second">
                     Hobbies / Interests (Maximum 10)
                   </span>
                   <input
                     type="text"
                     className="h-14 w-full rounded-[8px] border border-fourth-400 px-4 py-3 placeholder-fourth-900"
+                    value={hobbies}
+                    onChange={(e) => setHobbies(e.target.value)}
                   />
-                </label>
+                </label> */}
+
+                <div className="mt-6">
+                  <HobbiesProfilePage
+                    updateHobbies={updateHobbies}
+                    onOptionsChange={handleUpdateOptions}
+                  />
+                </div>
               </div>
 
               <label className="about-me-section flex w-full flex-col gap-1">
@@ -610,7 +626,6 @@ export default function ProfilePage() {
             <CustomButton
               buttonType="secondary"
               customStyle="w-[162px] text-base font-bold"
-              //onClick={() => router.push("/profile/preview-profile")}
               onClick={() =>
                 document.getElementById("preview-profile-mobile").showModal()
               }
@@ -634,6 +649,7 @@ export default function ProfilePage() {
                   racialPref={racialPref}
                   meetingInterest={meetingInterest}
                   aboutMe={aboutMe}
+                  hobby={selectedOptions}
                 />
               </div>
             </dialog>

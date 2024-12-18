@@ -9,7 +9,9 @@ export default async function handler(req, res) {
       SELECT 
       user_profiles.date_of_birth, 
       user_profiles.name,
-      user_Profiles.age,    
+      user_Profiles.age,  
+      array_agg(hobbies.hobby_name) AS hobbies,  
+      array_agg(hobbies_profiles.hobbies_id) AS hobbies_id,
       city.city_name AS city, 
       location.location_name AS location, 
       users.username AS username,    
@@ -19,7 +21,7 @@ export default async function handler(req, res) {
       racial_identity.racial_name AS racial_preference,
       meeting_interest.meeting_name AS meeting_interest,
       user_profiles.about_me,
-      user_Profiles.image_profile
+      user_profiles.image_profile
       FROM user_profiles
 
       LEFT JOIN users 
@@ -43,8 +45,31 @@ export default async function handler(req, res) {
       LEFT JOIN meeting_interest
       ON user_profiles.meeting_interest_id = meeting_interest.meeting_interest_id
 
-      WHERE user_profiles.user_id = $1;
-    `;
+      LEFT JOIN hobbies_profiles
+      ON user_profiles.profile_id = hobbies_profiles.profile_id
+
+      LEFT JOIN hobbies
+      ON hobbies_profiles.hobbies_id = hobbies.hobbies_id
+
+      WHERE user_profiles.user_id = $1
+
+      GROUP BY
+      user_profiles.profile_id,
+      user_profiles.user_id,
+      user_profiles.date_of_birth,
+      user_profiles.name,
+      user_profiles.age,
+      city.city_name,
+      location.location_name,
+      users.username,
+      users.email,
+      g1.gender_name,
+      g2.gender_name,
+      racial_identity.racial_name,
+      meeting_interest.meeting_name,
+      user_profiles.about_me,
+      user_profiles.image_profile
+      `;
 
       //const query = `select * from user_profiles where user_id = $1`;
       const { rows } = await connectionPool.query(userProfileQuery, [id]);
