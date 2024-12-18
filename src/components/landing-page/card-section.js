@@ -11,12 +11,12 @@ export default function CardSection() {
       description: "Lorem ipsum is a placeholder text",
     },
     {
-      emoji: "🥳",
+      emoji: "",
       title: "Click 'Merry' for get to know!",
       description: "Lorem ipsum is a placeholder text",
     },
     {
-      emoji: "😘",
+      emoji: "",
       title: "Start chatting and  relationship",
       description: "Lorem ipsum is a placeholder text",
     },
