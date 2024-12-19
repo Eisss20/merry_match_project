@@ -5,7 +5,6 @@ import { RxCross2 } from "react-icons/rx";
 import { IoHeart } from "react-icons/io5";
 import { useState, useEffect } from "react";
 import { HobbyBlog } from "../HobbyBlog";
-import { useRouter } from "next/navigation";
 
 export function PreviewProfile({
   name,
@@ -18,10 +17,35 @@ export function PreviewProfile({
   meetingInterest,
   aboutMe,
   hobby,
+  image,
 }) {
-  const [hobbyList, setHobbyList] = useState([]);
+  const [hobbyList, setHobbyList] = useState([]); // เก็บ hobby
+  const [imageList, setImageList] = useState([]); // เก็บ image
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // เก็บ index ของรูปที่กำลังแสดง
 
-  const router = useRouter();
+  // ฟังก์ชันสำหรับเลื่อนรูปไปข้างหน้า
+  const goToNextImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === imageList.length - 1 ? 0 : prevIndex + 1,
+    );
+  };
+
+  // ฟังก์ชันสำหรับเลื่อนรูปถอยหลัง
+  const goToPreviousImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? imageList.length - 1 : prevIndex - 1,
+    );
+  };
+
+  // เช็คค่าว่า props image ที่รับมาเป็น Object หรือไม่ แล้วแปลงเป็น Array
+  useEffect(() => {
+    if (image && typeof image === "object") {
+      const imageArray = Object.values(image);
+      setImageList(imageArray); // ใส่ลง state หลังแปลงเป็น Array
+      setCurrentImageIndex(0);
+    }
+  }, [image]); //ถ้า image มีการเปลี่ยนแปลง useEffect จะทำงาน
+  // console.log("imagelist", imageList);
 
   // เช็คค่าว่า props hobby ที่รับมาเป็น Array หรือไม่
   useEffect(() => {
@@ -30,6 +54,19 @@ export function PreviewProfile({
     }
   }, [hobby]); //ถ้า hobby มีการเปลี่ยนแปลง useEffect จะทำงาน
   // console.log("hobbylist", hobbyList);
+
+  // ฟังก์ชันสำหรับแสดง URL ของรูปภาพ
+  const getImageUrl = (img) => {
+    if (img && img.image_url) {
+      return img.image_url; // ถ้าเป็น Object ที่มี image_url ให้ใช้ URL นั้น
+    }
+    if (img instanceof File) {
+      return URL.createObjectURL(img); // ถ้าเป็น File ใช้ URL.createObjectURL() เพื่อแปลงเป็น URL
+    }
+    return ""; // ถ้าไม่มี URL คืนค่าเป็นค่าว่าง
+  };
+
+  const currentImage = imageList[currentImageIndex];
 
   return (
     <>
@@ -47,18 +84,20 @@ export function PreviewProfile({
             {/* show-image  */}
             <div className="image relative lg:w-full">
               <form method="dialog">
-                <button
-                  className="btn btn-ghost absolute rounded-xl lg:hidden"
-                  //onClick={() => router.push("/profile")}
-                >
+                <button className="btn btn-ghost absolute rounded-xl lg:hidden">
                   <IoArrowBackOutline className="h-4 w-4 text-white" />
                 </button>
               </form>
-              <img
-                src="/images/test1.png"
-                alt="man in black"
-                className="h-[315px] w-full rounded-bl-3xl rounded-br-3xl object-cover object-center lg:h-[436px] lg:rounded-[32px]"
-              />
+              {imageList.length > 0 && (
+                <div>
+                  <img
+                    src={getImageUrl(currentImage)}
+                    alt={`Image ${currentImageIndex + 1}`}
+                    className="h-[315px] w-full rounded-bl-3xl rounded-br-3xl object-cover object-center lg:h-[436px] lg:rounded-[32px]"
+                  />
+                </div>
+              )}
+
               <div className="dislike-like-button absolute left-1/2 top-[285px] flex -translate-x-1/2 flex-row gap-6 lg:top-[404px]">
                 <button className="dislike btn h-[60px] w-[60px] rounded-2xl bg-white drop-shadow-xl">
                   <RxCross2 className="text-5xl text-fourth-700" />
@@ -71,14 +110,21 @@ export function PreviewProfile({
               {/* image-wrapper */}
               <div className="image-wrapper flex flex-row justify-between">
                 <div className="image-number px-6 py-3 text-fourth-700">
-                  1<span className="text-fourth-600">/2</span>
+                  {currentImageIndex + 1}
+                  <span className="text-fourth-600">/{imageList.length}</span>
                 </div>
 
                 <div className="image-arrow">
-                  <button className="btn btn-ghost join-item rounded-xl bg-white">
+                  <button
+                    className="btn btn-ghost join-item rounded-xl bg-white"
+                    onClick={goToPreviousImage}
+                  >
                     <IoArrowBackOutline className="h-4 w-4 text-fourth-600" />
                   </button>
-                  <button className="btn btn-ghost join-item rounded-xl bg-white">
+                  <button
+                    className="btn btn-ghost join-item rounded-xl bg-white"
+                    onClick={goToNextImage}
+                  >
                     <IoArrowForwardOutline className="h-4 w-4 text-fourth-600" />
                   </button>
                 </div>

@@ -3,9 +3,8 @@ import { Footer } from "@/components/NavBar";
 import HobbiesProfilePage from "@/components/profile/HobbySection";
 import { CustomButton } from "@/components/CustomUi";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { PreviewProfile } from "@/components/profile/PreviewProfile";
-import axios, { all } from "axios";
+import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 export default function ProfilePage() {
@@ -25,19 +24,20 @@ export default function ProfilePage() {
   const [meetingInterest, setMeetingInterest] = useState("");
   const [hobbies, setHobbies] = useState([]);
   const [aboutMe, setAboutMe] = useState("");
-  const [image, setImage] = useState("");
-  const [avatar, setAvatars] = useState("");
+  // const [image, setImage] = useState([]);
+  const [avatar, setAvatars] = useState([]);
   const [allGender, setAllGender] = useState([]);
   const [allMeeting, setAllMeeting] = useState([]);
   const [allRacial, setAllRacial] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
 
-  const router = useRouter();
+  // console.log("image in state avatar", avatar);
 
+  // รับค่าจากไฟล์ HobbySection และอัปเดตที่นี่ เพื่อส่งค่าไปยังหน้า PreviewProfile
   const handleUpdateOptions = (options) => {
     setSelectedOptions(options); // รับค่าจากไฟล์ HobbySection และอัปเดตที่นี่
   };
-  // console.log("select from hobbysection", selectedOptions);
+  // console.log("selected from hobbysection", selectedOptions);
 
   // update keyword hobby
   const updateHobbies = (selectedOptions) => {
@@ -125,6 +125,12 @@ export default function ProfilePage() {
         .toISOString()
         .split("T")[0];
 
+      // ตรวจสอบว่าข้อมูลที่ get มาเป็น Array หรือ Object และมีค่า
+      const formattedAvatar = result.data.image_profiles.reduce((acc, img) => {
+        acc[img.image_profile_id] = { image_url: img.image_url };
+        return acc;
+      }, {});
+
       // เก็บค่าของ result ไว้ใน state
       setDate(fetchDate);
       setName(result.data.name);
@@ -138,39 +144,35 @@ export default function ProfilePage() {
       setRacialPref(result.data.racial_preference);
       setMeetingInterest(result.data.meeting_interest);
       setAboutMe(result.data.about_me);
-      // setHobbies(result.data.hobbies);
-      // setHobbyId(result.data.hobbies_id);
-
-      // console.log("User data response", result);
+      setAvatars(formattedAvatar);
     } catch (error) {
       console.log(error);
     }
   };
 
+  // กดเพิ่มรูปภาพ
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
-    const newAvatars = { ...avatar };
+    const updatedAvatars = { ...avatar };
 
     // ตรวจสอบว่าอัปโหลดไฟล์มากกว่า 5 ไฟล์หรือไม่
     files.forEach((file, index) => {
-      const uniqueId = Date.now() + index;
-      if (Object.keys(newAvatars).length < 5) {
-        newAvatars[uniqueId] = file;
+      const uniqueId = `new-${Date.now()}-${index}`;
+      if (Object.keys(updatedAvatars).length < 5) {
+        updatedAvatars[uniqueId] = file;
       }
     });
 
-    setAvatars(newAvatars);
+    setAvatars(updatedAvatars);
   };
 
   // กดลบรูปภาพ
-  const handleRemoveImage = (event, avatarKey) => {
-    event.preventDefault();
-
+  const handleRemoveImage = (avatarKey) => {
     // สร้างสำเนาของ avatars และลบ avatar ที่ต้องการ
     const updatedAvatars = { ...avatar };
-    delete updatedAvatars[avatarKey]; // ลบ avatar ตาม avatarKey
+    delete updatedAvatars[avatarKey]; // ลบรูปถาพที่ถูกเลือก
 
-    // อัปเดต state โดยการใช้สำเนาที่แก้ไขแล้ว
+    // อัปเดต state
     setAvatars(updatedAvatars);
   };
 
@@ -260,6 +262,7 @@ export default function ProfilePage() {
                         meetingInterest={meetingInterest}
                         aboutMe={aboutMe}
                         hobby={selectedOptions}
+                        image={avatar}
                       />
                     </div>
                   </dialog>
@@ -524,19 +527,24 @@ export default function ProfilePage() {
                   </label>
                 </div>
                 <div className="mx-auto flex h-auto w-full flex-wrap gap-4 rounded-lg border-gray-300 px-0 lg:w-[931px]">
-                  {Object.keys(avatar).map((avatarKey, index) => (
+                  {/* แสดงรูปภาพจาก State avatar */}
+                  {Object.keys(avatar).map((avatarKey) => (
                     <div
                       key={avatarKey}
                       className="relative h-[120px] w-[120px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-gray-300 sm:h-[140px] sm:w-[140px] lg:h-[167px] lg:w-[167px]"
                     >
                       <img
-                        src={URL.createObjectURL(avatar[avatarKey])}
+                        src={
+                          avatar[avatarKey] instanceof File
+                            ? URL.createObjectURL(avatar[avatarKey]) // Preview สำหรับภาพใหม่
+                            : avatar[avatarKey].image_url // URL สำหรับภาพจาก Database
+                        }
                         alt={`profile-${avatarKey}`}
                         className="h-full w-full rounded-lg object-cover"
                       />
                       <button
                         type="button"
-                        onClick={(event) => handleRemoveImage(event, avatarKey)}
+                        onClick={() => handleRemoveImage(avatarKey)} // ฟังก์ชั่นลบรูปภาพ
                         className="absolute right-[-5px] top-[-10px] flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xl text-white hover:bg-red-700"
                       >
                         x
@@ -650,6 +658,7 @@ export default function ProfilePage() {
                   meetingInterest={meetingInterest}
                   aboutMe={aboutMe}
                   hobby={selectedOptions}
+                  image={avatar}
                 />
               </div>
             </dialog>

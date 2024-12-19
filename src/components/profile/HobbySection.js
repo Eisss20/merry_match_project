@@ -38,8 +38,6 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
             label: hobbyItem, // หากข้อมูลที่ได้มีค่าหรือชื่ออยู่ใน hobbyItem
           };
         });
-
-        // console.log("updatedSelected", updatedSelectedOptions);
         setSelectedOptions(updatedSelectedOptions);
       }
     } catch (error) {
@@ -113,10 +111,10 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
     setSelectedOptions(newSelectedOptions);
     setInputValue("");
     setIsDropdownOpen(false);
-    // console.log("newSelect", newSelectedOptions);
+    // console.log("newSelect", newSelectedOptions); // จะขึ้น log ตอนเพิ่ม hobby
     updateHobbies(newSelectedOptions);
   };
-  //  console.log("selectOption", selectedOptions);
+  // console.log("selectOption", selectedOptions); // จะขึ้น log hobby ที่เลือกแล้วอยู่ตลอด
 
   const handleRemoveOption = (value) => {
     setSelectedOptions(

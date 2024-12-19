@@ -10,8 +10,8 @@ export default async function handler(req, res) {
       user_profiles.date_of_birth, 
       user_profiles.name,
       user_Profiles.age,  
-      array_agg(hobbies.hobby_name) AS hobbies,  
-      array_agg(hobbies_profiles.hobbies_id) AS hobbies_id,
+      array_agg(DISTINCT hobbies.hobby_name) AS hobbies,  
+      array_agg(DISTINCT hobbies_profiles.hobbies_id) AS hobbies_id,
       city.city_name AS city, 
       location.location_name AS location, 
       users.username AS username,    
@@ -21,7 +21,16 @@ export default async function handler(req, res) {
       racial_identity.racial_name AS racial_preference,
       meeting_interest.meeting_name AS meeting_interest,
       user_profiles.about_me,
-      user_profiles.image_profile
+      COALESCE(
+            JSON_AGG(
+              json_build_object(
+                'image_profile_id', image_profiles.image_profile_id,
+                'image_url', image_profiles.image_profile_url,
+                'is_primary', image_profiles.is_primary
+              )
+            ) FILTER (WHERE image_profiles.image_profile_id IS NOT NULL),
+            '[]'
+          ) AS image_profiles
       FROM user_profiles
 
       LEFT JOIN users 
@@ -51,6 +60,9 @@ export default async function handler(req, res) {
       LEFT JOIN hobbies
       ON hobbies_profiles.hobbies_id = hobbies.hobbies_id
 
+      LEFT JOIN image_profiles 
+      ON user_profiles.profile_id = image_profiles.profile_id
+
       WHERE user_profiles.user_id = $1
 
       GROUP BY
@@ -67,8 +79,7 @@ export default async function handler(req, res) {
       g2.gender_name,
       racial_identity.racial_name,
       meeting_interest.meeting_name,
-      user_profiles.about_me,
-      user_profiles.image_profile
+      user_profiles.about_me
       `;
 
       //const query = `select * from user_profiles where user_id = $1`;
