@@ -7,6 +7,7 @@ export default async function handler(req, res) {
     try {
       const userProfileQuery = `
       SELECT 
+      user_profiles.user_id,
       user_profiles.date_of_birth, 
       user_profiles.name,
       user_Profiles.age,  
@@ -92,6 +93,19 @@ export default async function handler(req, res) {
     } catch (error) {
       console.log(error);
       return res.status(500).json({ error: "Failed to fetch user data" });
+    }
+  } else if (req.method === "DELETE") {
+    if (!id) {
+      return res.status(400).json({ error: "User ID is required." });
+    }
+    try {
+      const query = `DELETE FROM users WHERE user_id = $1`;
+      await connectionPool.query(query, [id]);
+
+      return res.status(200).json({ message: `User ${id} has been deleted!` });
+    } catch (error) {
+      console.error("Database error:", error);
+      return res.status(500).json({ error: "Failed to delete user account." });
     }
   }
 }

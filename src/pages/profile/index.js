@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import { PreviewProfile } from "@/components/profile/PreviewProfile";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
+  const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [location, setLocation] = useState("");
@@ -32,6 +34,9 @@ export default function ProfilePage() {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   // console.log("image in state avatar", avatar);
+  // console.log("UserID", userId);
+
+  const { deleteuser } = useAuth();
 
   // รับค่าจากไฟล์ HobbySection และอัปเดตที่นี่ เพื่อส่งค่าไปยังหน้า PreviewProfile
   const handleUpdateOptions = (options) => {
@@ -132,6 +137,7 @@ export default function ProfilePage() {
       }, {});
 
       // เก็บค่าของ result ไว้ใน state
+      setUserId(result.data.user_id);
       setDate(fetchDate);
       setName(result.data.name);
       setAge(result.data.age);
@@ -608,6 +614,9 @@ export default function ProfilePage() {
                       <CustomButton
                         buttonType="secondary"
                         className="w-[200px] text-base font-bold"
+                        onClick={() => {
+                          deleteuser(userId);
+                        }}
                       >
                         Yes, I want to delete
                       </CustomButton>
@@ -700,6 +709,9 @@ export default function ProfilePage() {
                   <CustomButton
                     buttonType="secondary"
                     className="text-base font-bold"
+                    onClick={() => {
+                      deleteuser(userId);
+                    }}
                   >
                     Yes, I want to delete
                   </CustomButton>

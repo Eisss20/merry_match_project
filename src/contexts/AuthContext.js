@@ -121,9 +121,31 @@ function AuthProvider({ children }) {
     router.push("/");
   };
 
+  const deleteuser = async (id) => {
+    try {
+      localStorage.removeItem("token");
+      setState({
+        ...state,
+        success: "Delete account successful.",
+        error: null,
+        user: null,
+      });
+
+      await axios.delete(`${apiBaseUrl}/api/users/profile/${id}`);
+
+      setIsAuthenticated(false);
+      router.push("/");
+    } catch (error) {
+      console.log(
+        "Delete account failed:",
+        error.response?.data || error.message,
+      );
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ state, login, logout, register, isAuthenticated }}
+      value={{ state, login, logout, register, deleteuser, isAuthenticated }}
     >
       {children}
     </AuthContext.Provider>
