@@ -1,68 +1,162 @@
-// ฟังก์ชันตรวจสอบว่า name เป็นภาษาอังกฤษและตัวแรกเป็นพิมพ์ใหญ่
+
 export const validateName = (name) => {
-  const regex = /^[A-Za-z]+$/;
-  if (!name) {
-    return "The name cannot be empty.";
-  }
+  const regex = /^[A-Za-z]+$/; 
   if (!regex.test(name)) {
-    return "The name should contain only English letters.";
+    return "Name must be in English only"; 
   }
   if (name[0] !== name[0].toUpperCase()) {
-    return "The first letter of the name should be uppercase.";
+    return "The first letter must be capitalized"; 
   }
-  return null; // หากไม่มีข้อผิดพลาด
+  if (name.length >= 20) {
+    return "Your name exceeds the 20-character limit"; 
+  }
+  return null; 
 };
 
-// ฟังก์ชันตรวจสอบว่า email อยู่ในรูปแบบที่ถูกต้อง
-export const validateEmail = (email) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) {
-    return "Please enter your email.";
+
+export const validateAge = (date) => {
+  if (!date) {
+    return "Please select your date of birth"; 
   }
-  if (!regex.test(email)) {
-    return "Please enter a valid email address.";
+
+  const today = new Date();
+  const birthDate = new Date(date);
+  const age = today.getFullYear() - birthDate.getFullYear();
+
+  // ตรวจสอบว่าปีปัจจุบันมากกว่าปีเกิดอย่างน้อย 18 ปี
+  const hasBirthdayPassedThisYear =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() >= birthDate.getDate());
+
+  const isOldEnough = age > 18 || (age === 18 && hasBirthdayPassedThisYear);
+
+  if (!isOldEnough) {
+    return "You must be over 18 years old";
   }
-  return null; // หากไม่มีข้อผิดพลาด
+
+  return ""; 
 };
 
-// ฟังก์ชันตรวจสอบข้อมูลที่จำเป็นว่าถูกกรอกครบถ้วน
-export const validateRequiredFieldsStep1 = (fields) => {
-  const requiredFieldsStep1 = [
-    "name",
-    "date",
-    "selectedLocation",
-    "citys",
-    "username",
-    "email",
-  ];
-
-  for (let field of requiredFieldsStep1) {
-    if (!fields[field] || fields[field].trim() === "") {
-      return `Please fill in all required fields in`;
-    }
+export const validateLocation = (location) => {
+  if (!location) {
+    return "Please select Location";
   }
-  return null; // หากกรอกครบ
+  return "";
 };
 
-// ฟังก์ชันตรวจสอบข้อมูลที่จำเป็นใน Step 2
-export const validateRequiredFieldsStep2 = (fields) => {
-  const requiredFieldsStep2 = [
-    "sexualIdentities",
-    "sexualPreferences",
-    "racialIdentities",
-    "racialPreferences",
-    "meetingInterests",
-    "hobbies",
-    "aboutme",
-  ];
-
-  for (let field of requiredFieldsStep2) {
-    if (
-      !fields[field] ||
-      (typeof fields[field] === "string" && fields[field].trim() === "")
-    ) {
-      return `Please fill in all required fields in`;
-    }
+export const validateCity = (city) => {
+  if (!city) {
+    return "Please select City";
   }
-  return null; // หากกรอกครบ
+  return ""; 
+};
+
+export const validateUsername = async (username) => {
+  if (!username) {
+    return "Please enter your username"; 
+  }
+
+  const response = await fetch("/api/auth/check-username", {
+    method: "POST",
+    body: JSON.stringify({ username }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const result = await response.json();
+
+  if (result.exists) {
+    return "Username is already taken";
+  }
+
+  return ""; 
+};
+
+
+export const validateEmail = async (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const trimmedEmail = email.trim(); 
+
+  if (!trimmedEmail) {
+    return "Please enter your email"; 
+  }
+
+  const response = await fetch("/api/auth/check-email", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const result = await response.json();
+
+  if (result.exists) {
+    return "Email is already registered";
+  }
+
+  
+  if (!trimmedEmail.includes("@")) {
+    return "The email address is invalid"; 
+  }
+
+  if (!emailRegex.test(trimmedEmail)) {
+    return "The email format is incorrect. Please ensure it follows the format example@example.com"; 
+  }
+
+  return ""; 
+};
+
+export const validatePassword = (password) => {
+  const lowerCaseRegex = /[a-z]/; 
+  const upperCaseRegex = /[A-Z]/; 
+  const numberRegex = /[0-9]/; 
+
+
+  if (password.length < 8) {
+    return "Your password must be at least 8 characters long"; 
+  }
+  if (!lowerCaseRegex.test(password)) {
+    return "The password must contain lowercase letters"; 
+  }
+  if (!upperCaseRegex.test(password)) {
+    return "The password must contain at least one uppercase letter"; 
+  }
+  if (!numberRegex.test(password)) {
+    return "The password must contain at least one number"; 
+  }
+  return ""; 
+};
+
+export const validateConfirmPassword = (password, confirm) => {
+  if (!confirm) {
+    return "Please enter your ConfirmPassword"; 
+  }
+  if (confirm !== password) {
+    return "The password and confirm password do not match"; 
+  }
+  return ""; 
+};
+
+export const validateRequiredFieldsStep1 = ({
+  name,
+  date,
+  selectedLocation,
+  citys,
+  username,
+  email,
+  password,
+  confirm,
+}) => {
+  if (
+    !name ||
+    !date ||
+    !selectedLocation ||
+    !citys ||
+    !username ||
+    !email ||
+    !password ||
+    !confirm
+  ) {
+    return "Please fill in all the required information";
+  }
+  return "";
 };

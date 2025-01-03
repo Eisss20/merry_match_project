@@ -12,7 +12,6 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  console.log("TESTSTEP1", req.method);
   if (req.method !== "POST") {
     return res.setHeader("Allow", ["POST"]).status(405).end();
   }
@@ -74,22 +73,33 @@ export default async function handler(req, res) {
                   .json({ message: "Password is required" });
               }
 
-              const salt = await bcrypt.genSalt(10);
-
-              user.password = await bcrypt.hash(user.password, salt);
-
-              const sqlQuery =
-                "SELECT * FROM users WHERE username = $1 OR email = $2";
+              const sqlQuery = `
+                SELECT username, email 
+                FROM users 
+                WHERE username = $1 OR email = $2
+              `;
               const { rows } = await connectionPool.query(sqlQuery, [
                 user.username,
                 user.email,
               ]);
 
               if (rows.length > 0) {
-                return res
-                  .status(400)
-                  .json({ message: "Username or email already exists" });
+                const duplicateFields = [];
+                rows.forEach((row) => {
+                  if (row.username === user.username)
+                    duplicateFields.push("username");
+                  if (row.email === user.email) duplicateFields.push("email");
+                });
+
+                return res.status(400).json({
+                  message: `Duplicate fields: ${duplicateFields.join(", ")}`,
+                  duplicateFields,
+                });
               }
+
+              const salt = await bcrypt.genSalt(10);
+
+              user.password = await bcrypt.hash(user.password, salt);
 
               const image_profile = [];
               if (req.files?.avatar) {

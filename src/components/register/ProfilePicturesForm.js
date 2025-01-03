@@ -3,6 +3,8 @@ const ProfilePicturesForm = ({
   avatar,
   handleFileChange,
   handleRemoveImage,
+  avatarError,
+  disabled,
 }) => {
   return (
     <form
@@ -15,7 +17,10 @@ const ProfilePicturesForm = ({
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <label className="form-control">
-          <span className="label-text">Upload at least 2 photos</span>
+          {/* แสดงข้อความ error ถ้ามี */}
+          {avatarError && (
+            <small className="ml-2 pt-2 text-red-600">{avatarError}</small>
+          )}
         </label>
       </div>
       <div className="mx-auto flex h-auto w-full flex-wrap gap-4 rounded-lg border-gray-300 p-4 lg:w-[931px]">

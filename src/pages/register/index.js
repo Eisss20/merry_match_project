@@ -10,10 +10,29 @@ import axios from "axios";
 import {
   validateEmail,
   validateName,
+  validateAge,
+  validateLocation,
+  validateCity,
+  validateUsername,
+  validatePassword,
+  validateConfirmPassword,
   validateRequiredFieldsStep1,
-  validateRequiredFieldsStep2,
 } from "@/utils/validateRegisterStep1";
+import {
+  validateSexualIdentities,
+  validateSexualpreferences,
+  validateRacialIdentities,
+  validateRacialPreferences,
+  validateMeetingInterests,
+  validatehobbies,
+  validateAboutme,
+  validateRequiredFieldsStep2,
+} from "@/utils/validateRegisterStep2";
+import { validateProfilePicture } from "@/utils/validateRegisterStep3";
 import ProfilePicturesForm from "@/components/register/ProfilePicturesForm";
+import Alert from "@/components/register/AlertRegister";
+import AlertStepTwo from "@/components/register/AlertRegisterstep2";
+import AlertStepThree from "@/components/register/AlertRegisterstep3";
 
 function RegisterPage() {
   const [name, setName] = useState("");
@@ -38,12 +57,35 @@ function RegisterPage() {
   const [locations, setLocations] = useState([]);
   const [cities, setCities] = useState([]);
   const [allCities, setAllCities] = useState([]);
+  const [nameError, setNameError] = useState("");
+  const [dateError, setDateError] = useState("");
+  const [locationError, setLocationError] = useState("");
+  const [citysError, setCitysError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertVisibleTwo, setAlertVisibleTwo] = useState(false);
+  const [alertVisibleThree, setAlertVisibleThree] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessageTwo, setErrorMessageTwo] = useState("");
+  const [errorMessageThree, setErrorMessageThree] = useState("");
+  const [sexualIdentitiesError, setSexualIdentitiesError] = useState("");
+
+  const [sexualPreferencesError, setSexualPreferencesError] = useState("");
+  const [racialIdentitiesError, setRacialIdentitiesError] = useState("");
+  const [racialPreferencesError, setRacialPreferencesError] = useState("");
+  const [meetingInterestsError, setMeetingInterestsError] = useState("");
+  const [hobbiesError, setHobbiesError] = useState("");
+  const [aboutmeError, setAboutmeError] = useState("");
+  const [avatarError, setAvatarError] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/auth/registerStep2");
-        console.log("API Response:", response.data);
 
         const genderOptions = response.data.genders.rows.map((item) => ({
           value: item.gender_id.toString(),
@@ -78,7 +120,7 @@ function RegisterPage() {
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/auth/registerStep2");
-        console.log("API Response:", response.data);
+
         setLocations(
           response.data.location.map((loc) => ({
             value: loc.location_id.toString(),
@@ -119,6 +161,14 @@ function RegisterPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const avatarError = validateProfilePicture(avatar);
+    if (avatarError) {
+      setErrorMessageThree(avatarError);
+      setAlertVisibleThree(true);
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", name);
     formData.append("date", date);
@@ -144,8 +194,12 @@ function RegisterPage() {
 
   const updateHobbies = (selectedOptions) => {
     sethobbies(selectedOptions);
+    setHobbiesError("");
   };
-  console.log("updateHobbies", updateHobbies);
+
+  const updateHobbiesError = (error) => {
+    setHobbiesError(error); // รับค่า error จาก CustomSelect
+  };
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -159,17 +213,32 @@ function RegisterPage() {
     });
 
     setAvatars(newAvatars);
+
+    if (Object.keys(newAvatars).length >= 2) {
+      setAvatarError(""); // ล้างข้อความ error
+    }
   };
+
   const handleRemoveImage = (event, avatarKey) => {
     event.preventDefault();
     const updatedAvatars = { ...avatar };
     delete updatedAvatars[avatarKey];
     setAvatars(updatedAvatars);
+
+    // ใช้ validateProfilePicture เพื่อตรวจสอบข้อผิดพลาด
+    const error = validateProfilePicture(updatedAvatars);
+    setAvatarError(error); // อัพเดตข้อความ error
   };
 
   const handleInputChange = (event) => {
-    setAboutme("");
-    setAboutme(event.target.value);
+    const { name, value } = event.target;
+    if (name === "aboutme") {
+      setAboutme(value);
+      const error = validateAboutme(value);
+      setAboutmeError(error);
+    }
+    // setAboutme("");
+    // setAboutme(event.target.value);
   };
 
   const [step, setStep] = useState(1);
@@ -178,11 +247,80 @@ function RegisterPage() {
     if (step > 1) {
       setStep(step - 1);
     }
+    if (step === 3) {
+      sethobbies(""); // รีเซ็ต hobbies
+      setHobbiesError(""); // รีเซ็ตข้อผิดพลาดของ hobbies
+    }
   };
 
-  const goToNextStep = (e) => {
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setName(value);
+
+    // เรียก validateName เพื่อตรวจสอบค่า
+    const error = validateName(value);
+    setNameError(error || ""); // อัปเดตข้อผิดพลาด
+  };
+
+  const handleNameBlur = () => {
+    if (name.trim() === "") {
+      // ถ้าช่องว่าง ให้เคลียร์ข้อความ error
+      setNameError("");
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    const error = validatePassword(value, confirm);
+    setPasswordError(error || "");
+  };
+  const handlePasswordBlur = () => {
+    if (password.trim() === "") {
+      setPasswordError("");
+    }
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    const value = e.target.value;
+    setConfirm(value); // ตั้งค่าค่า confirmPassword ใหม่
+
+    // ตรวจสอบว่า password และ confirmPassword ตรงกันหรือไม่
+    const error = validateConfirmPassword(password, value); // เรียกใช้ validateConfirmPassword
+    setConfirmPasswordError(error || ""); // อัปเดตข้อผิดพลาดถ้ามี
+  };
+
+  const handleDateChange = (event) => {
+    const selectedDate = event.target.value;
+    setDate(selectedDate);
+
+    // ตรวจสอบอายุ
+    const error = validateAge(selectedDate);
+    setDateError(error);
+  };
+
+  const handleCityChange = (e) => {
+    const value = e.target.value; // ดึงค่าจาก event
+    setCitys(value); // อัปเดต state ของ citys
+
+    // ตรวจสอบข้อผิดพลาดใหม่
+    const error = validateCity(value);
+    setCitysError(error || ""); // อัปเดตข้อความ error
+  };
+
+  const goToNextStep = async (e) => {
     e.preventDefault();
     if (step === 1) {
+      const nameError = validateName(name);
+      const passwordError = validatePassword(password);
+      const confirmPasswordError = validateConfirmPassword(password, confirm);
+      const dateError = validateAge(date);
+      const cityError = validateCity(citys);
+      const usernameError = await validateUsername(username);
+      const emailError = await validateEmail(email);
+      const locationError = validateLocation(selectedLocation);
+
       const requiredErrorStep1 = validateRequiredFieldsStep1({
         name,
         date,
@@ -190,43 +328,125 @@ function RegisterPage() {
         citys,
         username,
         email,
+        password,
+        confirm,
       });
-      if (requiredErrorStep1) {
-        alert(requiredErrorStep1);
+
+      const errorMessages = {
+        name: nameError,
+        email: emailError,
+        selectedLocation: locationError,
+        citys: cityError,
+        date: dateError,
+        username: usernameError,
+        password: passwordError,
+        confirm: confirmPasswordError,
+      };
+
+      if (
+        nameError ||
+        passwordError ||
+        confirmPasswordError ||
+        locationError ||
+        emailError ||
+        usernameError ||
+        dateError ||
+        cityError ||
+        requiredErrorStep1
+      ) {
+        setErrorMessage(
+          "Please provide all the required information accurately and completely",
+        );
+        setAlertVisible(true);
+
+        setNameError(errorMessages.name || "");
+        setEmailError(errorMessages.email || "");
+        setLocationError(errorMessages.selectedLocation || "");
+        setCitysError(errorMessages.citys || "");
+        setDateError(errorMessages.date || "");
+        setUsernameError(errorMessages.username || "");
+        setPasswordError(errorMessages.password || "");
+        setConfirmPasswordError(errorMessages.confirm || "");
+
         return;
       }
-      const nameError = validateName(name);
-      if (nameError) {
-        alert(nameError);
-        return;
-      }
-      const emailError = validateEmail(email);
-      if (emailError) {
-        alert(emailError);
-        return;
-      }
-      if (password !== confirm) {
-        alert("Password และ Confirm Password ไม่ตรงกัน!");
-        return;
-      }
+
+      setAlertVisible(false);
+      setStep(step + 1);
     }
+
     if (step === 2) {
+      const sexualIdentitiesError = validateSexualIdentities(sexualIdentities);
+      const sexualPreferencesError =
+        validateSexualpreferences(sexualPreferences);
+      const racialIdentitiesError = validateRacialIdentities(racialIdentities);
+      const racialPreferencesError =
+        validateRacialPreferences(racialPreferences);
+      const meetingInterestsError = validateMeetingInterests(meetingInterests);
+      const hobbiesError = validatehobbies(hobbies);
+      const aboutmeError = validateAboutme(aboutme);
+
+      if (hobbiesError) {
+        setHobbiesError(hobbiesError);
+      } else {
+        setHobbiesError("");
+      }
+
       const requiredErrorStep2 = validateRequiredFieldsStep2({
-        sexualIdentities,
+        sexualIdentity: sexualIdentities,
         sexualPreferences,
         racialIdentities,
         racialPreferences,
         meetingInterests,
         hobbies,
-        aboutme,
+        value: aboutme,
       });
-      if (requiredErrorStep2) {
-        alert(requiredErrorStep2);
+
+      const errorMessages = {
+        sexualIdentities: sexualIdentitiesError,
+        sexualPreferences: sexualPreferencesError,
+        racialIdentities: racialIdentitiesError,
+        racialPreferences: racialPreferencesError,
+        meetingInterests: meetingInterestsError,
+        hobbies: hobbiesError,
+        aboutme: aboutmeError,
+      };
+
+      if (
+        sexualIdentitiesError ||
+        sexualPreferencesError ||
+        racialIdentitiesError ||
+        racialPreferencesError ||
+        meetingInterestsError ||
+        hobbiesError ||
+        aboutmeError ||
+        requiredErrorStep2
+      ) {
+        setErrorMessageTwo(
+          "Please provide all the required information accurately and completely",
+        );
+        setAlertVisibleTwo(true);
+
+        setSexualIdentitiesError(errorMessages.sexualIdentities || "");
+        setSexualPreferencesError(errorMessages.sexualPreferences || "");
+        setRacialIdentitiesError(errorMessages.racialIdentities || "");
+        setRacialPreferencesError(errorMessages.racialPreferences || "");
+        setMeetingInterestsError(errorMessages.meetingInterests || "");
+        setHobbiesError(errorMessages.hobbies || "");
+        setAboutmeError(errorMessages.aboutme || "");
+
         return;
       }
-    }
-    if (step < 3) {
+
+      setAlertVisibleTwo(false);
       setStep(step + 1);
+    }
+    const avatarError = validateProfilePicture(avatar);
+    if (step < 3) {
+      if (avatarError) {
+        setAvatarError(avatarError);
+        return;
+      }
     } else {
       router.push("/login");
     }
@@ -236,7 +456,7 @@ function RegisterPage() {
     <>
       <NavBar />
       <BackgroundPage className="flex items-center justify-center bg-utility-bgMain">
-        <div className="container mt-10 flex min-h-screen flex-col justify-start lg:mt-36">
+        <div className="container mt-10 flex flex-col justify-start lg:mt-36">
           <div className="">
             <div className="container ml-2 flex-grow">
               {" "}
@@ -319,33 +539,50 @@ function RegisterPage() {
                           type="text"
                           name="name"
                           value={name}
-                          onChange={(event) => {
-                            setName(event.target.value);
-                          }}
+                          onChange={handleNameChange}
+                          disabled={alertVisible}
+                          onBlur={handleNameBlur}
                           className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                           placeholder="Name"
                         />
+                        {nameError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {nameError}
+                          </small>
+                        )}{" "}
+                        {/* แสดงข้อผิดพลาดขณะพิมพ์ */}
                       </label>
-                      <label className="form-control">
-                        <span className="label-text">Date of Birth</span>
-                        <input
-                          type="date"
-                          name="date"
-                          value={date}
-                          onChange={(event) => {
-                            setDate(event.target.value);
-                          }}
-                          className="input input-bordered h-[48px] appearance-none rounded-[8px] border-[1px] bg-white dark:bg-white"
-                          max={getCurrentDate()} // ใช้วันที่ปัจจุบันเป็นค่าของ max
-                        />
-                      </label>
+                      <div>
+                        <label className="form-control">
+                          <span className="label-text">Date of Birth</span>
+                          <input
+                            type="date"
+                            name="date"
+                            value={date}
+                            onChange={handleDateChange}
+                            disabled={alertVisible}
+                            className="input input-bordered h-[48px] appearance-none rounded-[8px] border-[1px] bg-white dark:bg-white"
+                            max={getCurrentDate()}
+                          />
+                        </label>
+                        {dateError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {dateError}
+                          </small>
+                        )}{" "}
+                        {/* แสดงข้อผิดพลาด */}
+                      </div>
 
                       <label className="form-control">
                         <span className="label-text">Location</span>
                         <select
                           name="location"
                           value={selectedLocation}
-                          onChange={(e) => setSelectedLocation(e.target.value)}
+                          onChange={(e) => {
+                            setSelectedLocation(e.target.value);
+                            setLocationError("");
+                          }}
+                          disabled={alertVisible}
                           className="select select-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                         >
                           <option value="" disabled>
@@ -357,6 +594,11 @@ function RegisterPage() {
                             </option>
                           ))}
                         </select>
+                        {locationError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {locationError}
+                          </small>
+                        )}
                       </label>
 
                       <label className="form-control">
@@ -364,8 +606,8 @@ function RegisterPage() {
                         <select
                           name="city"
                           value={citys}
-                          onChange={(e) => setCitys(e.target.value)}
-                          disabled={!selectedLocation} // ถ้าไม่มีการเลือก location ให้ disabled
+                          onChange={handleCityChange}
+                          disabled={!selectedLocation || alertVisible}
                           className="select select-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                         >
                           <option value="" disabled>
@@ -377,8 +619,13 @@ function RegisterPage() {
                             </option>
                           ))}
                         </select>
+                        {/* แสดงข้อความผิดพลาดถ้ามี */}
+                        {citysError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {citysError}
+                          </small>
+                        )}
                       </label>
-
                       <label className="form-control">
                         <span className="label-text">Username</span>
                         <input
@@ -387,10 +634,18 @@ function RegisterPage() {
                           value={username}
                           onChange={(event) => {
                             setUsername(event.target.value);
+                            setUsernameError("");
                           }}
+                          disabled={alertVisible}
+                          onBlur={handleNameBlur}
                           className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                           placeholder="Username"
                         />
+                        {usernameError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {usernameError}
+                          </small>
+                        )}
                       </label>
                       <label className="form-control">
                         <span className="label-text">Email</span>
@@ -400,10 +655,20 @@ function RegisterPage() {
                           value={email}
                           onChange={(event) => {
                             setEmail(event.target.value);
+                            setEmailError("");
                           }}
+                          disabled={alertVisible}
+                          onBlur={handleNameBlur}
                           className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                           placeholder="Email"
                         />
+
+                        {/* แสดงข้อผิดพลาดถ้ามี */}
+                        {emailError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {emailError}
+                          </small>
+                        )}
                       </label>
                       <label className="form-control">
                         <span className="label-text">Password</span>
@@ -411,53 +676,80 @@ function RegisterPage() {
                           type="password"
                           name="password"
                           value={password}
-                          onChange={(event) => {
-                            setPassword(event.target.value);
-                          }}
+                          onChange={handlePasswordChange}
+                          disabled={alertVisible}
+                          onBlur={handlePasswordBlur}
                           className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                           placeholder="Password"
                         />
+                        {passwordError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {passwordError}
+                          </small>
+                        )}{" "}
+                        {/* แสดงข้อผิดพลาด */}
                       </label>
+
                       <label className="form-control">
                         <span className="label-text">Confirm Password</span>
                         <input
                           type="password"
                           name="confirm"
                           value={confirm}
-                          onChange={(event) => {
-                            setConfirm(event.target.value);
-                          }}
+                          onChange={handleConfirmPasswordChange}
+                          disabled={alertVisible}
                           className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                           placeholder="Confirm Password"
                         />
+                        {confirmPasswordError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {confirmPasswordError}
+                          </small>
+                        )}{" "}
+                        {/* แสดงข้อผิดพลาด */}
                       </label>
                     </div>
                   )}
+                  <div className="pt-10">
+                    {alertVisible && (
+                      <Alert
+                        message={errorMessage}
+                        onClose={() => setAlertVisible(false)}
+                      />
+                    )}
+                  </div>
                 </div>
 
-                <div className="">
+                <div className="container">
                   {step === 2 && (
                     <div className="">
                       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <label className="form-control">
                           <span className="label-text">Sexual identities</span>
                           <select
-                            className="select select-bordered bg-white"
                             name="sexualIdentities"
                             value={sexualIdentities}
                             onChange={(event) => {
                               setSexualIdentities(event.target.value);
+                              setSexualIdentitiesError("");
                             }}
+                            disabled={alertVisibleTwo}
+                            className="select select-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
                           >
                             <option value="" disabled>
                               Select Sexual Identity
-                            </option>{" "}
+                            </option>
                             {preferencesOptions.map((gender) => (
                               <option key={gender.value} value={gender.value}>
                                 {gender.label}
                               </option>
                             ))}
                           </select>
+                          {sexualIdentitiesError && (
+                            <small className="ml-2 pt-2 text-red-600">
+                              {sexualIdentitiesError}
+                            </small>
+                          )}
                         </label>
 
                         <label className="form-control">
@@ -468,7 +760,9 @@ function RegisterPage() {
                             value={sexualPreferences}
                             onChange={(event) => {
                               setSexualPreferences(event.target.value);
+                              setSexualPreferencesError("");
                             }}
+                            disabled={alertVisibleTwo}
                           >
                             <option value="" disabled>
                               Select Sexual Preference
@@ -480,6 +774,11 @@ function RegisterPage() {
                               </option>
                             ))}
                           </select>
+                          {sexualPreferencesError && (
+                            <small className="ml-2 pt-2 text-red-600">
+                              {sexualPreferencesError}
+                            </small>
+                          )}
                         </label>
 
                         <label className="form-control">
@@ -490,7 +789,9 @@ function RegisterPage() {
                             value={racialIdentities}
                             onChange={(event) => {
                               setRacialIdentities(event.target.value);
+                              setRacialIdentitiesError("");
                             }}
+                            disabled={alertVisibleTwo}
                           >
                             <option value="" disabled>
                               Select Racial Preference
@@ -505,6 +806,11 @@ function RegisterPage() {
                               </option>
                             ))}
                           </select>
+                          {racialIdentitiesError && (
+                            <small className="ml-2 pt-2 text-red-600">
+                              {racialIdentitiesError}
+                            </small>
+                          )}
                         </label>
 
                         <label className="form-control">
@@ -515,7 +821,9 @@ function RegisterPage() {
                             value={racialPreferences}
                             onChange={(event) => {
                               setRacialPreferences(event.target.value);
+                              setRacialPreferencesError("");
                             }}
+                            disabled={alertVisibleTwo}
                           >
                             <option value="" disabled>
                               Select Racial Preference
@@ -530,6 +838,11 @@ function RegisterPage() {
                               </option>
                             ))}
                           </select>
+                          {racialPreferencesError && (
+                            <small className="ml-2 pt-2 text-red-600">
+                              {racialPreferencesError}
+                            </small>
+                          )}
                         </label>
 
                         <label className="form-control">
@@ -539,7 +852,9 @@ function RegisterPage() {
                             value={meetingInterests}
                             onChange={(event) => {
                               setMeetingInterests(event.target.value);
+                              setMeetingInterestsError("");
                             }}
+                            disabled={alertVisibleTwo}
                           >
                             <option value="" disabled>
                               Select Meeting Interest
@@ -554,13 +869,25 @@ function RegisterPage() {
                               </option>
                             ))}
                           </select>
+                          {meetingInterestsError && (
+                            <small className="ml-2 pt-2 text-red-600">
+                              {meetingInterestsError}
+                            </small>
+                          )}
                         </label>
                       </div>
                       <div className="mt-6">
                         <CustomSelect
                           formData={hobbies}
                           updateHobbies={updateHobbies}
+                          updateHobbiesError={updateHobbiesError}
+                          disabled={alertVisibleTwo}
                         />
+                        {hobbiesError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {hobbiesError}
+                          </small>
+                        )}
                       </div>
                       <div>
                         <label className="about-me-section mt-6 flex w-full flex-col gap-1">
@@ -570,27 +897,56 @@ function RegisterPage() {
                           <input
                             type="text"
                             placeholder="Write something about yourself"
-                            className="h-28 w-full rounded-[8px] border bg-white px-4 pb-14 placeholder-fourth-900 dark:bg-white"
+                            className={`h-28 w-full rounded-[8px] border px-4 pb-14 placeholder-fourth-900 ${
+                              alertVisibleTwo
+                                ? "cursor-not-allowed bg-gray-100 text-gray-500"
+                                : "bg-white dark:bg-white"
+                            }`}
                             name="aboutme"
                             value={aboutme}
-                            onChange={handleInputChange} // ใช้ฟังก์ชันที่กำหนดเพื่ออัปเดตค่า
+                            onChange={handleInputChange}
+                            disabled={alertVisibleTwo}
                           />
                         </label>
+                        {aboutmeError && (
+                          <small className="ml-2 pt-2 text-red-600">
+                            {aboutmeError}
+                          </small>
+                        )}
                       </div>
                     </div>
                   )}
+                  <div className="pt-10">
+                    {alertVisibleTwo && (
+                      <AlertStepTwo
+                        message={errorMessageTwo}
+                        onClose={() => setAlertVisibleTwo(false)}
+                      />
+                    )}
+                  </div>
                 </div>
 
-                <div>
-                  {step === 3 && (
-                    <div className="mr-20 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex">
-                      <ProfilePicturesForm
-                        avatar={avatar}
-                        handleFileChange={handleFileChange}
-                        handleRemoveImage={handleRemoveImage}
+                <div className="container">
+                  <div>
+                    {step === 3 && (
+                      <div className="mr-20 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex">
+                        <ProfilePicturesForm
+                          avatar={avatar}
+                          handleFileChange={handleFileChange}
+                          handleRemoveImage={handleRemoveImage}
+                          avatarError={avatarError}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="pb-10 pt-10">
+                    {alertVisibleThree && (
+                      <AlertStepThree
+                        message={errorMessageThree}
+                        onClose={() => setAlertVisibleThree(false)}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

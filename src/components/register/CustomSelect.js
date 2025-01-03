@@ -1,12 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { validatehobbies } from "@/utils/validateRegisterStep2";
 
-export default function CustomSelect({ formData, updateHobbies }) {
+export default function CustomSelect({
+  formData,
+  updateHobbies,
+  updateHobbiesError,
+  disabled,
+}) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [hobbiesError, setHobbiesError] = useState("");
+
+  const validateSelectedOptions = (options) => {
+    const error = validatehobbies(options); // ใช้ validatehobbies จาก utils
+    return error;
+  };
 
   const dropdownRef = useRef(null);
 
@@ -63,23 +75,36 @@ export default function CustomSelect({ formData, updateHobbies }) {
   };
 
   const handleSelectOption = (option) => {
-    if (selectedOptions.length >= 10) {
-      alert("You can select up to 10 options only.");
-      setIsDropdownOpen(false);
-      return;
-    }
     const newSelectedOptions = [...selectedOptions, option];
     setSelectedOptions(newSelectedOptions);
+
+    const error = validateSelectedOptions(newSelectedOptions);
+    setHobbiesError(error); // ถ้ามี error จะอัพเดตข้อความ error
+
+    updateHobbies(newSelectedOptions);
+    updateHobbiesError(error); // ส่ง error กลับไปที่ parent component
+
     setInputValue("");
     setIsDropdownOpen(false);
-
     updateHobbies(newSelectedOptions);
   };
 
+  // ส่ง hobbiesError กลับไปให้กับ parent
+  useEffect(() => {
+    updateHobbiesError(hobbiesError);
+  }, [hobbiesError]);
+
   const handleRemoveOption = (value) => {
-    setSelectedOptions(
-      selectedOptions.filter((option) => option.value !== value),
+    const updatedOptions = selectedOptions.filter(
+      (option) => option.value !== value,
     );
+
+    setSelectedOptions(updatedOptions);
+
+    // ตรวจสอบข้อผิดพลาด
+    const error = validateSelectedOptions(updatedOptions);
+    setHobbiesError(error); // อัปเดตข้อความ error
+    updateHobbies(updatedOptions); // ส่งข้อมูลไปยังฟังก์ชันหลัก
   };
 
   return (
@@ -99,8 +124,13 @@ export default function CustomSelect({ formData, updateHobbies }) {
           placeholder="Type to search or click..."
           value={inputValue}
           onChange={handleInputChange}
+          disabled={disabled}
           onFocus={handleInputFocus}
-          className="rounded-lg border border-gray-300 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className={`rounded-lg border p-2 focus:outline-none focus:ring-2 ${
+            disabled
+              ? "cursor-not-allowed bg-gray-100 text-gray-500"
+              : "border-gray-300 bg-white focus:ring-blue-400"
+          }`}
         />
         {/* //อันนี้เพิ่มค่า option แต่ติดปัญหาที่ไม่อัพเดท ก่อนส่งค่า */}
         {/* {isDropdownOpen && (
@@ -164,6 +194,9 @@ export default function CustomSelect({ formData, updateHobbies }) {
             </div>
           ))}
         </div>
+        {/* {hobbiesError && (
+          <small className="mt-2 block text-red-600">{hobbiesError}</small>
+        )} */}
       </div>
     </div>
   );
