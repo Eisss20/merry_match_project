@@ -169,6 +169,7 @@ function RightSidebar({
 }
 
 export default function Matches() {
+  const [userId, setUserId] = useState(null);
   const [userProfiles, setUserProfiles] = useState([]);
   const [genderList, setGenderList] = useState([]);
   const [selectedGender, setSelectedGender] = useState([]);
@@ -185,6 +186,8 @@ export default function Matches() {
       router.push("/login");
       return;
     }
+
+    setUserId(state.user?.id);
 
     const fetchData = async () => {
       try {
@@ -205,7 +208,7 @@ export default function Matches() {
         if (age[1]) queryParams.append("maxAge", age[1]);
 
         const profileResponse = await apiClient.get(
-          `/api/users/profile?${queryParams.toString()}`,
+          `/api/matches/profiles?userMasterId=${state.user?.id}&${queryParams.toString()}`,
         );
 
         setUserProfiles(profileResponse.data);
@@ -236,7 +239,11 @@ export default function Matches() {
           </div>
         ) : (
           <section className="relative flex w-[20rem] flex-grow flex-col justify-center">
-            <LazyCardSwiper userProfiles={userProfiles} />
+            <LazyCardSwiper
+              userId={userId}
+              userProfiles={userProfiles}
+              setUserProfiles={setUserProfiles}
+            />
 
             <p className="absolute bottom-5 z-30 w-full text-center text-fourth-700">
               Merry limit today <span className="text-primary-400">2/20</span>

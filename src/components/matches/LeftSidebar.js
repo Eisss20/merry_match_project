@@ -129,8 +129,8 @@ export default function LeftSidebar() {
         setUserId(state.user?.id);
 
         const fetchUrls = {
-          matches: `/api/matches/chats/${state.user?.id}?filter=matches`,
-          lastChats: `/api/matches/chats/${state.user?.id}?filter=lastChats`,
+          matches: `/api/matches/chats/?userMasterId=${state.user?.id}&filter=matches`,
+          lastChats: `/api/matches/chats/?userMasterId=${state.user?.id}&filter=lastChats`,
         };
 
         const responses = await Promise.all(

@@ -8,12 +8,34 @@ import { EffectCoverflow } from "swiper/modules";
 import "swiper/css";
 
 import { useState } from "react";
+import axios from "axios";
 
-function CardSwiper({ userProfiles }) {
-  const profileSlides = [...userProfiles];
-
+function CardSwiper({ userId, userProfiles, setUserProfiles }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [swiperInstance, setSwiperInstance] = useState(null);
+
+  const handleLikeUser = async (otherUserId) => {
+    const response = await axios.post("/api/matches/likes", {
+      user_master: userId,
+      user_other: otherUserId,
+    });
+
+    console.log("response:", response);
+
+    const newuserProfiles = [...userProfiles].filter(
+      (profile) => profile.user_id !== otherUserId,
+    );
+
+    setUserProfiles(newuserProfiles);
+  };
+
+  const handleDislikeUser = async (otherUserId) => {
+    const newuserProfiles = [...userProfiles].filter(
+      (profile) => profile.user_id !== otherUserId,
+    );
+
+    setUserProfiles(newuserProfiles);
+  };
 
   return (
     <Swiper
@@ -42,7 +64,7 @@ function CardSwiper({ userProfiles }) {
       }}
       className="h-full w-full"
     >
-      {profileSlides.map((profile, index) => (
+      {userProfiles.map((profile, index) => (
         <SwiperSlide key={index} className="!flex items-center">
           <div className="relative mx-auto aspect-square w-full min-w-[10rem] max-w-[32.5rem] rounded-3xl 2xl:w-[60%] 2xl:max-w-full">
             {/* Text */}
@@ -79,7 +101,7 @@ function CardSwiper({ userProfiles }) {
                 <button
                   className={`text-utility-primary transition-colors duration-300 ${
                     activeIndex === index
-                      ? activeIndex === profileSlides.length - 1
+                      ? activeIndex === userProfiles.length - 1
                         ? "cursor-default text-opacity-50"
                         : "hover:text-neutral-200"
                       : "text-opacity-0"
@@ -94,11 +116,15 @@ function CardSwiper({ userProfiles }) {
             {/* Like/dislike button */}
             <div className="absolute bottom-0 z-20 flex w-full translate-y-1/2 items-center justify-center gap-5">
               <button
+                type="button"
+                onClick={() => handleDislikeUser(profile.user_id)}
                 className={`flex aspect-square h-auto w-[14%] items-center justify-center rounded-3xl bg-utility-primary text-fourth-700 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-neutral-200 ${activeIndex !== index ? "bg-opacity-0 text-opacity-0 shadow-none" : ""}`}
               >
                 <FiX className="aspect-square h-[60%] w-auto" />
               </button>
               <button
+                type="button"
+                onClick={() => handleLikeUser(profile.user_id)}
                 className={`flex aspect-square h-auto w-[14%] items-center justify-center rounded-3xl bg-utility-primary text-primary-500 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-neutral-200 ${activeIndex !== index ? "bg-opacity-0 text-opacity-0 shadow-none" : ""}`}
               >
                 <GoHeartFill className="aspect-square h-[55%] w-auto" />
@@ -107,7 +133,7 @@ function CardSwiper({ userProfiles }) {
 
             {/* Div gradient */}
             <div
-              className={`absolute -bottom-1 z-10 h-full w-full rounded-3xl bg-cardGradient transition-colors duration-300 ${activeIndex !== index ? "blur-sm" : ""}`}
+              className={`bg-cardGradient absolute -bottom-1 z-10 h-full w-full rounded-3xl transition-colors duration-300 ${activeIndex !== index ? "blur-sm" : ""}`}
             ></div>
             <img
               src={profile.image_profile[0]}

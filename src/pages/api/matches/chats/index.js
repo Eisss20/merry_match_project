@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { id: otherUserId, filter } = req.query;
+    const { userMasterId, filter } = req.query;
 
     if (!filter) {
       res.status(500).json({ error: "Required filter query" });
@@ -21,15 +21,17 @@ export default async function handler(req, res) {
       ON matching.matching_id = chats.matching_id
       LEFT JOIN user_profiles
       ON matching.user_other = user_profiles.user_id
-      WHERE matching.user_master = $1
+      WHERE matching.user_master = $1 AND is_match = true
       ORDER BY chats.chat_room_id ASC
     `;
-    const otherUserDataValues = [otherUserId];
+    const otherUserDataValues = [userMasterId];
 
     const otherUserDataResult = await connectionPool.query(
       otherUserDataQuery,
       otherUserDataValues,
     );
+
+    console.log("otherUserDataResult", otherUserDataResult.rows);
 
     // Return matches data
     if (filter === "matches") {
