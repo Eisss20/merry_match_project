@@ -1,15 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { validateHobbies } from "@/utils/validateProfilePage";
 
-export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
+export default function HobbiesProfilePage({
+  updateHobbies,
+  onOptionsChange,
+  updateHobbiesError,
+  disabled,
+}) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [hobbiesError, setHobbiesError] = useState("");
 
   const dropdownRef = useRef(null);
+
+  const validateSelectedOptions = (options) => {
+    const error = validateHobbies(options); // ใช้ validatehobbies จาก utils
+    return error;
+  };
 
   // ส่งค่าทุกครั้งที่ selectedOptions เปลี่ยน
   useEffect(() => {
@@ -109,21 +121,37 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
     }
     const newSelectedOptions = [...selectedOptions, option];
     setSelectedOptions(newSelectedOptions);
+
+    const error = validateSelectedOptions(newSelectedOptions);
+    setHobbiesError(error); // ถ้ามี error จะอัพเดตข้อความ error
+
+    updateHobbies(newSelectedOptions);
+    updateHobbiesError(error); // ส่ง error กลับไปที่ parent component
+
     setInputValue("");
     setIsDropdownOpen(false);
-
     updateHobbies(newSelectedOptions);
   };
  
 
+  // ส่ง hobbiesError กลับไปให้กับ parent
+  useEffect(() => {
+    updateHobbiesError(hobbiesError);
+  }, [hobbiesError]);
+
   const handleRemoveOption = (value) => {
-    setSelectedOptions(
-      selectedOptions.filter((option) => option.value !== value),
+    const updatedOptions = selectedOptions.filter(
+      (option) => option.value !== value,
     );
+    setSelectedOptions(updatedOptions);
+    // ตรวจสอบข้อผิดพลาด
+    const error = validateSelectedOptions(updatedOptions);
+    setHobbiesError(error); // อัปเดตข้อความ error
+    updateHobbies(updatedOptions); // ส่งข้อมูลไปยังฟังก์ชันหลัก
   };
 
   return (
-    <div className="relative w-full flex flex-col gap-1" ref={dropdownRef}>
+    <div className="relative flex w-full flex-col gap-1" ref={dropdownRef}>
       {" "}
       {/* ใช้ ref ที่นี่ */}
       <label
@@ -140,7 +168,8 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
           value={inputValue}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
-          className="rounded-lg border border-fourth-400 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 h-12"
+          disabled={disabled}
+          className="h-12 rounded-lg border border-fourth-400 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
 
         {/* อันนี้ตัวแก้ไขโดยไม่ให้เพิ่ม option */}

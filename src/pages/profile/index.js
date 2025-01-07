@@ -8,11 +8,22 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/router";
+import {
+  validateName,
+  validateAge,
+  validateHobbies,
+  validateAboutme,
+  validateProfilePicture,
+  validateRequiredFieldsProfilePage,
+} from "@/utils/validateProfilePage";
+import Alert from "@/components/register/AlertRegister";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
+  const [dateError, setDateError] = useState("");
   const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [age, setAge] = useState("");
   const [location, setLocation] = useState([]);
   const [allLocation, setAllLocation] = useState([]);
@@ -26,15 +37,19 @@ export default function ProfilePage() {
   const [racialPref, setRacialPref] = useState("");
   const [meetingInterest, setMeetingInterest] = useState("");
   const [hobbies, setHobbies] = useState([]);
+  const [hobbiesError, setHobbiesError] = useState("");
   const [aboutMe, setAboutMe] = useState("");
-  // const [image, setImage] = useState([]);
+  const [aboutMeError, setAboutMeError] = useState("");
   const [avatar, setAvatars] = useState([]);
+  const [avatarError, setAvatarError] = useState("");
   const [allGender, setAllGender] = useState([]);
   const [allMeeting, setAllMeeting] = useState([]);
   const [allRacial, setAllRacial] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
 
-  // console.log("image in state avatar", avatar);
+  // console.log("hobby error", hobbiesError);
 
   const { deleteuser } = useAuth();
   const router = useRouter();
@@ -48,6 +63,12 @@ export default function ProfilePage() {
   // update keyword hobby
   const updateHobbies = (selectedOptions) => {
     setHobbies(selectedOptions);
+    setHobbiesError("");
+  };
+
+  // hobbies error
+  const updateHobbiesError = (error) => {
+    setHobbiesError(error); // รับค่า error จาก HobbiesProfilePage
   };
 
   // ดึง racial
@@ -103,6 +124,15 @@ export default function ProfilePage() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  // ตั้งค่า Max date
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   // ดึงข้อมูล users โดยระบุ id
@@ -201,7 +231,8 @@ export default function ProfilePage() {
   // console.log("Files to upload:", filesToUpload); // แสดงไฟล์ที่ต้องอัปโหลด
 
   // function handler update user profile
-  const handleUpdateProfile = async () => {
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You are not logged in. Please log in again.");
@@ -212,6 +243,61 @@ export default function ProfilePage() {
     const { id } = jwtDecode(token);
     if (!id) {
       alert("Invalid user ID.");
+      return;
+    }
+
+    const nameError = validateName(name);
+    const dateError = validateAge(date);
+    const hobbiesError = validateHobbies(selectedOptions);
+    const aboutmeError = validateAboutme(aboutMe);
+    const avatarError = validateProfilePicture(avatar);
+
+    if (hobbiesError) {
+      setHobbiesError(hobbiesError);
+    } else {
+      setHobbiesError("");
+    }
+
+    if (avatarError) {
+      setAvatarError(avatarError);
+    } else {
+      setAvatarError("");
+    }
+
+    const validationError = validateRequiredFieldsProfilePage({
+      name,
+      date,
+      selectedOptions,
+      value: aboutMe,
+      avatar,
+    });
+
+    const errorMessages = {
+      name: nameError,
+      date: dateError,
+      hobbies: hobbiesError,
+      aboutme: aboutmeError,
+      image: avatarError,
+    };
+
+    if (
+      nameError ||
+      dateError ||
+      hobbiesError ||
+      aboutmeError ||
+      avatarError ||
+      validationError
+    ) {
+      setErrorMessage(
+        "Please provide all the required information accurately and completely",
+      );
+      setAlertVisible(true);
+
+      setNameError(errorMessages.name || "");
+      setDateError(errorMessages.date || "");
+      setHobbiesError(errorMessages.hobbies || "");
+      setAboutMeError(errorMessages.aboutme || "");
+      setAvatarError(errorMessages.image || "");
       return;
     }
 
@@ -269,7 +355,12 @@ export default function ProfilePage() {
       }
     });
 
+    // อัปเดต state
     setAvatars(updatedAvatars);
+
+    if (Object.keys(updatedAvatars).length >= 2) {
+      setAvatarError(""); // ล้างข้อความ error
+    }
   };
 
   // กดลบรูปภาพ
@@ -280,6 +371,10 @@ export default function ProfilePage() {
 
     // อัปเดต state
     setAvatars(updatedAvatars);
+
+    // ใช้ validateProfilePicture เพื่อตรวจสอบข้อผิดพลาด
+    const error = validateProfilePicture(updatedAvatars);
+    setAvatarError(error); // อัพเดตข้อความ error
   };
 
   // เมื่อเปิดหน้าเว็บให้ function getProfileData ทำงาน
@@ -351,27 +446,6 @@ export default function ProfilePage() {
                     Preview Profile
                   </CustomButton>
 
-                  {/* popup preview profile desktop*/}
-                  <dialog
-                    id="preview-profile-desktop"
-                    className="modal overflow-y-auto"
-                  >
-                    <div className="">
-                      <PreviewProfile
-                        name={name}
-                        age={age}
-                        city={city}
-                        location={location}
-                        sexIdentity={sexIdentity}
-                        sexPref={sexPref}
-                        racialPref={racialPref}
-                        meetingInterest={meetingInterest}
-                        aboutMe={aboutMe}
-                        hobby={selectedOptions}
-                        image={avatar}
-                      />
-                    </div>
-                  </dialog>
                   <CustomButton
                     buttonType="primary"
                     customStyle="w-[162px] text-base font-bold"
@@ -424,10 +498,23 @@ export default function ProfilePage() {
                     <input
                       type="date"
                       name="date"
+                      max={getCurrentDate()}
                       value={date}
-                      onChange={(e) => setDate(e.target.value)}
+                      onChange={(e) => {
+                        setDate(e.target.value);
+                        // ตรวจสอบอายุ
+                        const error = validateAge(e.target.value);
+                        setDateError(error);
+                      }}
+                      disabled={alertVisible}
                       className="input input-bordered h-12 w-full rounded-[8px] border-[1px] border-fourth-400 py-3 pl-3 pr-4 lg:w-full"
                     />
+                    {dateError && (
+                      <small className="ml-2 pt-2 text-red-600">
+                        {dateError}
+                      </small>
+                    )}{" "}
+                    {/* แสดงข้อผิดพลาด */}
                   </label>
                   <label className="name-section flex w-full flex-col gap-1 lg:order-1 lg:w-full">
                     <span className="text-base font-normal text-utility-second">
@@ -437,8 +524,20 @@ export default function ProfilePage() {
                       type="text"
                       className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-400 lg:w-full"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        // เรียกใช้ validate name
+                        const error = validateName(e.target.value);
+                        setNameError(error || "");
+                      }}
+                      disabled={alertVisible}
                     />
+                    {nameError && (
+                      <small className="ml-2 pt-2 text-red-600">
+                        {nameError}
+                      </small>
+                    )}{" "}
+                    {/* แสดงข้อผิดพลาดขณะพิมพ์ */}
                   </label>
                 </div>
 
@@ -451,6 +550,7 @@ export default function ProfilePage() {
                       className="select select-bordered h-12 w-full border-fourth-400"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{city}</option>
                       {filterCity
@@ -473,6 +573,7 @@ export default function ProfilePage() {
                       className="select select-bordered h-12 w-full border-fourth-400"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{location}</option>
                       {allLocation
@@ -500,7 +601,7 @@ export default function ProfilePage() {
                     />
                   </label>
                   <label className="username-section flex w-full flex-col gap-1 lg:order-1">
-                    <span className="text-base font-normal text-utility-second">
+                    <span className="text-base font-normal text-fourth-600">
                       Username
                     </span>
                     <input
@@ -508,6 +609,7 @@ export default function ProfilePage() {
                       placeholder="At least 6 character"
                       className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 placeholder-fourth-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
                       value={username}
+                      disabled
                       onChange={(e) => setUsername(e.target.value)}
                     />
                   </label>
@@ -531,6 +633,7 @@ export default function ProfilePage() {
                       className="select select-bordered h-12 w-full border-fourth-400"
                       value={sexPref}
                       onChange={(e) => setSexPref(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{sexPref}</option>
                       {allGender
@@ -550,6 +653,7 @@ export default function ProfilePage() {
                       className="select select-bordered h-12 w-full border-fourth-400"
                       value={sexIdentity}
                       onChange={(e) => setSexIdentity(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{sexIdentity}</option>
                       {allGender
@@ -572,6 +676,7 @@ export default function ProfilePage() {
                       className="select select-bordered h-12 w-full border-fourth-400"
                       value={meetingInterest}
                       onChange={(e) => setMeetingInterest(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{meetingInterest}</option>
                       {allMeeting
@@ -594,6 +699,7 @@ export default function ProfilePage() {
                       className="select select-bordered h-12 w-full border-fourth-400"
                       value={racialPref}
                       onChange={(e) => setRacialPref(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{racialPref}</option>
                       {allRacial
@@ -610,23 +716,18 @@ export default function ProfilePage() {
                   </label>
                 </div>
 
-                {/* <label className="hobbies-section flex w-full flex-col gap-1">
-                  <span className="text-base font-normal text-utility-second">
-                    Hobbies / Interests (Maximum 10)
-                  </span>
-                  <input
-                    type="text"
-                    className="h-14 w-full rounded-[8px] border border-fourth-400 px-4 py-3 placeholder-fourth-900"
-                    value={hobbies}
-                    onChange={(e) => setHobbies(e.target.value)}
-                  />
-                </label> */}
-
                 <div className="hobby-input">
                   <HobbiesProfilePage
                     updateHobbies={updateHobbies}
                     onOptionsChange={handleUpdateOptions}
+                    updateHobbiesError={updateHobbiesError}
+                    disabled={alertVisible}
                   />
+                  {hobbiesError && (
+                    <small className="ml-2 pt-2 text-red-600">
+                      {hobbiesError}
+                    </small>
+                  )}
                 </div>
               </div>
 
@@ -635,12 +736,26 @@ export default function ProfilePage() {
                   About me (Maximum 150 characters)
                 </span>
                 <input
+                  name="aboutme"
                   type="text"
                   placeholder="Write something about yourself"
                   className="h-28 w-full rounded-[8px] border border-fourth-400 px-4 pb-14 placeholder-fourth-900"
+                  disabled={alertVisible}
                   value={aboutMe}
-                  onChange={(e) => setAboutMe(e.target.value)}
+                  onChange={(e) => {
+                    const { name, value } = e.target;
+                    if (name === "aboutme") {
+                      setAboutMe(value);
+                      const error = validateAboutme(value);
+                      setAboutMeError(error);
+                    }
+                  }}
                 />
+                {aboutMeError && (
+                  <small className="ml-2 pt-2 text-red-600">
+                    {aboutMeError}
+                  </small>
+                )}
               </label>
             </div>
 
@@ -656,7 +771,12 @@ export default function ProfilePage() {
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <label className="form-control">
-                    <span className="label-text">Upload at least 2 photos</span>
+                    {/* แสดงข้อความ error ถ้ามี */}
+                    {avatarError && (
+                      <small className="ml-2 pt-2 text-red-600">
+                        {avatarError}
+                      </small>
+                    )}
                   </label>
                 </div>
                 <div className="mx-auto flex h-auto w-full flex-wrap gap-4 rounded-lg border-gray-300 px-0 lg:w-[931px]">
@@ -709,6 +829,14 @@ export default function ProfilePage() {
                 </div>
               </form>
             </div>
+            <div className="pt-10">
+              {alertVisible && (
+                <Alert
+                  message={errorMessage}
+                  onClose={() => setAlertVisible(false)}
+                />
+              )}
+            </div>
 
             {/* Button: Delete account desktop */}
             <div className="delete-account hidden lg:flex lg:justify-end">
@@ -720,48 +848,6 @@ export default function ProfilePage() {
               >
                 Delete account
               </button>
-              {/* popup delete confirm */}
-              <dialog id="delete-confirm-desktop" className="modal px-4">
-                <div className="delete-popup w-[530px] rounded-2xl bg-white">
-                  <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-6 py-2">
-                    <h3 className="text-xl font-semibold">
-                      Delete Confirmation
-                    </h3>
-                    <form method="dialog">
-                      <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
-                        x
-                      </button>
-                    </form>
-                  </div>
-                  <div className="flex flex-col gap-6 p-6">
-                    <p className="text-base font-normal text-fourth-700">
-                      Do you sure to delete account?
-                    </p>
-                    <div className="flex flex-row gap-4">
-                      <CustomButton
-                        buttonType="secondary"
-                        className="w-[200px] text-base font-bold"
-                        onClick={() => {
-                          deleteuser(userId);
-                        }}
-                      >
-                        Yes, I want to delete
-                      </CustomButton>
-                      <CustomButton
-                        buttonType="primary"
-                        className="w-[125px] text-base font-bold"
-                        onClick={() =>
-                          document
-                            .getElementById("delete-confirm-desktop")
-                            .close()
-                        }
-                      >
-                        No, I don't
-                      </CustomButton>
-                    </div>
-                  </div>
-                </div>
-              </dialog>
             </div>
           </div>
 
@@ -776,28 +862,6 @@ export default function ProfilePage() {
             >
               Preview Profile
             </CustomButton>
-
-            {/* popup preview profile mobile*/}
-            <dialog
-              id="preview-profile-mobile"
-              className="modal overflow-y-auto"
-            >
-              <div className="w-full">
-                <PreviewProfile
-                  name={name}
-                  age={age}
-                  city={city}
-                  location={location}
-                  sexIdentity={sexIdentity}
-                  sexPref={sexPref}
-                  racialPref={racialPref}
-                  meetingInterest={meetingInterest}
-                  aboutMe={aboutMe}
-                  hobby={selectedOptions}
-                  image={avatar}
-                />
-              </div>
-            </dialog>
 
             <CustomButton
               buttonType="primary"
@@ -818,46 +882,124 @@ export default function ProfilePage() {
             >
               Delete account
             </button>
-
-            {/* popup delete confirm */}
-            <dialog id="delete-confirm-mobile" className="modal px-4">
-              <div className="delete-popup w-full rounded-2xl bg-white">
-                <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-4 py-2">
-                  <h3 className="text-xl font-semibold">Delete Confirmation</h3>
-                  <form method="dialog">
-                    <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
-                      x
-                    </button>
-                  </form>
-                </div>
-                <div className="flex flex-col gap-6 p-4">
-                  <p className="text-base font-normal text-fourth-700">
-                    Do you sure to delete account?
-                  </p>
-                  <CustomButton
-                    buttonType="secondary"
-                    className="text-base font-bold"
-                    onClick={() => {
-                      deleteuser(userId);
-                    }}
-                  >
-                    Yes, I want to delete
-                  </CustomButton>
-                  <CustomButton
-                    buttonType="primary"
-                    className="text-base font-bold"
-                    onClick={() =>
-                      document.getElementById("delete-confirm-mobile").close()
-                    }
-                  >
-                    No, I don't
-                  </CustomButton>
-                </div>
-              </div>
-            </dialog>
           </div>
         </div>
       </main>
+
+      {/* popup preview profile desktop*/}
+      <dialog id="preview-profile-desktop" className="modal overflow-y-auto">
+        <div className="">
+          <PreviewProfile
+            name={name}
+            age={age}
+            city={city}
+            location={location}
+            sexIdentity={sexIdentity}
+            sexPref={sexPref}
+            racialPref={racialPref}
+            meetingInterest={meetingInterest}
+            aboutMe={aboutMe}
+            hobby={selectedOptions}
+            image={avatar}
+          />
+        </div>
+      </dialog>
+
+      {/* popup preview profile mobile*/}
+      <dialog id="preview-profile-mobile" className="modal overflow-y-auto">
+        <div className="w-full">
+          <PreviewProfile
+            name={name}
+            age={age}
+            city={city}
+            location={location}
+            sexIdentity={sexIdentity}
+            sexPref={sexPref}
+            racialPref={racialPref}
+            meetingInterest={meetingInterest}
+            aboutMe={aboutMe}
+            hobby={selectedOptions}
+            image={avatar}
+          />
+        </div>
+      </dialog>
+
+      {/* popup delete confirm mobile*/}
+      <dialog id="delete-confirm-mobile" className="modal px-4">
+        <div className="delete-popup w-full rounded-2xl bg-white">
+          <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-4 py-2">
+            <h3 className="text-xl font-semibold">Delete Confirmation</h3>
+            <form method="dialog">
+              <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
+                x
+              </button>
+            </form>
+          </div>
+          <div className="flex flex-col gap-6 p-4">
+            <p className="text-base font-normal text-fourth-700">
+              Do you sure to delete account?
+            </p>
+            <CustomButton
+              buttonType="secondary"
+              className="text-base font-bold"
+              onClick={() => {
+                deleteuser(userId);
+              }}
+            >
+              Yes, I want to delete
+            </CustomButton>
+            <CustomButton
+              buttonType="primary"
+              className="text-base font-bold"
+              onClick={() =>
+                document.getElementById("delete-confirm-mobile").close()
+              }
+            >
+              No, I don't
+            </CustomButton>
+          </div>
+        </div>
+      </dialog>
+
+      {/* popup delete confirm desktop*/}
+      <dialog id="delete-confirm-desktop" className="modal px-4">
+        <div className="delete-popup w-[530px] rounded-2xl bg-white">
+          <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-6 py-2">
+            <h3 className="text-xl font-semibold">Delete Confirmation</h3>
+            <form method="dialog">
+              <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
+                x
+              </button>
+            </form>
+          </div>
+          <div className="flex flex-col gap-6 p-6">
+            <p className="text-base font-normal text-fourth-700">
+              Do you sure to delete account?
+            </p>
+            <div className="flex flex-row gap-4">
+              <CustomButton
+                buttonType="secondary"
+                className="w-[200px] text-base font-bold"
+                onClick={() => {
+                  deleteuser(userId);
+                }}
+              >
+                Yes, I want to delete
+              </CustomButton>
+              <CustomButton
+                buttonType="primary"
+                className="w-[125px] text-base font-bold"
+                onClick={() =>
+                  document.getElementById("delete-confirm-desktop").close()
+                }
+              >
+                No, I don't
+              </CustomButton>
+            </div>
+          </div>
+        </div>
+      </dialog>
+
       <footer className="footer-section">
         <Footer />
       </footer>
