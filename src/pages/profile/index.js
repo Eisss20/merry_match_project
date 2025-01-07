@@ -230,6 +230,25 @@ export default function ProfilePage() {
   // console.log("Valid URLs:", validUrls); // แสดง URL ที่ถูกต้อง
   // console.log("Files to upload:", filesToUpload); // แสดงไฟล์ที่ต้องอัปโหลด
 
+  // function คำนวณอายุไว้แสดงใน modal แบบ real time
+  const calculateAge = (birthdate) => {
+    const birthDate = new Date(birthdate);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    // ตรวจสอบว่าครบรอบวันเกิดแล้วหรือยัง
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
   // function handler update user profile
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -501,7 +520,13 @@ export default function ProfilePage() {
                       max={getCurrentDate()}
                       value={date}
                       onChange={(e) => {
-                        setDate(e.target.value);
+                        const selectedDate = e.target.value;
+                        setDate(selectedDate);
+
+                        // ตรวจสอบอายุและอัปเดต state
+                        const calculatedAge = calculateAge(selectedDate);
+                        setAge(calculatedAge);
+
                         // ตรวจสอบอายุ
                         const error = validateAge(e.target.value);
                         setDateError(error);
