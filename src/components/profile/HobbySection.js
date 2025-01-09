@@ -194,7 +194,7 @@ export default function HobbiesProfilePage({
           </ul>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex max-w-full flex-wrap gap-2 lg:flex-wrap">
           {selectedOptions.map((option) => (
             <div
               key={option.value}

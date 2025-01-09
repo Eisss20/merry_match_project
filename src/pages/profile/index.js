@@ -49,7 +49,7 @@ export default function ProfilePage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
 
-  // console.log("hobby error", hobbiesError);
+  // console.log("image in state avatar", avatar);
 
   const { deleteuser } = useAuth();
   const router = useRouter();
@@ -265,32 +265,23 @@ export default function ProfilePage() {
       return;
     }
 
+    // validate แต่ละช่อง input ว่าตรงตามเงื่อนไขหรือไม่
     const nameError = validateName(name);
     const dateError = validateAge(date);
     const hobbiesError = validateHobbies(selectedOptions);
     const aboutmeError = validateAboutme(aboutMe);
     const avatarError = validateProfilePicture(avatar);
 
-    if (hobbiesError) {
-      setHobbiesError(hobbiesError);
-    } else {
-      setHobbiesError("");
-    }
-
-    if (avatarError) {
-      setAvatarError(avatarError);
-    } else {
-      setAvatarError("");
-    }
-
-    const validationError = validateRequiredFieldsProfilePage({
+    // validate ทั้งหน้า ว่ากรอกข้อมูลครบทุก input หรือไม่
+    const allAalidationError = validateRequiredFieldsProfilePage({
       name,
       date,
       selectedOptions,
       value: aboutMe,
-      avatar,
+      fields: { avatar: avatar },
     });
 
+    // error message
     const errorMessages = {
       name: nameError,
       date: dateError,
@@ -299,13 +290,16 @@ export default function ProfilePage() {
       image: avatarError,
     };
 
+    console.log("ALL validationError", allAalidationError); // error กรอกข้อมูลไม่ครบทั้ง form
+    console.log("errorMessages", errorMessages); // error ของแต่ละ input
+
     if (
       nameError ||
       dateError ||
       hobbiesError ||
       aboutmeError ||
       avatarError ||
-      validationError
+      allAalidationError
     ) {
       setErrorMessage(
         "Please provide all the required information accurately and completely",
@@ -441,8 +435,8 @@ export default function ProfilePage() {
       <main className="info-section">
         {/* Profile-section */}
         <div className="profile flex flex-col items-center gap-10 bg-utility-bgMain px-4 py-10">
-          <div className="profile-section flex flex-col gap-10 lg:mx-auto lg:gap-20">
-            <div className="title-section flex flex-col gap-2 lg:flex-row lg:gap-20">
+          <div className="profile-section flex w-full max-w-[931px] flex-col gap-10 lg:mx-auto lg:gap-20">
+            <div className="title-section flex flex-col gap-2 lg:flex-row lg:justify-between lg:gap-20">
               <div className="title lg:flex lg:w-[517px] lg:flex-col lg:gap-2">
                 <span className="text-sm font-semibold text-third-700">
                   PROFILE
@@ -760,11 +754,11 @@ export default function ProfilePage() {
                 <span className="text-base font-normal text-utility-second">
                   About me (Maximum 150 characters)
                 </span>
-                <input
+                <textarea
                   name="aboutme"
                   type="text"
                   placeholder="Write something about yourself"
-                  className="h-28 w-full rounded-[8px] border border-fourth-400 px-4 pb-14 placeholder-fourth-900"
+                  className="h-28 w-full resize-none rounded-[8px] border border-fourth-400 px-4 py-3 placeholder-fourth-900"
                   disabled={alertVisible}
                   value={aboutMe}
                   onChange={(e) => {

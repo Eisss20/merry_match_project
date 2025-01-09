@@ -65,7 +65,7 @@ export const validateRequiredFieldsProfilePage = ({
   date,
   hobbies,
   value,
-  // fields,
+  fields,
 }) => {
   const requiredFieldPicture = ["avatar"];
 
@@ -75,10 +75,11 @@ export const validateRequiredFieldsProfilePage = ({
       !date ||
       (Array.isArray(hobbies) && hobbies.length === 0) ||
       !value ||
-      (typeof value === "string" && value.trim() === "") // ||
-      // !fields[field] ||
-      // (Array.isArray(fields[field]) && fields[field].length === 0) ||
-      // (typeof fields[field] === "object" && fields[field] === null)
+      (typeof value === "string" && value.trim() === "") ||
+      !fields ||
+      !fields[field] ||
+      (typeof fields[field] === "object" &&
+        Object.keys(fields[field]).length === 0)
     ) {
       return "Please fill in all the required information";
     }
