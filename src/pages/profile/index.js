@@ -451,9 +451,7 @@ export default function ProfilePage() {
                     buttonType="secondary"
                     customStyle="w-[162px] text-base font-bold"
                     onClick={() =>
-                      document
-                        .getElementById("preview-profile-desktop")
-                        .showModal()
+                      document.getElementById("preview-profile").showModal()
                     }
                   >
                     Preview Profile
@@ -469,32 +467,6 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-
-            {/* Update success modal */}
-            <dialog
-              id="update-success-modal"
-              className="modal fixed flex items-center justify-center"
-            >
-              <div className="modal-content w-[530px] rounded-2xl bg-white p-6">
-                <h3 className="mb-4 text-center text-xl font-semibold text-gray-800">
-                  Success!
-                </h3>
-                <p className="test-base mb-6 text-center font-normal text-gray-600">
-                  Your profile has been successfully updated.
-                </p>
-                <div className="flex justify-center">
-                  <CustomButton
-                    buttonType="primary"
-                    className="w-[125px] px-4 py-2 text-base font-bold"
-                    onClick={() =>
-                      document.getElementById("update-success-modal").close()
-                    }
-                  >
-                    Close
-                  </CustomButton>
-                </div>
-              </div>
-            </dialog>
 
             {/* Basic Information */}
             <div className="basic-information-section flex flex-col gap-6">
@@ -862,7 +834,7 @@ export default function ProfilePage() {
               <button
                 className="text-base font-bold text-fourth-700"
                 onClick={() =>
-                  document.getElementById("delete-confirm-desktop").showModal()
+                  document.getElementById("delete-confirm").showModal()
                 }
               >
                 Delete account
@@ -876,7 +848,7 @@ export default function ProfilePage() {
               buttonType="secondary"
               customStyle="w-[162px] text-base font-bold"
               onClick={() =>
-                document.getElementById("preview-profile-mobile").showModal()
+                document.getElementById("preview-profile").showModal()
               }
             >
               Preview Profile
@@ -896,7 +868,7 @@ export default function ProfilePage() {
             <button
               className="text-base font-bold text-fourth-700"
               onClick={() =>
-                document.getElementById("delete-confirm-mobile").showModal()
+                document.getElementById("delete-confirm").showModal()
               }
             >
               Delete account
@@ -905,85 +877,56 @@ export default function ProfilePage() {
         </div>
       </main>
 
-      {/* popup preview profile desktop*/}
-      <dialog id="preview-profile-desktop" className="modal overflow-y-auto">
-        <div className="">
-          <PreviewProfile
-            name={name}
-            age={age}
-            city={city}
-            location={location}
-            sexIdentity={sexIdentity}
-            sexPref={sexPref}
-            racialPref={racialPref}
-            meetingInterest={meetingInterest}
-            aboutMe={aboutMe}
-            hobby={selectedOptions}
-            image={avatar}
-          />
-        </div>
-      </dialog>
-
-      {/* popup preview profile mobile*/}
-      <dialog id="preview-profile-mobile" className="modal overflow-y-auto">
-        <div className="w-full">
-          <PreviewProfile
-            name={name}
-            age={age}
-            city={city}
-            location={location}
-            sexIdentity={sexIdentity}
-            sexPref={sexPref}
-            racialPref={racialPref}
-            meetingInterest={meetingInterest}
-            aboutMe={aboutMe}
-            hobby={selectedOptions}
-            image={avatar}
-          />
-        </div>
-      </dialog>
-
-      {/* popup delete confirm mobile*/}
-      <dialog id="delete-confirm-mobile" className="modal px-4">
-        <div className="delete-popup w-full rounded-2xl bg-white">
-          <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-4 py-2">
-            <h3 className="text-xl font-semibold">Delete Confirmation</h3>
-            <form method="dialog">
-              <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
-                x
-              </button>
-            </form>
-          </div>
-          <div className="flex flex-col gap-6 p-4">
-            <p className="text-base font-normal text-fourth-700">
-              Do you sure to delete account?
-            </p>
-            <CustomButton
-              buttonType="secondary"
-              className="text-base font-bold"
-              onClick={() => {
-                deleteuser(userId);
-              }}
-            >
-              Yes, I want to delete
-            </CustomButton>
+      {/* Update success modal */}
+      <dialog
+        id="update-success-modal"
+        className="modal fixed flex items-center justify-center px-4"
+      >
+        <div className="modal-content w-[530px] rounded-2xl bg-white p-6">
+          <h3 className="mb-4 text-center text-xl font-semibold text-gray-800">
+            Success !
+          </h3>
+          <p className="test-base mb-6 text-center font-normal text-gray-600">
+            Your profile has been successfully updated.
+          </p>
+          <div className="flex justify-center">
             <CustomButton
               buttonType="primary"
-              className="text-base font-bold"
+              className="w-[125px] px-4 py-2 text-base font-bold"
               onClick={() =>
-                document.getElementById("delete-confirm-mobile").close()
+                document.getElementById("update-success-modal").close()
               }
             >
-              No, I don't
+              Close
             </CustomButton>
           </div>
         </div>
       </dialog>
 
-      {/* popup delete confirm desktop*/}
-      <dialog id="delete-confirm-desktop" className="modal px-4">
-        <div className="delete-popup w-[530px] rounded-2xl bg-white">
-          <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-6 py-2">
+      {/* modal preview profile */}
+      <dialog
+        id="preview-profile"
+        className="modal fixed inset-0 overflow-y-auto"
+      >
+        <PreviewProfile
+          name={name}
+          age={age}
+          city={city}
+          location={location}
+          sexIdentity={sexIdentity}
+          sexPref={sexPref}
+          racialPref={racialPref}
+          meetingInterest={meetingInterest}
+          aboutMe={aboutMe}
+          hobby={selectedOptions}
+          image={avatar}
+        />
+      </dialog>
+
+      {/* modal delete confirm */}
+      <dialog id="delete-confirm" className="modal px-4">
+        <div className="delete-popup w-full max-w-[530px] rounded-2xl bg-white shadow-xl">
+          <div className="delete-title flex items-center justify-between border-b border-fourth-300 px-4 py-2 md:px-6">
             <h3 className="text-xl font-semibold">Delete Confirmation</h3>
             <form method="dialog">
               <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
@@ -991,14 +934,14 @@ export default function ProfilePage() {
               </button>
             </form>
           </div>
-          <div className="flex flex-col gap-6 p-6">
+          <div className="flex flex-col gap-6 p-4 md:p-6">
             <p className="text-base font-normal text-fourth-700">
               Do you sure to delete account?
             </p>
-            <div className="flex flex-row gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:gap-4">
               <CustomButton
                 buttonType="secondary"
-                className="w-[200px] text-base font-bold"
+                className="w-full text-base font-bold md:w-[200px]"
                 onClick={() => {
                   deleteuser(userId);
                 }}
@@ -1007,9 +950,9 @@ export default function ProfilePage() {
               </CustomButton>
               <CustomButton
                 buttonType="primary"
-                className="w-[125px] text-base font-bold"
+                className="w-full text-base font-bold md:w-[125px]"
                 onClick={() =>
-                  document.getElementById("delete-confirm-desktop").close()
+                  document.getElementById("delete-confirm").close()
                 }
               >
                 No, I don't
