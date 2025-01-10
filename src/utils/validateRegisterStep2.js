@@ -2,14 +2,14 @@ export const validateSexualIdentities = (sexualIdentity) => {
   if (!sexualIdentity) {
     return "Please select sexual identities";
   }
-  return ""; // ไม่มีข้อผิดพลาด
+  return ""; 
 };
 
 export const validateSexualpreferences = (sexualPreferences) => {
   if (!sexualPreferences) {
     return "Please select sexual preferences";
   }
-  return ""; // ไม่มีข้อผิดพลาด
+  return ""; 
 };
 
 export const validateRacialIdentities = (racialIdentities) => {
@@ -23,19 +23,22 @@ export const validateRacialPreferences = (racialPreferences) => {
   if (!racialPreferences) {
     return "Please select racial preferences";
   }
-  return ""; 
+  return "";
 };
 
 export const validateMeetingInterests = (meetingInterests) => {
   if (!meetingInterests) {
     return "Please select meeting interests";
   }
-  return ""; 
+  return "";
 };
 
 export const validatehobbies = (hobbies) => {
   if (!hobbies || hobbies.length === 0) {
-    return "Please select hobbies / interests";
+    return "Please select hobbies / interests.";
+  }
+  if (hobbies.length > 10) {
+    return "You can only select up to 10 hobbies / interests.";
   }
   return ""; 
 };
@@ -65,11 +68,11 @@ export const validateRequiredFieldsStep2 = ({
     !racialIdentities ||
     !racialPreferences ||
     !meetingInterests ||
-    (Array.isArray(hobbies) && hobbies.length === 0) || 
+    (Array.isArray(hobbies) && hobbies.length === 0) ||
     !value ||
-    (typeof value === "string" && value.trim() === "") 
+    (typeof value === "string" && value.trim() === "")
   ) {
     return "Please fill in all the required information";
   }
-  return ""; 
+  return "";
 };

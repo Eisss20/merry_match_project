@@ -33,6 +33,7 @@ import ProfilePicturesForm from "@/components/register/ProfilePicturesForm";
 import Alert from "@/components/register/AlertRegister";
 import AlertStepTwo from "@/components/register/AlertRegisterstep2";
 import AlertStepThree from "@/components/register/AlertRegisterstep3";
+import Loading from "@/components/loading/loading";
 
 function RegisterPage() {
   const [name, setName] = useState("");
@@ -81,6 +82,10 @@ function RegisterPage() {
   const [hobbiesError, setHobbiesError] = useState("");
   const [aboutmeError, setAboutmeError] = useState("");
   const [avatarError, setAvatarError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [avatar, setAvatars] = useState("");
+  const [step, setStep] = useState(1);
+  const { register } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -156,16 +161,15 @@ function RegisterPage() {
     return `${year}-${month}-${day}`;
   };
 
-  const [avatar, setAvatars] = useState("");
-  const { register } = useAuth();
-
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsLoading(true);
 
     const avatarError = validateProfilePicture(avatar);
     if (avatarError) {
       setErrorMessageThree(avatarError);
       setAlertVisibleThree(true);
+      setIsLoading(false);
       return;
     }
 
@@ -189,7 +193,15 @@ function RegisterPage() {
     for (let avatarKey in avatar) {
       formData.append("avatar", avatar[avatarKey]);
     }
-    register(formData);
+
+    try {
+      await register(formData);
+      router.push("/login");
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const updateHobbies = (selectedOptions) => {
@@ -198,7 +210,7 @@ function RegisterPage() {
   };
 
   const updateHobbiesError = (error) => {
-    setHobbiesError(error); // รับค่า error จาก CustomSelect
+    setHobbiesError(error);
   };
 
   const handleFileChange = (event) => {
@@ -212,10 +224,16 @@ function RegisterPage() {
       }
     });
 
-    setAvatars(newAvatars);
+    const avatarsArray = Object.values(newAvatars);
+    const avatarsObject = avatarsArray.reduce((acc, file, index) => {
+      acc[index] = file;
+      return acc;
+    }, {});
 
-    if (Object.keys(newAvatars).length >= 2) {
-      setAvatarError(""); // ล้างข้อความ error
+    setAvatars(avatarsObject);
+
+    if (Object.keys(avatarsObject).length >= 2) {
+      setAvatarError("");
     }
   };
 
@@ -225,9 +243,12 @@ function RegisterPage() {
     delete updatedAvatars[avatarKey];
     setAvatars(updatedAvatars);
 
-    // ใช้ validateProfilePicture เพื่อตรวจสอบข้อผิดพลาด
     const error = validateProfilePicture(updatedAvatars);
-    setAvatarError(error); // อัพเดตข้อความ error
+    setAvatarError(error);
+  };
+
+  const handleAvatarUpdate = (updatedAvatars) => {
+    setAvatars(updatedAvatars);
   };
 
   const handleInputChange = (event) => {
@@ -237,19 +258,16 @@ function RegisterPage() {
       const error = validateAboutme(value);
       setAboutmeError(error);
     }
-    // setAboutme("");
-    // setAboutme(event.target.value);
   };
 
-  const [step, setStep] = useState(1);
   const goToPrevStep = (e) => {
     e.preventDefault();
     if (step > 1) {
       setStep(step - 1);
     }
     if (step === 3) {
-      sethobbies(""); // รีเซ็ต hobbies
-      setHobbiesError(""); // รีเซ็ตข้อผิดพลาดของ hobbies
+      sethobbies("");
+      setHobbiesError("");
     }
   };
 
@@ -257,14 +275,12 @@ function RegisterPage() {
     const value = e.target.value;
     setName(value);
 
-    // เรียก validateName เพื่อตรวจสอบค่า
     const error = validateName(value);
-    setNameError(error || ""); // อัปเดตข้อผิดพลาด
+    setNameError(error || "");
   };
 
   const handleNameBlur = () => {
     if (name.trim() === "") {
-      // ถ้าช่องว่าง ให้เคลียร์ข้อความ error
       setNameError("");
     }
   };
@@ -284,29 +300,26 @@ function RegisterPage() {
 
   const handleConfirmPasswordChange = (e) => {
     const value = e.target.value;
-    setConfirm(value); // ตั้งค่าค่า confirmPassword ใหม่
+    setConfirm(value);
 
-    // ตรวจสอบว่า password และ confirmPassword ตรงกันหรือไม่
-    const error = validateConfirmPassword(password, value); // เรียกใช้ validateConfirmPassword
-    setConfirmPasswordError(error || ""); // อัปเดตข้อผิดพลาดถ้ามี
+    const error = validateConfirmPassword(password, value);
+    setConfirmPasswordError(error || "");
   };
 
   const handleDateChange = (event) => {
     const selectedDate = event.target.value;
     setDate(selectedDate);
 
-    // ตรวจสอบอายุ
     const error = validateAge(selectedDate);
     setDateError(error);
   };
 
   const handleCityChange = (e) => {
-    const value = e.target.value; // ดึงค่าจาก event
-    setCitys(value); // อัปเดต state ของ citys
+    const value = e.target.value;
+    setCitys(value);
 
-    // ตรวจสอบข้อผิดพลาดใหม่
     const error = validateCity(value);
-    setCitysError(error || ""); // อัปเดตข้อความ error
+    setCitysError(error || "");
   };
 
   const goToNextStep = async (e) => {
@@ -447,8 +460,6 @@ function RegisterPage() {
         setAvatarError(avatarError);
         return;
       }
-    } else {
-      router.push("/login");
     }
   };
 
@@ -526,10 +537,12 @@ function RegisterPage() {
               </div>
             </div>
 
-            {/* Form Content */}
+            {/* การแสดง loading เมื่อ isLoading เป็น true */}
+            {isLoading && <Loading className="mt-52"></Loading>}
 
-            <div className="mt-8 flex flex-col">
-              <div className="container flex-grow px-4">
+            {/* Form Content */}
+            <div className="lg:mt-10">
+              <div className="container mt-8 flex flex-grow flex-col px-4">
                 <div className="container">
                   {step === 1 && (
                     <div className="grid-cols-1 gap-6 lg:grid lg:grid-cols-2">
@@ -542,7 +555,7 @@ function RegisterPage() {
                           onChange={handleNameChange}
                           disabled={alertVisible}
                           onBlur={handleNameBlur}
-                          className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                          className={`input border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${nameError ? "border-utility-third" : ""}`}
                           placeholder="Name"
                         />
                         {nameError && (
@@ -561,7 +574,7 @@ function RegisterPage() {
                             value={date}
                             onChange={handleDateChange}
                             disabled={alertVisible}
-                            className="input input-bordered h-[48px] appearance-none rounded-[8px] border-[1px] bg-white dark:bg-white"
+                            className={`input border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${dateError ? "border-utility-third" : ""}`}
                             max={getCurrentDate()}
                           />
                         </label>
@@ -583,7 +596,7 @@ function RegisterPage() {
                             setLocationError("");
                           }}
                           disabled={alertVisible}
-                          className="select select-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                          className={`select select-bordered border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${locationError ? "border-utility-third" : ""}`}
                         >
                           <option value="" disabled>
                             Select Location
@@ -608,7 +621,7 @@ function RegisterPage() {
                           value={citys}
                           onChange={handleCityChange}
                           disabled={!selectedLocation || alertVisible}
-                          className="select select-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                          className={`select select-bordered border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${citysError ? "border-utility-third" : ""}`}
                         >
                           <option value="" disabled>
                             Select City
@@ -638,7 +651,7 @@ function RegisterPage() {
                           }}
                           disabled={alertVisible}
                           onBlur={handleNameBlur}
-                          className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                          className={`input border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${usernameError ? "border-utility-third" : ""}`}
                           placeholder="Username"
                         />
                         {usernameError && (
@@ -659,7 +672,7 @@ function RegisterPage() {
                           }}
                           disabled={alertVisible}
                           onBlur={handleNameBlur}
-                          className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                          className={`input border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${emailError ? "border-utility-third" : ""}`}
                           placeholder="Email"
                         />
 
@@ -679,7 +692,7 @@ function RegisterPage() {
                           onChange={handlePasswordChange}
                           disabled={alertVisible}
                           onBlur={handlePasswordBlur}
-                          className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                          className={`input border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${passwordError ? "border-utility-third" : ""}`}
                           placeholder="Password"
                         />
                         {passwordError && (
@@ -698,7 +711,7 @@ function RegisterPage() {
                           value={confirm}
                           onChange={handleConfirmPasswordChange}
                           disabled={alertVisible}
-                          className="input input-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                          className={`input border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${confirmPasswordError ? "border-utility-third" : ""}`}
                           placeholder="Confirm Password"
                         />
                         {confirmPasswordError && (
@@ -734,7 +747,7 @@ function RegisterPage() {
                               setSexualIdentitiesError("");
                             }}
                             disabled={alertVisibleTwo}
-                            className="select select-bordered h-[48px] rounded-[8px] border-[1px] bg-white dark:bg-white"
+                            className={`select select-bordered border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${sexualIdentitiesError ? "border-utility-third" : ""}`}
                           >
                             <option value="" disabled>
                               Select Sexual Identity
@@ -755,7 +768,7 @@ function RegisterPage() {
                         <label className="form-control">
                           <span className="label-text">Sexual preferences</span>
                           <select
-                            className="select select-bordered bg-white"
+                            className={`select select-bordered border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${sexualIdentitiesError ? "border-utility-third" : ""}`}
                             name="sexualPreferences"
                             value={sexualPreferences}
                             onChange={(event) => {
@@ -784,7 +797,7 @@ function RegisterPage() {
                         <label className="form-control">
                           <span className="label-text">Racial identities</span>
                           <select
-                            className="select select-bordered bg-white"
+                            className={`select select-bordered border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${racialIdentitiesError ? "border-utility-third" : ""}`}
                             name="racialPreferences"
                             value={racialIdentities}
                             onChange={(event) => {
@@ -816,7 +829,7 @@ function RegisterPage() {
                         <label className="form-control">
                           <span className="label-text">Racial preferences</span>
                           <select
-                            className="select select-bordered bg-white"
+                            className={`select select-bordered border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${racialPreferencesError ? "border-utility-third" : ""}`}
                             name="racialPreferences"
                             value={racialPreferences}
                             onChange={(event) => {
@@ -848,7 +861,7 @@ function RegisterPage() {
                         <label className="form-control">
                           <span className="label-text">Meeting Interests</span>
                           <select
-                            className="select select-bordered bg-white"
+                            className={`select select-bordered border-fourth-400 bg-utility-primary text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${meetingInterestsError ? "border-utility-third" : ""}`}
                             value={meetingInterests}
                             onChange={(event) => {
                               setMeetingInterests(event.target.value);
@@ -876,12 +889,16 @@ function RegisterPage() {
                           )}
                         </label>
                       </div>
-                      <div className="mt-6">
+                      <div className="container mt-6">
                         <CustomSelect
                           formData={hobbies}
                           updateHobbies={updateHobbies}
                           updateHobbiesError={updateHobbiesError}
                           disabled={alertVisibleTwo}
+                          hobbieError={hobbiesError}
+                          className={`${
+                            hobbiesError ? "border-utility-third" : "" // เปลี่ยนเส้นขอบตาม error
+                          }`}
                         />
                         {hobbiesError && (
                           <small className="ml-2 pt-2 text-red-600">
@@ -894,18 +911,15 @@ function RegisterPage() {
                           <span className="text-base font-normal text-utility-second">
                             About me (Maximum 150 characters)
                           </span>
-                          <input
+                          <textarea
                             type="text"
-                            placeholder="Write something about yourself"
-                            className={`h-28 w-full rounded-[8px] border px-4 pb-14 placeholder-fourth-900 ${
-                              alertVisibleTwo
-                                ? "cursor-not-allowed bg-gray-100 text-gray-500"
-                                : "bg-white dark:bg-white"
-                            }`}
                             name="aboutme"
                             value={aboutme}
                             onChange={handleInputChange}
                             disabled={alertVisibleTwo}
+                            onBlur={handleNameBlur}
+                            className={`input h-28 w-full rounded-[8px] border border-fourth-400 bg-utility-primary px-4 pb-14 pt-3 text-utility-second placeholder-fourth-900 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${aboutmeError ? "border-utility-third" : ""}`}
+                            placeholder="Write something about yourself"
                           />
                         </label>
                         {aboutmeError && (
@@ -929,16 +943,18 @@ function RegisterPage() {
                 <div className="container">
                   <div>
                     {step === 3 && (
-                      <div className="mr-20 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:flex">
+                      <div className="grid grid-cols-1 gap-6 text-2xl sm:grid-cols-2 lg:flex">
                         <ProfilePicturesForm
                           avatar={avatar}
                           handleFileChange={handleFileChange}
                           handleRemoveImage={handleRemoveImage}
                           avatarError={avatarError}
+                          handleAvatarUpdate={handleAvatarUpdate}
                         />
                       </div>
                     )}
                   </div>
+
                   <div className="pb-10 pt-10">
                     {alertVisibleThree && (
                       <AlertStepThree

@@ -23,7 +23,7 @@ export const validateAge = (date) => {
   const birthDate = new Date(date);
   const age = today.getFullYear() - birthDate.getFullYear();
 
-  // ตรวจสอบว่าปีปัจจุบันมากกว่าปีเกิดอย่างน้อย 18 ปี
+  
   const hasBirthdayPassedThisYear =
     today.getMonth() > birthDate.getMonth() ||
     (today.getMonth() === birthDate.getMonth() &&

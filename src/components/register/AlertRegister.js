@@ -2,7 +2,7 @@ import React from "react";
 
 const Alert = ({ message, onClose }) => {
   return (
-    <div role="alert" className="alert shadow-lg">
+    <div role="alert" className="alert shadow-lg ">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

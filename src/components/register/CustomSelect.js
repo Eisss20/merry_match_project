@@ -7,6 +7,7 @@ export default function CustomSelect({
   updateHobbies,
   updateHobbiesError,
   disabled,
+  hobbieError,
 }) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState("");
@@ -16,7 +17,7 @@ export default function CustomSelect({
   const [hobbiesError, setHobbiesError] = useState("");
 
   const validateSelectedOptions = (options) => {
-    const error = validatehobbies(options); // ใช้ validatehobbies จาก utils
+    const error = validatehobbies(options);
     return error;
   };
 
@@ -75,21 +76,20 @@ export default function CustomSelect({
   };
 
   const handleSelectOption = (option) => {
+    if (selectedOptions.length >= 10) {
+      const errorMessage = "You can only select up to 10 hobbies / interests";
+      setHobbiesError(errorMessage);
+      setIsDropdownOpen(false);
+      return;
+    }
     const newSelectedOptions = [...selectedOptions, option];
     setSelectedOptions(newSelectedOptions);
-
-    const error = validateSelectedOptions(newSelectedOptions);
-    setHobbiesError(error); // ถ้ามี error จะอัพเดตข้อความ error
-
-    updateHobbies(newSelectedOptions);
-    updateHobbiesError(error); // ส่ง error กลับไปที่ parent component
-
     setInputValue("");
     setIsDropdownOpen(false);
+
     updateHobbies(newSelectedOptions);
   };
 
-  // ส่ง hobbiesError กลับไปให้กับ parent
   useEffect(() => {
     updateHobbiesError(hobbiesError);
   }, [hobbiesError]);
@@ -101,14 +101,13 @@ export default function CustomSelect({
 
     setSelectedOptions(updatedOptions);
 
-    // ตรวจสอบข้อผิดพลาด
     const error = validateSelectedOptions(updatedOptions);
-    setHobbiesError(error); // อัปเดตข้อความ error
-    updateHobbies(updatedOptions); // ส่งข้อมูลไปยังฟังก์ชันหลัก
+    setHobbiesError(error);
+    updateHobbies(updatedOptions);
   };
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className="container relative" ref={dropdownRef}>
       {" "}
       {/* ใช้ ref ที่นี่ */}
       <label
@@ -117,7 +116,7 @@ export default function CustomSelect({
       >
         Hobbies / Interests (Maximum 10)
       </label>
-      <div className="flex flex-col gap-2">
+      <div className="container flex flex-col gap-2 lg:w-[950px]">
         <input
           type="text"
           id="hobbies"
@@ -126,40 +125,16 @@ export default function CustomSelect({
           onChange={handleInputChange}
           disabled={disabled}
           onFocus={handleInputFocus}
-          className={`rounded-lg border p-2 focus:outline-none focus:ring-2 ${
+          className={`rounded-lg border p-2 hover:border-second-500 focus:border-second-500 focus:outline-none ${
             disabled
-              ? "cursor-not-allowed bg-gray-100 text-gray-500"
-              : "border-gray-300 bg-white focus:ring-blue-400"
+              ? "cursor-not-allowed bg-gray-100 text-gray-500" // เมื่อ disabled จะไม่เปลี่ยนสีเส้นขอบ
+              : `border-gray-300 bg-white focus:ring-blue-400 ${hobbieError ? "border-utility-third" : ""}` // เมื่อไม่ disabled ถ้ามี error ให้เปลี่ยนเส้นขอบเป็นสีแดง
           }`}
         />
-        {/* //อันนี้เพิ่มค่า option แต่ติดปัญหาที่ไม่อัพเดท ก่อนส่งค่า */}
-        {/* {isDropdownOpen && (
-          <ul className="absolute top-full z-10 mt-2 max-h-40 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white">
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <li
-                  key={option.value}
-                  onClick={() => handleSelectOption(option)}
-                  className="cursor-pointer p-2 hover:bg-gray-100"
-                >
-                  {option.label}
-                </li>
-              ))
-            ) : (
-              <li
-                onClick={handleAddNewOption}
-                className="cursor-pointer p-2 text-blue-600 hover:bg-blue-100"
-              >
-                Add "{inputValue}" as a new option
-              </li>
-            )}
-          </ul>
-        )} */}
 
-        {/* อันนี้ตัวแก้ไขโดยไม่ให้เพิ่ม option */}
         {isDropdownOpen && (
-          <ul className="absolute top-full z-10 mt-2 max-h-40 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white">
-            {filteredOptions.length > 0 ? (
+          <ul className="absolute top-full z-10 mt-2 max-h-40 overflow-y-auto rounded-lg border border-gray-300 bg-white">
+            {filteredOptions.length > 10 ? (
               filteredOptions.map((option) => (
                 <li
                   key={option.value}
@@ -170,7 +145,6 @@ export default function CustomSelect({
                 </li>
               ))
             ) : (
-              // ไม่แสดงรายการเพิ่มใหม่ในกรณีที่ไม่มีตัวเลือก
               <li className="cursor-pointer p-2 text-gray-500">
                 No results found
               </li>
@@ -182,7 +156,7 @@ export default function CustomSelect({
           {selectedOptions.map((option) => (
             <div
               key={option.value}
-              className="flex items-center rounded-full bg-pink-200 px-3 py-1 text-blue-500"
+              className="flex items-center rounded-full bg-second-100 px-3 py-1 text-second-600"
             >
               <span className="mr-2">{option.label}</span>
               <button
@@ -194,9 +168,6 @@ export default function CustomSelect({
             </div>
           ))}
         </div>
-        {/* {hobbiesError && (
-          <small className="mt-2 block text-red-600">{hobbiesError}</small>
-        )} */}
       </div>
     </div>
   );
