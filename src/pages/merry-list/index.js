@@ -10,7 +10,7 @@ import { IoMdEye } from "react-icons/io";
 import { NavBar, Footer } from "@/components/NavBar";
 import { jwtDecode } from "jwt-decode";
 import { MatchlistProfile } from "@/components/profile/MatchlistProfile";
-import LoadingMerry from "@/components/loading/LoadingMerry";
+import LoadingMerry from "@/components/custom-loading/LoadingMerry";
 
 function MerryCountBox({ count = 0, text = "Merry", twoHearts = false }) {
   return (

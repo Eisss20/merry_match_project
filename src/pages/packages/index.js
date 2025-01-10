@@ -7,7 +7,7 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { useAuth } from "@/contexts/AuthContext";
 import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
 import { DeleteConfirmationModal2 } from "@/components/admin/DeleteConfirmationModal";
-import { SkeletonMembership } from "@/components/loading/SkeletonCard";
+import { SkeletonMembership } from "@/components/custom-loading/SkeletonCard";
 
 export default function MerryPackage() {
   const [packages, setPackages] = useState([]); // เก็บข้อมูลแพ็กเกจ

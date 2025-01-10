@@ -7,7 +7,8 @@ import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal"
 import {
   SkeletonPaymentMembershipPackage,
   SkeletonPaymentMembershipHistory,
-} from "../loading/SkeletonCard";
+} from "../custom-loading/SkeletonCard";
+
 function PaymentMembership() {
   const { state } = useAuth();
   const userId = state.user?.id;
