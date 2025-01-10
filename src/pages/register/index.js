@@ -33,7 +33,7 @@ import ProfilePicturesForm from "@/components/register/ProfilePicturesForm";
 import Alert from "@/components/register/AlertRegister";
 import AlertStepTwo from "@/components/register/AlertRegisterstep2";
 import AlertStepThree from "@/components/register/AlertRegisterstep3";
-import Loading from "@/components/loading/loading";
+import LoadingMerry from "@/components/custom-loading/LoadingMerry";
 
 function RegisterPage() {
   const [name, setName] = useState("");
@@ -538,7 +538,7 @@ function RegisterPage() {
             </div>
 
             {/* การแสดง loading เมื่อ isLoading เป็น true */}
-            {isLoading && <Loading className="mt-52"></Loading>}
+            {isLoading && <LoadingMerry className="mt-52"></LoadingMerry>}
 
             {/* Form Content */}
             <div className="lg:mt-10">
