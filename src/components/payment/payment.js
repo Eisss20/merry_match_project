@@ -135,8 +135,8 @@ function PaymentPage({
         className="bg-utility-bgMain lg:flex lg:justify-center lg:pb-40 lg:pt-40"
       >
         {/* Package */}
-        <div className="bg-fourth-400 lg:h-[290px] lg:w-[380px] lg:rounded-[24px]">
-          <div className="containerpt pt-5">
+        <div className="bg-gray-100 shadow-inner shadow-sm lg:h-72 lg:w-96 lg:rounded-2xl">
+          <div className="containerpt border-b-2 pt-8 lg:border-b-0">
             <div className="w-auto pl-5 pr-5">
               <div className="flex items-center justify-start gap-[12px]">
                 <Image
@@ -145,22 +145,22 @@ function PaymentPage({
                   height={24}
                   alt="packageList"
                 />
-                <h1 className="ml-2 text-[20px] lg:font-bold">
+                <h1 className="text-xl font-semibold text-gray-500 lg:font-bold">
                   Merry Membership
                 </h1>
               </div>
               <div className="h-auto w-auto pb-5 pt-5">
                 <div className="flex justify-between">
-                  <h1 className="text-[16px]">Package</h1>
-                  <h1 className="text-[20px] font-bold">{name_package}</h1>
+                  <h1 className="text-lg font-medium text-gray-500">Package</h1>
+                  <h1 className="pr-2 text-[20px] font-bold">{name_package}</h1>
                 </div>
                 <div className="pt-3 lg:pt-2">
-                  <div className="h-auto min-h-[76px] flex-col rounded-[8px] bg-white pl-2 pt-4">
+                  <div className="h-auto min-h-[76px] flex-col rounded-[8px] bg-white pl-2 pt-4 font-medium text-gray-500">
                     {Array.isArray(parsedDescription) &&
                     parsedDescription.length > 0 ? (
-                      <ul className="list-disc pl-5">
+                      <ul className="list-disc pl-8">
                         {parsedDescription.map((detail, index) => (
-                          <li className="text-[16px]" key={index}>
+                          <li className="pl-1 text-base" key={index}>
                             {detail}
                           </li>
                         ))}
@@ -173,8 +173,12 @@ function PaymentPage({
                   </div>
                 </div>
                 <div className="flex justify-between pt-5 lg:pt-6">
-                  <h1 className="text-[16px]">Price (Monthly)</h1>
-                  <h1 className="text-[20px] font-bold">THB {price}</h1>
+                  <h1 className="text-lg font-normal text-gray-500">
+                    Price (Monthly)
+                  </h1>
+                  <h1 className="pr-2 text-xl font-bold text-primary-800">
+                    THB {price}
+                  </h1>
                 </div>
               </div>
             </div>
@@ -182,9 +186,9 @@ function PaymentPage({
         </div>
         {/* End Package */}
 
-        <div className="container lg:ml-7 lg:h-[555px] lg:w-[535px] lg:rounded-[24px] lg:border-[1px]">
-          <div className="flex items-center justify-between gap-[12px] bg-fourth-400 p-8 lg:rounded-t-[24px]">
-            <h1 className="text text-[20px] font-bold text-[#646C80]">
+        <div className="container shadow lg:ml-7 lg:w-[38vw] lg:rounded-3xl lg:border">
+          <div className="mt-5 flex items-center justify-between gap-[12px] bg-gray-100 p-8 lg:mt-0 lg:rounded-xl">
+            <h1 className="text-xl font-semibold text-[#646C80]">
               Credit Card
             </h1>
             <Image
@@ -196,51 +200,14 @@ function PaymentPage({
           </div>
 
           {/* Stripe Card Element */}
-          <div className="container p-6">
+          <div className="container bg-utility-bgMain p-6">
             {/*  Card Number */}
-            <label className="mb-10 block">
-              <span className="block text-[18px] font-medium text-gray-700">
-                Card number <span className="text-red-500">*</span>
-              </span>
-              <CardNumberElement
-                options={{
-                  style: {
-                    base: {
-                      fontSize: "16px",
-                      color: "#32325d",
-                      fontFamily: "Arial, sans-serif",
-                      "::placeholder": {
-                        color: "#aab7c4",
-                      },
-                    },
-                    invalid: {
-                      color: "#fa755a",
-                    },
-                  },
-                }}
-                className="mt-2 rounded-md border border-gray-300 p-2"
-              />
-            </label>
-
-            {/*  Card owner  */}
-            <label className="mb-10 block">
-              <span className="block text-[18px] font-medium text-gray-700">
-                Card owner <span className="text-red-500">*</span>
-              </span>
-              <input
-                type="text"
-                placeholder="Holder of card"
-                className="mt-2 w-full rounded-md border border-gray-300 p-2"
-              />
-            </label>
-
-            {/*  Expiry date  */}
-            <div className="flex gap-4">
-              <label className="block w-1/2">
-                <span className="block text-[18px] font-medium text-gray-700">
-                  Expiry date <span className="text-red-500">*</span>
+            <div className="flex flex-col gap-10">
+              <label className="block">
+                <span className="block text-lg font-medium text-gray-700">
+                  Card number <span className="text-red-500">*</span>
                 </span>
-                <CardExpiryElement
+                <CardNumberElement
                   options={{
                     style: {
                       base: {
@@ -248,62 +215,108 @@ function PaymentPage({
                         color: "#32325d",
                         fontFamily: "Arial, sans-serif",
                         "::placeholder": {
-                          color: "#aab7c4",
+                          color: "#9AA1B9",
+                          fontSize: "16px",
                         },
                       },
                       invalid: {
                         color: "#fa755a",
                       },
                     },
+                    placeholder: "Number of card",
                   }}
-                  className="mt-2 rounded-md border border-gray-300 p-2"
+                  className="mt-2 rounded-md border border-gray-300 p-3 font-semibold"
                 />
               </label>
-              {/*  {/*  Expiry date  */}
-              <label className="block w-1/2">
-                <span className="block text-[18px] font-medium text-gray-700">
-                  CVC/CVV <span className="text-red-500">*</span>
+
+              {/*  Card owner  */}
+              <label className="block">
+                <span className="block text-lg font-medium text-gray-700">
+                  Card owner <span className="text-red-500">*</span>
                 </span>
-                <CardCvcElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: "16px",
-                        color: "#32325d",
-                        fontFamily: "Arial, sans-serif",
-                        "::placeholder": {
-                          color: "#aab7c4",
-                        },
-                      },
-                      invalid: {
-                        color: "#fa755a",
-                      },
-                    },
-                  }}
-                  className="mt-2 rounded-md border border-gray-300 p-2"
+                <input
+                  type="text"
+                  placeholder="Holder of card"
+                  className="mt-2 w-full rounded-md border border-gray-300 p-3 text-lg font-normal focus:outline-none"
                 />
               </label>
+
+              {/*  Expiry date  */}
+              <div className="flex gap-4">
+                <label className="block w-1/2">
+                  <span className="block text-lg font-semibold text-gray-700">
+                    Expiry date <span className="text-red-500">*</span>
+                  </span>
+                  <CardExpiryElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#32325d",
+                          fontFamily: "Arial, sans-serif",
+                          "::placeholder": {
+                            color: "#aab7c4",
+                            fontSize: "16px",
+                          },
+                        },
+                        invalid: {
+                          color: "#fa755a",
+                        },
+                      },
+                      placeholder: "MM/YY",
+                    }}
+                    className="mt-2 rounded-md border border-gray-300 p-4"
+                  />
+                </label>
+                {/*  {/*  Expiry date  */}
+                <label className="block w-1/2">
+                  <span className="block text-lg font-medium text-gray-700">
+                    CVC/CVV <span className="text-red-500">*</span>
+                  </span>
+                  <CardCvcElement
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "16px",
+                          color: "#32325d",
+                          fontFamily: "Arial, sans-serif",
+                          "::placeholder": {
+                            color: "#aab7c4",
+                            fontSize: "16px",
+                          },
+                        },
+                        invalid: {
+                          color: "#fa755a",
+                        },
+                      },
+                      placeholder: "x x x",
+                    }}
+                    className="mt-2 rounded-md border border-gray-300 p-4"
+                  />
+                </label>
+              </div>
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="container flex justify-between bg-white pb-20 pt-5 lg:rounded-b-[24px] lg:border-t lg:px-8 lg:pb-4">
+          <div className="container mt-5 flex flex-row justify-center gap-24 pb-10 pt-5 lg:mt-0 lg:gap-72">
             <button
               type="button"
-              className="rounded-[99px] text-[16px] text-primary-500 lg:font-bold"
+              className="transform rounded text-base font-bold text-primary-500 transition-transform duration-200 hover:scale-105 hover:text-primary-700 lg:font-bold"
             >
               <Link href="/packages">Cancel</Link>
             </button>
             <button
               type="submit"
               disabled={loading || !stripe || !elements}
-              className="h-[48px] w-[177px] rounded-[99px] bg-primary-500 text-[16px] text-white"
+              className="transform rounded-[99px] bg-primary-500 pb-3 pl-5 pr-5 pt-3 text-base font-bold text-white shadow-xl transition-transform duration-200 hover:scale-105 hover:bg-primary-700"
             >
               {loading ? "Processing..." : "Payment Confirm"}
             </button>
           </div>
-
-          {error && <p className="mt-4 text-center text-red-500">{error}</p>}
+          {error && (
+            <p className="hidden text-center text-red-500 lg:mb-10">{error}</p>
+          )}
         </div>
       </form>
     </>

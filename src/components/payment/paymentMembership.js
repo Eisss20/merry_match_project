@@ -121,21 +121,21 @@ function PaymentMembership() {
 
   return (
     <>
-      <div className="mx-auto max-w-4xl px-4 py-8 text-gray-700">
-        <h3 className="lg:text-left">MERRY MEMBERSHIP</h3>
-        <h1 className="w-auto text-4xl font-bold text-primary-700 lg:text-left lg:text-4xl">
-          Manage your membership
-        </h1>
-        <h1 className="w-auto text-4xl font-bold text-primary-700 lg:text-left lg:text-4xl">
+      <div className="mx-auto max-w-4xl px-4 py-8 pt-10 text-gray-700 lg:pt-20">
+        <h3 className="text-sm text-third-800 lg:text-left">
+          MERRY MEMBERSHIP
+        </h3>
+        <h1 className="pt-3 text-3xl font-extrabold text-second-500 lg:text-left lg:text-4xl">
+          Manage your membership <br />
           and payment method
         </h1>
 
         {/* Membership Package */}
-        <section className="mt-8">
-          <h2 className="text-lg font-bold lg:text-left lg:text-xl">
+        <section className="pt-7 lg:pt-16">
+          <h2 className="text-xl font-bold text-gray-700 lg:text-left lg:text-xl">
             Merry Membership Package
           </h2>
-          <div className="relative mt-4 rounded-[24px] bg-bg-card p-6 text-white">
+          <div className="relative mt-4 rounded-[24px] bg-bg-card p-6 text-white shadow">
             <div className="flex flex-col gap-4 lg:flex-row">
               <div className="h-[60px] w-[60px] flex-shrink-0">
                 <img
@@ -150,7 +150,8 @@ function PaymentMembership() {
                   {paymentMembership.name_package}
                 </h3>
                 <p className="lg:text-md mt-1 text-lg">
-                  THB {paymentMembership?.price} / Month
+                  THB {paymentMembership?.price}
+                  <span className="text-sm"> /Month </span>
                 </p>
               </div>
               {/* Detail PackageCard */}
@@ -206,14 +207,14 @@ function PaymentMembership() {
                   cancelLoading ||
                   paymentMembership.subscription_status === "Cancelled"
                 }
-                className={`hidden text-base font-semibold text-white lg:block lg:pt-5 ${
+                className={`hidden text-base font-semibold text-white hover:text-primary-200 lg:block lg:pt-5 ${
                   cancelLoading ? "cursor-not-allowed opacity-50" : ""
                 }`}
               >
                 {cancelLoading ? "Cancelling..." : "Cancel Package"}
               </button>
             </div>
-            <button className="absolute right-6 top-6 hidden rounded-full bg-rose-50 px-4 py-1 text-sm font-medium text-orange-600 lg:block">
+            <button className="absolute right-6 top-6 hidden rounded-full bg-rose-50 px-4 py-1 text-sm font-bold text-primary-600 hover:bg-primary-100 lg:block">
               {paymentMembership.subscription_status === "Active"
                 ? "Active"
                 : "Inactive"}
@@ -222,12 +223,12 @@ function PaymentMembership() {
         </section>
 
         {/* Billing History */}
-        <section className="mt-8">
-          <h2 className="text-lg font-bold lg:text-left lg:text-xl">
+        <section className="pt-10">
+          <h2 className="text-xl font-bold lg:text-left lg:text-xl">
             Billing History
           </h2>
           <div className="flex lg:hidden">
-            <h3 className="mb-4 text-sm font-semibold text-gray-600 lg:text-lg">
+            <h3 className="mt2 text-lg font-semibold text-gray-600 lg:text-lg">
               <div>
                 Next billing :&nbsp;
                 {endDate
@@ -236,11 +237,11 @@ function PaymentMembership() {
               </div>
             </h3>
           </div>
-          <div className="mt-4 rounded-[24px] bg-white p-6 shadow">
+          <div className="mt-4 shadow lg:rounded-2xl lg:p-6">
             <table className="w-full text-sm lg:text-base">
               <thead>
                 <tr>
-                  <th className="mb-4 hidden text-sm font-semibold text-gray-600 lg:flex lg:text-lg">
+                  <th className="0 mb-4 hidden text-sm font-semibold text-gray-500 lg:flex lg:text-lg">
                     <div>Next billing :&nbsp;</div>
 
                     <div>
@@ -256,15 +257,15 @@ function PaymentMembership() {
                   paymentHistory.map((history, index) => (
                     <tr
                       key={index}
-                      className={index % 2 === 0 ? "bg-gray-50" : ""}
+                      className={index % 2 === 0 ? "bg-gray-100" : ""}
                     >
-                      <td className="py-3">
+                      <td className="p-2">
                         {new Date(history.payment_date).toLocaleDateString(
                           "en-GB",
                         )}
                       </td>
-                      <td className="py-3">{history.name_package}</td>
-                      <td className="py-3 text-right">THB {history.price}</td>
+                      <td className="pl-3">{history.name_package}</td>
+                      <td className="pr-5 text-right">THB {history.price}</td>
                     </tr>
                   ))
                 ) : (
