@@ -5,10 +5,9 @@ import axios from "axios";
 import { useCallback } from "react";
 import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
 import {
-  SkeletonMembership,
   SkeletonPaymentMembershipPackage,
   SkeletonPaymentMembershipHistory,
-} from "@/components/Loading/SkeletonCard";
+} from "../loading/SkeletonCard";
 function PaymentMembership() {
   const { state } = useAuth();
   const userId = state.user?.id;

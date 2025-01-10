@@ -9,12 +9,8 @@ import {
 import { IoMdEye } from "react-icons/io";
 import { NavBar, Footer } from "@/components/NavBar";
 import { jwtDecode } from "jwt-decode";
-import { doc } from "prettier";
-import { set } from "mongoose";
 import { MatchlistProfile } from "@/components/profile/MatchlistProfile";
-import Loading from "@/components/loading/loading";
-
-
+import LoadingMerry from "@/components/loading/LoadingMerry";
 
 function MerryCountBox({ count = 0, text = "Merry", twoHearts = false }) {
   return (
@@ -46,7 +42,6 @@ function ProfileBox({
   profileData,
   updateMerryToggle,
   onPreviewClick,
-  selectedProfile,
 }) {
   const [merryToggle, setMerryToggle] = useState(true);
 
@@ -100,9 +95,6 @@ function ProfileBox({
           >
             <IoMdEye className="size-5 md:size-6" />
           </button>
-
-
-
 
           {/* Merry button */}
           <button
@@ -173,7 +165,9 @@ function ProfileBox({
         {/* Profile picture */}
         <figure className="relative aspect-square min-w-[7rem] max-w-[10rem] overflow-hidden rounded-3xl md:max-w-[11rem]">
           <img
-            src={profileData?.images[0]?.image_url || "/images/blank-profile.png"}
+            src={
+              profileData?.images[0]?.image_url || "/images/blank-profile.png"
+            }
             alt=""
             className="h-full w-full object-cover"
           />
@@ -233,7 +227,7 @@ export default function MerryList() {
         }, 3000);
         return;
       }
-  
+
       try {
         const decodedToken = jwtDecode(token); //    ถอดรหัส token ด้วย jwtDecode
         const userMasterId = decodedToken.id; //  ดึง userMasterId จาก decodedToken payload
@@ -312,12 +306,11 @@ export default function MerryList() {
 
   if (loading) {
     return (
-      <Loading/>
+      <LoadingMerry />
 
       // <main className="flex h-screen items-center justify-center bg-utility-bgMain">
       //   <span className="loading loading-spinner loading-lg"></span>
       // </main>
-
     );
   }
 
@@ -375,41 +368,27 @@ export default function MerryList() {
             </Fragment>
           ))}
         </div>
-
-
-       
-          
       </section>
 
-
       <dialog id="preview-profile-desktop" className="modal overflow-y-auto">
-       
-    
-       {selectedProfile && (
-         <MatchlistProfile
-           name={selectedProfile.name}
-           age={selectedProfile.age}
-           city={selectedProfile.city_name}
-           location={selectedProfile.location_name}
-           sexIdentity={selectedProfile.sexual_identity}
-           sexPref={selectedProfile.sexual_preference}
-           racialPref={selectedProfile.racial_preference}
-           meetingInterest={selectedProfile.meeting_interest}
-           aboutMe={selectedProfile.about_me}
-           hobby={selectedProfile.hobbies}
-           image={selectedProfile.images}
-         />
-       )}
-  
-   </dialog>
-
-
+        {selectedProfile && (
+          <MatchlistProfile
+            name={selectedProfile.name}
+            age={selectedProfile.age}
+            city={selectedProfile.city_name}
+            location={selectedProfile.location_name}
+            sexIdentity={selectedProfile.sexual_identity}
+            sexPref={selectedProfile.sexual_preference}
+            racialPref={selectedProfile.racial_preference}
+            meetingInterest={selectedProfile.meeting_interest}
+            aboutMe={selectedProfile.about_me}
+            hobby={selectedProfile.hobbies}
+            image={selectedProfile.images}
+          />
+        )}
+      </dialog>
 
       <Footer />
-
-
-
-
     </main>
   );
 }

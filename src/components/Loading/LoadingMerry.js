@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function Loading() {
+export default function LoadingMerry() {
   return (
     <div>
       {/* ใช้ relative เพื่อให้รูปภาพทับกัน */}
