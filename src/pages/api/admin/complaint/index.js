@@ -26,7 +26,8 @@ ON
 LEFT JOIN 
     user_profiles -- ตารางโปรไฟล์ผู้ใช้
 ON 
-    complaint.user_id = user_profiles.user_id; -- เชื่อมตารางด้วย user_id (แก้ไขจาก users_id)
+    complaint.user_id = user_profiles.user_id -- เชื่อมตารางด้วย user_id (แก้ไขจาก users_id)
+    ORDER BY complaint.complaint_id DESC;
       `;
 
       const result = await connectionPool.query(query); // รันคำสั่ง SQL

@@ -10,7 +10,7 @@ import {
 } from "../custom-loading/SkeletonCard";
 
 function PaymentMembership() {
-  const { state } = useAuth();
+  const { state, logout } = useAuth();
   const userId = state.user?.id;
 
   const [paymentMembership, setPaymentMembership] = useState(null);
@@ -106,6 +106,13 @@ function PaymentMembership() {
     }
   }, [paymentHistory]);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // ตรวจสอบ Token ใน Local Storage
+    if (!token) {
+      logout();
+    }
+  }, []);
+
   let parsedDescription = paymentMembership?.description
     ? JSON.parse(paymentMembership.description)
     : [];
@@ -137,11 +144,11 @@ function PaymentMembership() {
           </h2>
           <div className="relative mt-4 rounded-[24px] bg-bg-card p-6 text-white shadow">
             <div className="flex flex-col gap-4 lg:flex-row">
-              <div className="h-[60px] w-[60px] flex-shrink-0">
+              <div className="border-1 flex h-16 w-16 flex-shrink-0 flex-row items-center justify-center rounded-2xl bg-gray-100">
                 <img
                   src={paymentMembership.icon_url}
                   alt="Package Icon"
-                  className="h-full w-full rounded-lg object-cover"
+                  className="h-12 w-12 object-cover"
                 />
               </div>
 

@@ -59,7 +59,11 @@ function ComplaintResolved() {
       <AdminSideBar />
       <main className="flex-1">
         <AdminHeader
-          title={complaint.issue || "Resolved Complaint"}
+          title={
+            complaint.issue.length > 50
+              ? complaint.issue.substring(0, 50) + "..."
+              : complaint.issue
+          }
           backButton={true}
           extraContent={
             <span
@@ -85,7 +89,7 @@ function ComplaintResolved() {
           </h3>
           <div className="mb-6 border-t pt-6">
             <p className="mb-4 text-lg font-semibold text-gray-500">Issue</p>
-            <p className="text-gray-800">
+            <p className="break-words text-gray-800">
               {complaint.issue || "No issue provided"}
             </p>
           </div>
@@ -93,7 +97,7 @@ function ComplaintResolved() {
             <p className="mb-4 text-lg font-semibold text-gray-500">
               Description
             </p>
-            <p className="text-gray-800">
+            <p className="break-words text-gray-800">
               {complaint.description || "No description provided"}
             </p>
           </div>

@@ -93,10 +93,10 @@ export function DeleteConfirmationModal2({
         </div>
 
         {/* Content */}
-        <div className="space-y-4 p-6">
-          <ol className="list-decimal space-y-2 pl-5 text-gray-700">
-            <li>You already have a package. Wait for it to end (30 days)</li>
-            <li>
+        <div className="space-y-4 p-4">
+          <div className="list-decimal space-y-2 pl-5 text-gray-700">
+            <p>You already have a package. Wait for it to end (30 days)</p>
+            <p>
               or cancel it here:
               <Link
                 href="/payment/membership"
@@ -104,8 +104,8 @@ export function DeleteConfirmationModal2({
               >
                 [Manage Current Package].
               </Link>
-            </li>
-          </ol>
+            </p>
+          </div>
         </div>
 
         {/* Footer */}

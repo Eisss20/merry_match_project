@@ -21,10 +21,9 @@ export default function MerryPackage() {
 
   const router = useRouter(); // ใช้สำหรับ Redirect
 
-  const { state } = useAuth();
+  const { state, logout } = useAuth();
   const userId = state.user?.id;
 
-  console.log("userId = ", userId);
   // ดึงข้อมูลแพ็กเกจ
   const fetchPackages = async () => {
     try {
@@ -46,6 +45,8 @@ export default function MerryPackage() {
     const token = localStorage.getItem("token"); // ตรวจสอบ Token ใน Local Storage
     if (token) {
       setIsMember(true); // หากมี Token ให้ถือว่าเป็นสมาชิก
+    } else {
+      logout();
     }
     if (userId) {
       fetchPackages(); // เรียกเฉพาะเมื่อ userId มีค่า
@@ -90,6 +91,7 @@ export default function MerryPackage() {
           router.push({
             pathname: "/payment",
             query: {
+              icon_url: pkg.icon_url,
               packages_id: pkg.id,
               name_package: pkg.title,
               price: pkg.price,

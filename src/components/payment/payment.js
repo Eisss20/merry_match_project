@@ -19,20 +19,20 @@ const stripePromise = loadStripe(
 );
 
 function PaymentPage({
+  icon_url,
   packages_id,
   name_package,
   price,
   description = "[]",
   stripe_price_id,
 }) {
-  const { state } = useAuth();
+  const { state, logout } = useAuth();
   const userId = state.user?.id;
 
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [clientSecret, setClientSecret] = useState(null);
 
   const router = useRouter();
 
@@ -109,6 +109,7 @@ function PaymentPage({
         router.push({
           pathname: "/payment/success",
           query: {
+            icon_url,
             transactionId: paymentIntent.id,
             amount: price,
             name_package,
@@ -126,7 +127,15 @@ function PaymentPage({
     }
   };
 
-  console.log("Data in description = ", description);
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // ตรวจสอบ Token ใน Local Storage
+
+    if (!token) {
+      logout();
+    }
+  }, []);
+
+  console.log("icon in PaymentContainer is ", icon_url);
 
   return (
     <>
@@ -186,7 +195,7 @@ function PaymentPage({
         </div>
         {/* End Package */}
 
-        <div className="container shadow lg:ml-7 lg:w-[38vw] lg:rounded-3xl lg:border">
+        <div className="container shadow lg:ml-7 lg:w-[24vw] lg:rounded-3xl lg:border">
           <div className="mt-5 flex items-center justify-between gap-[12px] bg-gray-100 p-8 lg:mt-0 lg:rounded-xl">
             <h1 className="text-xl font-semibold text-[#646C80]">
               Credit Card
@@ -299,7 +308,7 @@ function PaymentPage({
           </div>
 
           {/* Buttons */}
-          <div className="container mt-5 flex flex-row justify-center gap-24 pb-10 pt-5 lg:mt-0 lg:gap-72">
+          <div className="container mt-5 flex flex-row justify-center gap-24 pb-10 pt-5 lg:mt-0 lg:gap-72 lg:border-t">
             <button
               type="button"
               className="transform rounded text-base font-bold text-primary-500 transition-transform duration-200 hover:scale-105 hover:text-primary-700 lg:font-bold"

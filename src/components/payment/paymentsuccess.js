@@ -7,11 +7,13 @@ import { CustomButton } from "../CustomUi";
 
 function PaymentSuccess({ name_package, price, description }) {
   const router = useRouter();
+  const { icon_url } = router.query;
+
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
 
   // ดึง userId จาก state ใน context ที่ได้มาจากการรับค่าของ Token ตอน login เข้ามาและเก็บเข้าไปใน state ในหน้า context
   // ทำการดึงมาใช้โดยผ่าน useAuth และทำการเข้าถึง state
-  const { state } = useAuth();
+  const { state, logout } = useAuth();
   const userId = state.user?.id;
 
   // แปลง description เป็น Array ก่อน
@@ -50,6 +52,13 @@ function PaymentSuccess({ name_package, price, description }) {
       fetchSubscriptionDetails();
     }
   }, [userId]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // ตรวจสอบ Token ใน Local Storage
+    if (!token) {
+      logout();
+    }
+  }, []);
 
   return (
     <>
@@ -90,8 +99,8 @@ function PaymentSuccess({ name_package, price, description }) {
 
         {/* Package Card */}
         <div className="mt-5 h-[25.5rem] w-[22rem] justify-center rounded-3xl border bg-bg-card p-5 shadow-lg">
-          <div className="h-[60px] w-[60px]">
-            <img src="/icon.svg" />
+          <div className="border-1 flex h-16 w-16 flex-row items-center justify-center rounded-2xl bg-gray-100">
+            <img src={icon_url} className="h-12 w-12 object-cover" />
           </div>
           <div className="gap-7 pt-3">
             <h1 className="text-[32px] text-white">{name_package}</h1>
@@ -156,7 +165,7 @@ function PaymentSuccess({ name_package, price, description }) {
         <div></div>
         <div></div>
 
-        <div className="container flex justify-center gap-5 pb-10 pt-10 lg:-mt-36 lg:hidden lg:w-[364px] lg:items-center lg:pb-40 lg:pt-10">
+        <div className="container flex justify-start gap-5 pb-10 pt-10 lg:-mt-36 lg:hidden lg:w-[364px] lg:items-center lg:pb-40 lg:pt-10">
           <CustomButton buttonType="secondary" onClick={() => router.push("/")}>
             Back to home
           </CustomButton>
