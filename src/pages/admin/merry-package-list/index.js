@@ -7,7 +7,7 @@ import { AdminSideBar } from "@/components/admin/AdminSideBar";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
+import { SubmitConfirmationModal } from "@/components/admin/DeleteConfirmationModal";
 import { jwtDecode } from "jwt-decode";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
@@ -21,6 +21,10 @@ function MerryPackageList() {
   const [dataLoading, setDataLoading] = useState(true);
 
   const { logout } = useAdminAuth(); // ดึง logout จาก Context
+
+  // ✅ State สำหรับ Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // เปลี่ยนเป็น 15 ได้ตามต้องการ
 
   // ฟังก์ชันดึงข้อมูล package
   const fetchPackages = async () => {
@@ -46,23 +50,20 @@ function MerryPackageList() {
     (pkg) => pkg.name_package.toLowerCase().includes(searchQuery.toLowerCase()), // กรองชื่อแพ็กเกจตาม searchQuery
   );
 
-  // ฟังก์ชันสำหรับลบ package  old
-  const deletePackage = async (id) => {
-    if (window.confirm("Are you sure you want to delete this package?")) {
-      try {
-        // ลบข้อมูลจาก database ผ่าน API
-        await axios.delete("/api/admin/packages", { data: { id } });
+  // ✅ ตัดข้อมูลตามหน้าปัจจุบัน
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentPackages = filteredPackages.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
 
-        // อัปเดต state ให้ลบรายการที่ถูกลบออก
-        //setPackages(packages.filter((pkg) => pkg.id_package !== id));
-        fetchPackages();
+  // ✅ คำนวณจำนวนหน้าทั้งหมด
+  const totalPages = Math.ceil(filteredPackages.length / itemsPerPage);
 
-        alert("Package deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting package:", error);
-        alert("Failed to delete package.");
-      }
-    }
+  // ✅ เปลี่ยนหน้าปัจจุบัน
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   // deleteDetail Step2:
@@ -182,8 +183,10 @@ function MerryPackageList() {
                   <th className="rounded-tr-lg px-6 py-3 text-center font-medium text-gray-600"></th>
                 </tr>
               </thead>
+
+              {/* ของเก่า {filteredPackages.map((pkg, index) => ( */}
               <tbody>
-                {filteredPackages.map((pkg, index) => (
+                {currentPackages.map((pkg, index) => (
                   <tr
                     key={pkg.package_id}
                     className="border-t text-center align-middle hover:bg-gray-50"
@@ -236,16 +239,35 @@ function MerryPackageList() {
               </tbody>
             </table>
           )}
+
+          {/* ✅ Pagination Controls */}
+          <div className="mt-4 flex justify-center">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (number) => (
+                <button
+                  key={number}
+                  onClick={() => handlePageChange(number)}
+                  className={`mx-1 rounded px-3 py-1 ${
+                    number === currentPage
+                      ? "bg-primary-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  {number}
+                </button>
+              ),
+            )}
+          </div>
         </div>
       </main>
 
       {/* Delete Confirm Modal */}
-      <DeleteConfirmationModal
+      <SubmitConfirmationModal
         isOpen={isModalOpen} // isModalOpen = true เปิดใช้งาน
         onClose={closeModal} // deleteDetail Step3.2: เรียกใช้ function closeModal เพื่อยกเลิก
         onConfirm={handleDelete} // ลบรายการโดยกดยืนยัน deleteDetail Step5: เรียกใข้ function: handleDelete
         title="Delete Confirmation"
-        message="Are you sure you want to delete this detail?"
+        message="Do you sure to delete this Package?"
         confirmLabel="Yes, I want to delete"
         cancelLabel="No, I don't want"
       />

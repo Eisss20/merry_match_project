@@ -3,7 +3,9 @@ import AdminHeader from "@/components/admin/AdminHeader";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
-import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
+import DeleteConfirmationModal, {
+  ValidationModal,
+} from "@/components/admin/DeleteConfirmationModal";
 import { jwtDecode } from "jwt-decode";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
@@ -141,7 +143,6 @@ function MerryPackageAdd() {
   // deleteDetail Step3.3: เรียกใช้ setIsModalOpen เพื่อ false ปิดหน้า Modal
   const closeModal = () => {
     setIsModalOpen(false);
-    setDetailToDelete(null);
     router.push("/admin/merry-package-list");
   };
 
@@ -366,28 +367,26 @@ function MerryPackageAdd() {
       </main>
 
       {/*  Modal */}
-      <DeleteConfirmationModal
+      <ValidationModal
         isOpen={isModalOpen} // isModalOpen = true เปิดใช้งาน
-        onClose={closeModal} // deleteDetail Step3.2: เรียกใช้ function closeModal เพื่อยกเลิก
         onConfirm={() => {
           setIsModalOpen(false);
           router.push("/admin/merry-package-list");
         }}
-        title="Success"
+        title="Completed"
         message="Package added successfully!"
         confirmLabel="Submit"
       />
 
       {/*  Modal Validation */}
-      <DeleteConfirmationModal
+      <ValidationModal
         isOpen={isModalValidation} // isModalOpen = true เปิดใช้งาน
-        onClose={() => setIsModalValidation(false)}
         onConfirm={() => {
           setIsModalValidation(false);
         }}
         title="Validation Error"
         message={modalMessage}
-        confirmLabel="Submit"
+        confirmLabel="Continue"
       />
     </div>
   );

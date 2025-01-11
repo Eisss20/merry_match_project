@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import { useCallback } from "react";
-import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
+import DeleteConfirmationModal, {
+  SubmitCancelMembershipModal,
+} from "@/components/admin/DeleteConfirmationModal";
 import {
   SkeletonPaymentMembershipPackage,
   SkeletonPaymentMembershipHistory,
@@ -23,6 +25,10 @@ function PaymentMembership() {
   const [confirmAction, setConfirmAction] = useState(() => () => {}); // เก็บฟังก์ชันที่ต้องการเรียกเมื่อผู้ใช้กดยืนยัน
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  // เพิ่ม State สำหรับ Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // จำนวนรายการที่แสดงต่อหน้า
 
   const fetchMembership = useCallback(async () => {
     setMembershipLoading(true);
@@ -74,7 +80,7 @@ function PaymentMembership() {
       });
       if (response.data.message) {
         // alert("Package cancelled successfully."); <<<<<<<<<<<<<<<<<<<<<<<<<<<
-        setModalMessage("Package cancelled successfully."); // ตั้งข้อความใน Modal
+        //setModalMessage("Do you sure to cancel Membership to get more Merry"); // ตั้งข้อความใน Modal
         fetchMembership(); // Refresh membership data after cancellation
       }
     } catch (error) {
@@ -86,7 +92,7 @@ function PaymentMembership() {
   };
 
   const openCancelModal = () => {
-    setModalMessage("Are you sure you want to cancel this package?");
+    setModalMessage("Do you sure to cancel Membership to get more Merry?");
     setConfirmAction(() => handleCancelPackage); // เก็บฟังก์ชันสำหรับดำเนินการหลังจากยืนยัน
     setIsModalOpen(true);
   };
@@ -116,6 +122,16 @@ function PaymentMembership() {
   let parsedDescription = paymentMembership?.description
     ? JSON.parse(paymentMembership.description)
     : [];
+
+  // คำนวณการแบ่งหน้า
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentHistory = paymentHistory.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
+  // ฟังก์ชันเปลี่ยนหน้า
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (membershipLoading || HistoryLoading) {
     return (
@@ -259,9 +275,14 @@ function PaymentMembership() {
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                {paymentHistory.length > 0 ? (
+
+              {/* ของเดิม
+              {paymentHistory.length > 0 ? (
                   paymentHistory.map((history, index) => (
+              */}
+              <tbody>
+                {currentHistory.length > 0 ? (
+                  currentHistory.map((history, index) => (
                     <tr
                       key={index}
                       className={index % 2 === 0 ? "bg-gray-100" : ""}
@@ -284,22 +305,45 @@ function PaymentMembership() {
                 )}
               </tbody>
             </table>
+
+            {/* Pagination */}
+            {paymentHistory.length > itemsPerPage && (
+              <div className="mt-4 flex justify-center space-x-2">
+                {Array.from({
+                  length: Math.ceil(paymentHistory.length / itemsPerPage),
+                }).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => paginate(index + 1)}
+                    className={`rounded-md px-3 py-1 ${
+                      currentPage === index + 1
+                        ? "bg-primary-500 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* End Pagination */}
           </div>
         </section>
       </div>
 
       {/* Modal การลบ */}
-      <DeleteConfirmationModal
+      <SubmitCancelMembershipModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)} // ปิด Modal
         onConfirm={() => {
           confirmAction(); // เรียกฟังก์ชันที่ตั้งไว้ (handleCancelPackage)
           setIsModalOpen(false); // ปิด Modal
         }}
-        title="Confirm Cancellation"
+        title="Confirm Confirmation"
         message={modalMessage}
-        confirmLabel="Yes, Cancel"
-        cancelLabel="No, Keep it"
+        confirmLabel="Yes, I want to cancel"
+        cancelLabel="No, I still want to be member"
       />
     </>
   );

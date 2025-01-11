@@ -1,6 +1,6 @@
 import { AdminSideBar } from "@/components/admin/AdminSideBar";
 import AdminHeader from "@/components/admin/AdminHeader";
-import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
+import { SubmitConfirmationModal } from "@/components/admin/DeleteConfirmationModal";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -13,7 +13,6 @@ function MerryPackageEdit() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(""); // สำหรับข้อความใน modal ลองสร้างเทสแทนการส่งตรง
   const [authLoading, setAuthLoading] = useState(true);
 
   const { logout } = useAdminAuth(); // ดึง logout จาก Context
@@ -43,7 +42,6 @@ function MerryPackageEdit() {
   // deleteDetail Step3.3: เรียกใช้ setIsModalOpen เพื่อ false ปิดหน้า Modal
   const closeModal = () => {
     setIsModalOpen(false);
-    setDetailToDelete(null);
   };
 
   const confirmDelete = (id) => {
@@ -157,17 +155,15 @@ function MerryPackageEdit() {
           },
         },
       );
-      console.log("PUT Response:", response.data);
+
       // ตรวจสอบว่า API ส่ง URL ของรูปภาพใหม่กลับมาหรือไม่
+      /* The above code is written in JavaScript and it is performing the following actions: */
       if (response.data.icon_url) {
         setPackageData((prev) => ({
           ...prev,
           icon_url: response.data.icon_url, // ใช้ URL ใหม่จาก API
         }));
       }
-
-      setSuccessMessage("Package updated successfully!"); // ตั้งข้อความ
-      setIsSuccessModalOpen(true); // เปิด modal
     } catch (error) {
       console.error("Error updating package:", error);
       console.log(error);
@@ -196,7 +192,7 @@ function MerryPackageEdit() {
             {
               label: "Edit",
               type: "primary",
-              onClick: handleSave,
+              onClick: () => setIsSuccessModalOpen(true),
             },
           ]}
         />
@@ -384,7 +380,7 @@ function MerryPackageEdit() {
         </div>
       </main>
       {/* Delete Confirm Modal Details */}
-      <DeleteConfirmationModal
+      <SubmitConfirmationModal
         isOpen={isModalOpen} // isModalOpen = true เปิดใช้งาน
         onClose={closeModal}
         onConfirm={handleDeletePackage}
@@ -395,18 +391,19 @@ function MerryPackageEdit() {
       />
 
       {/* Edit Modal */}
-      <DeleteConfirmationModal
+      <SubmitConfirmationModal
         isOpen={isSuccessModalOpen}
         onClose={() => {
           setIsSuccessModalOpen(false); // ปิด modal
         }}
-        title="Success"
-        message={successMessage}
-        confirmLabel="OK"
-        cancelLabel={null} // ไม่แสดงปุ่ม Cancel
-        onConfirm={() => {
-          setIsSuccessModalOpen(false); // ปิด modal
-          router.push("/admin/merry-package-list"); // เปลี่ยนหน้าเมื่อกดยืนยัน
+        title="Confirm Update"
+        message="Are you sure you want to save the changes?"
+        confirmLabel="Yes, I want to Save Changes"
+        cancelLabel="No, I don't want"
+        onConfirm={async () => {
+          await handleSave(); // เรียกบันทึกข้อมูลเมื่อกด Submit
+          setIsSuccessModalOpen(false); // ปิด Modal หลังบันทึกเสร็จ
+          router.push("/admin/merry-package-list"); // กลับไปหน้ารายการ Package
         }}
       />
     </div>
