@@ -30,7 +30,31 @@ export default async function handler(req, res) {
 
       // ตรวจสอบความสมบูรณ์ของข้อมูลที่ส่งมาว่าไม่ว่างเปล่า
       if (!issue || !description) {
-        return res.status(400).json({ error: "Missing required fields" }); // ขาดฟิลด์ที่จำเป็น
+        return res.status(400).json({ error: "Please complete all required details to proceed." }); // ขาดฟิลด์ที่จำเป็น
+      }
+
+      // ฟังก์ชันนับจำนวนคำ
+      const countWords = (text) => text.trim().split(/\s+/).length;
+
+      // ตรวจสอบจำนวนคำของ issue และ description
+      const maxIssueWords = 50; // จำนวนคำสูงสุดสำหรับ issue
+      const maxDescriptionWords = 500; // จำนวนคำสูงสุดสำหรับ description
+
+      const issueWordCount = countWords(issue);
+      const descriptionWordCount = countWords(description);
+
+      if (issueWordCount > maxIssueWords) {
+        return res
+          .status(400)
+          .json({ error: `The issue field must not exceed ${maxIssueWords} words. You entered ${issueWordCount} words.` });
+      }
+
+      if (descriptionWordCount > maxDescriptionWords) {
+        return res
+          .status(400)
+          .json({
+            error: `The description field must not exceed ${maxDescriptionWords} words. You entered ${descriptionWordCount} words.`,
+          });
       }
 
       // แสดงข้อมูลที่ได้รับจาก frontend ใน console
