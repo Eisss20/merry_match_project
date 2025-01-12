@@ -61,19 +61,10 @@ export default async function handler(req, res) {
         (
             SELECT JSON_AGG(
                 json_build_object(
-                    'image_profile_id', ip.image_profile_id,
-                    'image_url', ip.image_profile_url,
-                    'is_primary', ip.is_primary
+                    'image_url', img
                 )
-            ) 
-            FROM (
-                SELECT DISTINCT image_profiles.image_profile_id, 
-                                image_profiles.image_profile_url, 
-                                image_profiles.is_primary
-                FROM image_profiles
-                WHERE image_profiles.profile_id = user_profiles.profile_id
-                ORDER BY image_profiles.image_profile_id
-            ) AS ip
+            )
+            FROM unnest(user_profiles.image_profile) AS img
         ),
         '[]'
     ) AS image_profiles

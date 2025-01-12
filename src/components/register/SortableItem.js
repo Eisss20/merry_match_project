@@ -5,9 +5,10 @@ const SortableItem = ({ id, children }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
+  // Styles สำหรับการลากและแอนิเมชัน
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: CSS.Transform.toString(transform), // การเปลี่ยนตำแหน่ง
+    transition, // แอนิเมชัน
   };
 
   return (

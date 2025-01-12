@@ -17,6 +17,17 @@ import {
   validateRequiredFieldsProfilePage,
 } from "@/utils/validateProfilePage";
 import Alert from "@/components/register/AlertRegister";
+import {
+  DndContext,
+  useSensor,
+  useSensors,
+  PointerSensor,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortableItem from "@/components/register/SortableItem";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
@@ -40,7 +51,7 @@ export default function ProfilePage() {
   const [hobbiesError, setHobbiesError] = useState("");
   const [aboutMe, setAboutMe] = useState("");
   const [aboutMeError, setAboutMeError] = useState("");
-  const [avatar, setAvatars] = useState([]);
+  const [avatar, setAvatar] = useState([]);
   const [avatarError, setAvatarError] = useState("");
   const [allGender, setAllGender] = useState([]);
   const [allMeeting, setAllMeeting] = useState([]);
@@ -49,7 +60,7 @@ export default function ProfilePage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
 
-  // console.log("image in state avatar", avatar);
+  console.log("state avatar", avatar);
 
   const { deleteuser } = useAuth();
   const router = useRouter();
@@ -163,10 +174,10 @@ export default function ProfilePage() {
         .split("T")[0];
 
       // ตรวจสอบว่าข้อมูลที่ get มาเป็น Array หรือ Object และมีค่า
-      const formattedAvatar = result.data.image_profiles.reduce((acc, img) => {
-        acc[img.image_profile_id] = { image_url: img.image_url };
-        return acc;
-      }, {});
+      // const formattedAvatar = result.data.image_profiles.reduce((acc, img) => {
+      //   acc[img.image_profile_id] = { image_url: img.image_url };
+      //   return acc;
+      // }, {});
 
       // เก็บค่าของ result ไว้ใน state
       setUserId(result.data.user_id);
@@ -182,7 +193,7 @@ export default function ProfilePage() {
       setRacialPref(result.data.racial_preference);
       setMeetingInterest(result.data.meeting_interest);
       setAboutMe(result.data.about_me);
-      setAvatars(formattedAvatar);
+      setAvatar(result.data.image_profiles);
     } catch (error) {
       console.log(error);
     }
@@ -250,8 +261,7 @@ export default function ProfilePage() {
   };
 
   // function handler update user profile
-  const handleUpdateProfile = async (e) => {
-    e.preventDefault();
+  const handleUpdateProfile = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You are not logged in. Please log in again.");
@@ -368,10 +378,17 @@ export default function ProfilePage() {
       }
     });
 
-    // อัปเดต state
-    setAvatars(updatedAvatars);
+    // แปลง newAvatars เป็น avatarsObject
+    const avatarsArray = Object.values(updatedAvatars);
+    const avatarsObject = avatarsArray.reduce((acc, file, index) => {
+      acc[index] = file;
+      return acc;
+    }, {});
 
-    if (Object.keys(updatedAvatars).length >= 2) {
+    // อัปเดต state
+    setAvatar(avatarsObject);
+
+    if (Object.keys(avatarsObject).length >= 2) {
       setAvatarError(""); // ล้างข้อความ error
     }
   };
@@ -383,12 +400,81 @@ export default function ProfilePage() {
     delete updatedAvatars[avatarKey]; // ลบรูปถาพที่ถูกเลือก
 
     // อัปเดต state
-    setAvatars(updatedAvatars);
+    setAvatar(updatedAvatars);
 
     // ใช้ validateProfilePicture เพื่อตรวจสอบข้อผิดพลาด
     const error = validateProfilePicture(updatedAvatars);
     setAvatarError(error); // อัพเดตข้อความ error
   };
+
+  const handleAvatarUpdate = (updatedAvatars) => {
+    setAvatar(updatedAvatars); // อัปเดตค่าของ avatar ใน parent
+  };
+
+  // console.log(" updated state avatar", avatar);
+
+  // drag and drop รูปภาพ
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over) return;
+    // over คือค่าที่วาง โดยจะเป็นเลข ตำแหน่งที่อยู่ใน Array
+    // active คือค่าที่โดนกดลาก โดยจะเป็นเลข ตำแหน่งที่อยู่ใน Array
+    console.log("over", over);
+    console.log("active", active);
+
+    const activeIndex = parseInt(active.id, 10); // parseInt แปลง String เป็นตัวเลขแบบเต็มจำนวน จาก id
+    const overIndex = parseInt(over.id, 10); // parseInt แปลง String เป็นตัวเลขแบบเต็มจำนวน จาก id
+
+    console.log("activeIndex00000", activeIndex);
+    console.log("overIndex00000", overIndex);
+
+    if (activeIndex !== overIndex) {
+      // สำเนาของ avatars
+      const updatedAvatars = { ...avatar };
+      console.log("updatedAvatars", updatedAvatars);
+
+      // ดึงค่าของรูปที่ถูกลาก
+      const activeAvatar = updatedAvatars[activeIndex];
+      console.log("activeAvatar", activeAvatar);
+
+      // ลบรูปที่ถูกลากออกจากตำแหน่งเดิม
+      delete updatedAvatars[activeIndex];
+
+      // จัดเรียงลำดับใหม่และแทรกรูปที่ถูกลากในตำแหน่งใหม่
+      const newAvatars = {};
+      let currentIndex = 0;
+      Object.keys(updatedAvatars).forEach((key, index) => {
+        if (currentIndex === overIndex) {
+          newAvatars[overIndex] = activeAvatar;
+          currentIndex++;
+        }
+        if (key !== String(activeIndex)) {
+          newAvatars[currentIndex] = updatedAvatars[key];
+          currentIndex++;
+        }
+      });
+
+      // กรณีที่ลากไปยังตำแหน่งสุดท้าย
+      if (overIndex >= Object.keys(updatedAvatars).length) {
+        newAvatars[overIndex] = activeAvatar;
+      }
+      console.log("Object.keys", Object.keys(updatedAvatars));
+      console.log("updatedAvatars.length", Object.keys(updatedAvatars).length);
+      console.log("Updated avatars after rearranging: ", newAvatars);
+      setAvatar(newAvatars); // อัปเดต state avatars
+
+      handleAvatarUpdate(newAvatars); // เรียกฟังก์ชันเพิ่มเติมถ้ามี
+      // console.log("handleAvatarUpdate", newAvatars);
+    }
+  };
+
+  // Sensors สำหรับการลาก
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 10 },
+    }),
+  );
+  // console.log("sensors", sensors);
 
   // เมื่อเปิดหน้าเว็บให้ function getProfileData ทำงาน
   useEffect(() => {
@@ -761,40 +847,45 @@ export default function ProfilePage() {
                 </h1>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="form-control">
-                    {/* แสดงข้อความ error ถ้ามี */}
-                    {avatarError && (
-                      <small className="ml-2 pt-2 text-red-600">
-                        {avatarError}
-                      </small>
-                    )}
-                  </label>
+                  {avatarError && (
+                    <small className="ml-2 pt-2 text-red-600">
+                      {avatarError}
+                    </small>
+                  )}
                 </div>
                 <div className="mx-auto flex h-auto w-full flex-wrap gap-4 rounded-lg border-gray-300 px-0 lg:w-[931px]">
                   {/* แสดงรูปภาพจาก State avatar */}
-                  {Object.keys(avatar).map((avatarKey) => (
-                    <div
-                      key={avatarKey}
-                      className="relative h-[120px] w-[120px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-gray-300 sm:h-[140px] sm:w-[140px] lg:h-[167px] lg:w-[167px]"
+                  <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+                    <SortableContext
+                      items={Object.keys(avatar)}
+                      strategy={horizontalListSortingStrategy} // ใช้ horizontal list
                     >
-                      <img
-                        src={
-                          avatar[avatarKey] instanceof File
-                            ? URL.createObjectURL(avatar[avatarKey]) // Preview สำหรับภาพใหม่
-                            : avatar[avatarKey].image_url // URL สำหรับภาพจาก Database
-                        }
-                        alt={`profile-${avatarKey}`}
-                        className="h-full w-full rounded-lg object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(avatarKey)} // ฟังก์ชั่นลบรูปภาพ
-                        className="absolute right-[-5px] top-[-10px] flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xl text-white hover:bg-red-700"
-                      >
-                        x
-                      </button>
-                    </div>
-                  ))}
+                      {Object.entries(avatar).map(([key, value]) => {
+                        return (
+                          <SortableItem key={key} id={key}>
+                            <img
+                              src={
+                                value instanceof File
+                                  ? URL.createObjectURL(value) // Preview สำหรับภาพใหม่
+                                  : value.image_url // URL สำหรับภาพจาก Database
+                              }
+                              alt={`profile-${key}`}
+                              className="h-full w-full rounded-lg object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(key)} // ฟังก์ชั่นลบรูปภาพ
+                              className="absolute right-[-5px] top-[-10px] flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xl text-white hover:bg-red-700"
+                            >
+                              x
+                            </button>
+                          </SortableItem>
+                        );
+                      })}
+                    </SortableContext>
+                  </DndContext>
+
+                  {/* ถ้าจำนวนรูปน้อยกว่า 5 ให้โชว์ปุ่มอัปโหลด */}
                   {Object.keys(avatar).length < 5 && (
                     <div className="relative h-[120px] w-[120px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-gray-300 sm:h-[140px] sm:w-[140px] lg:h-[167px] lg:w-[167px]">
                       <label
@@ -802,15 +893,28 @@ export default function ProfilePage() {
                         className="flex h-full w-full items-center justify-center text-sm text-gray-500"
                       >
                         {Object.keys(avatar).length === 0 ? (
-                          <span>คลิกเพื่อเลือกไฟล์</span>
+                          <div className="flex h-full items-center justify-center">
+                            <span className="flex flex-col items-center justify-center">
+                              +
+                              <p className="text-lg font-medium">
+                                Upload photo
+                              </p>
+                            </span>
+                          </div>
                         ) : (
-                          <span>เลือกไฟล์ใหม่</span>
+                          <div className="flex h-full items-center justify-center">
+                            <span className="flex flex-col items-center justify-center">
+                              +
+                              <p className="text-lg font-medium">
+                                Upload photo
+                              </p>
+                            </span>
+                          </div>
                         )}
                         <input
                           id="upload"
                           name="avatar"
                           type="file"
-                          placeholder="Enter last name here"
                           onChange={handleFileChange}
                           className="absolute z-10 h-full w-full cursor-pointer opacity-0"
                         />
