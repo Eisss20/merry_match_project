@@ -19,6 +19,16 @@ body {
   scrollbar-color: #2a2e3f transparent;
 }
 
+/* Hide scrollbar */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Remove scrollbar from daisy modal on matching-page */
+html.matches-page {
+  scrollbar-gutter: auto !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
