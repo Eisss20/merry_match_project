@@ -40,6 +40,9 @@ export const validateHobbies = (hobbies) => {
   if (!hobbies || hobbies.length === 0) {
     return "Please select hobbies / interests";
   }
+  if (hobbies.length > 10) {
+    return "You can only select up to 10 hobbies / interests.";
+  }
   return "";
 };
 

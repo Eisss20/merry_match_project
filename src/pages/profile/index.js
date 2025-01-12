@@ -584,7 +584,7 @@ export default function ProfilePage() {
                         setDateError(error);
                       }}
                       disabled={alertVisible}
-                      className="input input-bordered h-12 w-full rounded-[8px] border-[1px] border-fourth-400 py-3 pl-3 pr-4 lg:w-full"
+                      className={`input h-12 w-full rounded-[8px] border-[1px] border-fourth-400 bg-utility-primary py-3 pl-3 pr-4 text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400 lg:w-full ${dateError ? "border-utility-third" : ""}`}
                     />
                     {dateError && (
                       <small className="ml-2 pt-2 text-red-600">
@@ -599,15 +599,16 @@ export default function ProfilePage() {
                     </span>
                     <input
                       type="text"
-                      className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-400 lg:w-full"
+                      disabled={alertVisible}
+                      className={`input h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400 lg:w-full ${nameError ? "border-utility-third" : ""}`}
                       value={name}
                       onChange={(e) => {
                         setName(e.target.value);
+                        // bg-utility-primary transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${nameError ? "border-utility-third" : ""}
                         // เรียกใช้ validate name
                         const error = validateName(e.target.value);
                         setNameError(error || "");
                       }}
-                      disabled={alertVisible}
                     />
                     {nameError && (
                       <small className="ml-2 pt-2 text-red-600">
@@ -624,7 +625,7 @@ export default function ProfilePage() {
                       City
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       disabled={alertVisible}
@@ -647,7 +648,7 @@ export default function ProfilePage() {
                       Location
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       disabled={alertVisible}
@@ -666,25 +667,25 @@ export default function ProfilePage() {
 
                 <div className="flex flex-col gap-6 lg:flex-row lg:gap-6">
                   <label className="email-section flex w-full flex-col gap-1 lg:order-2">
-                    <span className="text-base font-normal text-fourth-600">
+                    <span className="text-base font-normal text-utility-second">
                       Email
                     </span>
                     <input
                       type="text"
                       placeholder="name@website.com"
-                      className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 placeholder-fourth-900"
+                      className="input h-12 w-full rounded-[8px] border py-3 pl-3 pr-4 text-fourth-600 placeholder-fourth-900 disabled:border-fourth-400"
                       value={email}
                       disabled
                     />
                   </label>
                   <label className="username-section flex w-full flex-col gap-1 lg:order-1">
-                    <span className="text-base font-normal text-fourth-600">
+                    <span className="text-base font-normal text-utility-second">
                       Username
                     </span>
                     <input
                       type="text"
                       placeholder="At least 6 character"
-                      className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 placeholder-fourth-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="input h-12 w-full rounded-[8px] border py-3 pl-3 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:border-fourth-400"
                       value={username}
                       disabled
                       onChange={(e) => setUsername(e.target.value)}
@@ -707,7 +708,7 @@ export default function ProfilePage() {
                       Sexual preferences
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={sexPref}
                       onChange={(e) => setSexPref(e.target.value)}
                       disabled={alertVisible}
@@ -727,7 +728,7 @@ export default function ProfilePage() {
                       Sexual identities
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={sexIdentity}
                       onChange={(e) => setSexIdentity(e.target.value)}
                       disabled={alertVisible}
@@ -750,7 +751,7 @@ export default function ProfilePage() {
                       Meeting interests
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={meetingInterest}
                       onChange={(e) => setMeetingInterest(e.target.value)}
                       disabled={alertVisible}
@@ -773,7 +774,7 @@ export default function ProfilePage() {
                       Racial preferences
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={racialPref}
                       onChange={(e) => setRacialPref(e.target.value)}
                       disabled={alertVisible}
@@ -799,6 +800,10 @@ export default function ProfilePage() {
                     onOptionsChange={handleUpdateOptions}
                     updateHobbiesError={updateHobbiesError}
                     disabled={alertVisible}
+                    hobbieError={hobbiesError}
+                    className={`${
+                      hobbiesError ? "border-utility-third" : "" // เปลี่ยนเส้นขอบตาม error
+                    }`}
                   />
                   {hobbiesError && (
                     <small className="ml-2 pt-2 text-red-600">
@@ -816,7 +821,7 @@ export default function ProfilePage() {
                   name="aboutme"
                   type="text"
                   placeholder="Write something about yourself"
-                  className="h-28 w-full resize-none rounded-[8px] border border-fourth-400 px-4 py-3 placeholder-fourth-900"
+                  className={`input h-28 w-full resize-none rounded-[8px] border border-fourth-400 px-4 py-3 placeholder-fourth-900 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400 ${aboutMeError ? "border-utility-third" : ""}`}
                   disabled={alertVisible}
                   value={aboutMe}
                   onChange={(e) => {
