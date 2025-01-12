@@ -6,7 +6,7 @@ import { GoHeartFill } from "react-icons/go";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow } from "swiper/modules";
 import "swiper/css";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 
 import { DetailProfileDesktop } from "./matches/DetailProfileDesktop";
@@ -16,6 +16,7 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
   const [swiperInstance, setSwiperInstance] = useState(null);
 
   const activeProfileDesktop = userProfiles[activeIndex];
+  const modalRef = useRef(null);
 
   const handleLikeUser = async (otherUserId) => {
     const response = await axios.post("/api/matches/likes", {
@@ -75,7 +76,7 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
               <div className="absolute bottom-0 z-20 flex w-full items-center justify-between px-10 pb-14">
                 <div className="flex items-center gap-4 text-3xl font-medium">
                   <p
-                    className={`text-utility-primary duration-300 ${activeIndex !== index ? "text-opacity-0" : ""}`}
+                    className={`text-utility-primary duration-300 ${activeIndex !== index ? "pointer-events-none text-opacity-0" : ""}`}
                   >
                     {profile.name} {profile.age} {profile.gender}
                   </p>
@@ -88,7 +89,7 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
                     }}
                   >
                     <IoMdEye
-                      className={`size-4 text-utility-primary duration-300 ${activeIndex !== index ? "text-opacity-0" : ""}`}
+                      className={`size-4 text-utility-primary duration-300 ${activeIndex !== index ? "pointer-events-none text-opacity-0" : ""}`}
                     />
                   </button>
                 </div>
@@ -101,7 +102,7 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
                         ? activeIndex === 0
                           ? "cursor-default text-opacity-50"
                           : "hover:text-neutral-200"
-                        : "text-opacity-0"
+                        : "pointer-events-none text-opacity-0"
                     } `}
                     onClick={() => swiperInstance?.slidePrev()}
                   >
@@ -113,7 +114,7 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
                         ? activeIndex === userProfiles.length - 1
                           ? "cursor-default text-opacity-50"
                           : "hover:text-neutral-200"
-                        : "text-opacity-0"
+                        : "pointer-events-none text-opacity-0"
                     }`}
                     onClick={() => swiperInstance?.slideNext()}
                   >
@@ -127,14 +128,14 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
                 <button
                   type="button"
                   onClick={() => handleDislikeUser(profile.user_id)}
-                  className={`flex aspect-square h-auto w-[14%] items-center justify-center rounded-3xl bg-utility-primary text-fourth-700 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-neutral-200 ${activeIndex !== index ? "bg-opacity-0 text-opacity-0 shadow-none" : ""}`}
+                  className={`flex aspect-square h-auto w-[5rem] items-center justify-center rounded-3xl bg-utility-primary text-fourth-700 shadow-lg transition-colors duration-300 hover:bg-neutral-200 ${activeIndex !== index ? "pointer-events-none bg-opacity-0 text-opacity-0 shadow-none" : ""}`}
                 >
                   <FiX className="aspect-square h-[60%] w-auto" />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleLikeUser(profile.user_id)}
-                  className={`flex aspect-square h-auto w-[14%] items-center justify-center rounded-3xl bg-utility-primary text-primary-500 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-neutral-200 ${activeIndex !== index ? "bg-opacity-0 text-opacity-0 shadow-none" : ""}`}
+                  className={`flex aspect-square h-auto w-[5rem] items-center justify-center rounded-3xl bg-utility-primary text-primary-500 shadow-lg transition-colors duration-300 hover:bg-neutral-200 ${activeIndex !== index ? "pointer-events-none bg-opacity-0 text-opacity-0 shadow-none" : ""}`}
                 >
                   <GoHeartFill className="aspect-square h-[55%] w-auto" />
                 </button>
@@ -155,7 +156,11 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
       </Swiper>
 
       {/* Profile modal */}
-      <dialog id="preview-profile-desktop" className="modal px-10">
+      <dialog
+        id="preview-profile-desktop"
+        ref={modalRef}
+        className="modal px-10"
+      >
         {activeProfileDesktop && (
           <DetailProfileDesktop
             name={activeProfileDesktop.name}
@@ -169,6 +174,10 @@ function CardSwiper({ userId, userProfiles, setUserProfiles }) {
             aboutMe={activeProfileDesktop.about_me}
             hobby={activeProfileDesktop.hobbies}
             image={activeProfileDesktop.image_profile}
+            userId={activeProfileDesktop.user_id}
+            onDislike={handleDislikeUser}
+            onLike={handleLikeUser}
+            closeModal={() => modalRef.current?.close()}
           />
         )}
       </dialog>

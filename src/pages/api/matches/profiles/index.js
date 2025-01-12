@@ -65,16 +65,39 @@ export default async function handler(req, res) {
 
       if (gender) {
         if (Array.isArray(gender)) {
-          const genderPlaceholders = gender.map(
-            (_, index) => `$${values.length + index + 1}`,
-          );
-          conditions.push(
-            `Gender.gender_name IN (${genderPlaceholders.join(", ")})`,
-          );
-          values.push(...gender);
+          const conditionsForGender = [];
+
+          // If "Other" is in the array
+          if (gender.includes("Other")) {
+            conditionsForGender.push(
+              `(Gender.gender_name NOT IN ('Male', 'Female'))`,
+            );
+          }
+
+          // Add conditions for other genders
+          const otherGenders = gender.filter((g) => g !== "Other");
+          if (otherGenders.length > 0) {
+            const genderPlaceholders = otherGenders.map(
+              (_, index) => `$${values.length + index + 1}`,
+            );
+            conditionsForGender.push(
+              `Gender.gender_name IN (${genderPlaceholders.join(", ")})`,
+            );
+            values.push(...otherGenders);
+          }
+
+          // Combine all gender-related conditions with OR
+          if (conditionsForGender.length > 0) {
+            conditions.push(`(${conditionsForGender.join(" OR ")})`);
+          }
         } else {
-          conditions.push(`Gender.gender_name = $${values.length + 1}`);
-          values.push(gender);
+          // Single gender case
+          if (gender === "Other") {
+            conditions.push(`(Gender.gender_name NOT IN ('Male', 'Female'))`);
+          } else {
+            conditions.push(`Gender.gender_name = $${values.length + 1}`);
+            values.push(gender);
+          }
         }
       }
 

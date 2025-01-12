@@ -1,5 +1,4 @@
-import { FiX, FiSearch } from "react-icons/fi";
-import { GoHeartFill } from "react-icons/go";
+import { FiX } from "react-icons/fi";
 import { TbLoader2 } from "react-icons/tb";
 
 import { NavBar } from "@/components/NavBar";
@@ -21,7 +20,29 @@ const LazyCardSwiper = dynamic(() => import("@/components/CardSwiper"), {
   ssr: false,
 });
 
-function AgeRangeSlider({ age, setAge }) {
+function AgeRangeSlider({ age, setAge, inputValues, setInputValues }) {
+  const handleInputChange = (index, value) => {
+    const updatedValues = [...inputValues];
+    updatedValues[index] = value;
+    setInputValues(updatedValues);
+  };
+
+  const handleInputKeyDown = (event, index) => {
+    if (event.key === "Enter") {
+      const value = parseInt(inputValues[index], 10);
+
+      if (index === 0) {
+        const newMin = Math.max(18, Math.min(value, age[1]));
+        setAge([newMin, age[1]]);
+        setInputValues([newMin, inputValues[1]]);
+      } else {
+        const newMax = Math.min(80, Math.max(value, age[0]));
+        setAge([age[0], newMax]);
+        setInputValues([inputValues[0], newMax]);
+      }
+    }
+  };
+
   return (
     <>
       {/* Slider */}
@@ -31,7 +52,10 @@ function AgeRangeSlider({ age, setAge }) {
           min={18}
           max={80}
           values={age}
-          onChange={(values) => setAge(values)}
+          onChange={(values) => {
+            setAge(values);
+            setInputValues(values);
+          }}
           renderTrack={({ props, children }) => {
             const { key, ...restProps } = props;
             return (
@@ -64,8 +88,9 @@ function AgeRangeSlider({ age, setAge }) {
       <div className="flex items-center gap-2">
         <input
           type="number"
-          value={age[0]}
-          onChange={(e) => setAge([+e.target.value, age[1]])}
+          value={inputValues[0]}
+          onChange={(e) => handleInputChange(0, e.target.value)}
+          onKeyDown={(e) => handleInputKeyDown(e, 0)}
           className="hover: w-full rounded-lg border-2 border-fourth-400 bg-utility-primary px-3 py-2 text-fourth-600 outline-none"
           min={18}
           max={age[1]}
@@ -73,8 +98,9 @@ function AgeRangeSlider({ age, setAge }) {
         <span className="font-semibold text-utility-second">-</span>
         <input
           type="number"
-          value={age[1]}
-          onChange={(e) => setAge([age[0], +e.target.value])}
+          value={inputValues[1]}
+          onChange={(e) => handleInputChange(1, e.target.value)}
+          onKeyDown={(e) => handleInputKeyDown(e, 1)}
           className="w-full rounded-lg border-2 border-fourth-400 bg-utility-primary px-3 py-2 text-fourth-600 outline-none"
           min={age[0]}
           max={80}
@@ -106,14 +132,16 @@ function RightSidebar({
   genderList,
   selectedGender,
   setSelectedGender,
+  setSendAge,
+  setSendSelectedGender,
+  inputValues,
+  setInputValues,
 }) {
   const handleCheckboxChange = (genderName, isChecked) => {
     setSelectedGender((prev) => {
       if (isChecked) {
-        // Add gender if checked
         return [...prev, genderName];
       } else {
-        // Remove gender if unchecked
         return prev.filter((gender) => gender !== genderName);
       }
     });
@@ -125,22 +153,14 @@ function RightSidebar({
         <div className="flex flex-col gap-5">
           <p className="font-bold text-fourth-900">Gender you interest</p>
           <div className="flex flex-col gap-4">
-            <CustomCheckbox
-              key="default"
-              list="Default"
-              onChange={(isChecked) =>
-                handleCheckboxChange("Default", isChecked)
-              }
-              isChecked={selectedGender.includes("Default")}
-            />
             {genderList.map((interest, index) => (
               <CustomCheckbox
                 key={index}
-                list={interest.gender_name}
+                list={interest}
                 onChange={(isChecked) =>
-                  handleCheckboxChange(interest.gender_name, isChecked)
+                  handleCheckboxChange(interest, isChecked)
                 }
-                isChecked={selectedGender.includes(interest.gender_name)}
+                isChecked={selectedGender.includes(interest)}
               />
             ))}
           </div>
@@ -149,7 +169,12 @@ function RightSidebar({
         <div className="flex flex-col gap-5">
           <p className="font-bold text-fourth-900">Age Range</p>
           <div className="flex flex-col gap-6">
-            <AgeRangeSlider age={age} setAge={setAge} />
+            <AgeRangeSlider
+              age={age}
+              setAge={setAge}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+            />
           </div>
         </div>
       </div>
@@ -158,12 +183,25 @@ function RightSidebar({
 
       <div className="flex items-center justify-end gap-6 px-4 py-4">
         <Link
-          href="#"
+          href=""
+          onClick={() => {
+            setSelectedGender([]);
+            setAge([18, 50]);
+            setInputValues([18, 50]);
+          }}
           className="font-bold text-primary-500 transition-colors duration-300 hover:text-primary-600"
         >
           Clear
         </Link>
-        <CustomButton>Search</CustomButton>
+        <CustomButton
+          buttonType="primary"
+          onClick={() => {
+            setSendSelectedGender(selectedGender);
+            setSendAge(age);
+          }}
+        >
+          Search
+        </CustomButton>
       </div>
     </aside>
   );
@@ -175,14 +213,16 @@ function FilterMobile({
   genderList,
   selectedGender,
   setSelectedGender,
+  setSendAge,
+  setSendSelectedGender,
+  inputValues,
+  setInputValues,
 }) {
   const handleCheckboxChange = (genderName, isChecked) => {
     setSelectedGender((prev) => {
       if (isChecked) {
-        // Add gender if checked
         return [...prev, genderName];
       } else {
-        // Remove gender if unchecked
         return prev.filter((gender) => gender !== genderName);
       }
     });
@@ -194,22 +234,14 @@ function FilterMobile({
         <div className="flex flex-col gap-5">
           <p className="font-bold text-fourth-900">Gender you interest</p>
           <div className="flex flex-col gap-4">
-            <CustomCheckbox
-              key="default"
-              list="Default"
-              onChange={(isChecked) =>
-                handleCheckboxChange("Default", isChecked)
-              }
-              isChecked={selectedGender.includes("Default")}
-            />
             {genderList.map((interest, index) => (
               <CustomCheckbox
                 key={index}
-                list={interest.gender_name}
+                list={interest}
                 onChange={(isChecked) =>
-                  handleCheckboxChange(interest.gender_name, isChecked)
+                  handleCheckboxChange(interest, isChecked)
                 }
-                isChecked={selectedGender.includes(interest.gender_name)}
+                isChecked={selectedGender.includes(interest)}
               />
             ))}
           </div>
@@ -218,14 +250,22 @@ function FilterMobile({
         <div className="flex flex-col gap-5">
           <p className="font-bold text-fourth-900">Age Range</p>
           <div className="flex flex-col gap-6">
-            <AgeRangeSlider age={age} setAge={setAge} />
+            <AgeRangeSlider
+              age={age}
+              setAge={setAge}
+              inputValues={inputValues}
+              setInputValues={setInputValues}
+            />
           </div>
         </div>
 
         <CustomButton
           buttonType="primary"
           className="w-full"
-          onClick={() => router.push("/")}
+          onClick={() => {
+            setSendSelectedGender(selectedGender);
+            setSendAge(age);
+          }}
         >
           Search
         </CustomButton>
@@ -235,16 +275,21 @@ function FilterMobile({
 }
 
 export default function Matches() {
+  const { state, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [userProfiles, setUserProfiles] = useState([]);
-  const [genderList, setGenderList] = useState([]);
-  const [selectedGender, setSelectedGender] = useState([]);
+
+  const [selectedGender, setSelectedGender] = useState(["Default"]);
   const [age, setAge] = useState([18, 50]);
+  const [sendSelectedGender, setSendSelectedGender] = useState(["Default"]);
+  const [sendAge, setSendAge] = useState([18, 50]);
+  const [inputValues, setInputValues] = useState(age);
+
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [isfilterMobileOpen, setIsfilterMobileOpen] = useState(false);
 
-  const { state, isAuthenticated } = useAuth();
-  const router = useRouter();
+  const genderList = ["Default", "Male", "Female", "Other"];
 
   // Remove scrollbar from daisy modal
   useEffect(() => {
@@ -255,6 +300,7 @@ export default function Matches() {
     };
   }, []);
 
+  // Authorization
   useEffect(() => {
     if (state.loading) return;
 
@@ -264,27 +310,41 @@ export default function Matches() {
     }
 
     setUserId(state.user?.id);
+  }, [isAuthenticated, state.loading, router]);
 
+  // Fetch other user profile
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        setMatchesLoading(true);
+        if (!userId) return;
 
-        // Fetch gender list
-        const genderResponse = await apiClient.get(`/api/genders`);
-        setGenderList(genderResponse.data);
+        setMatchesLoading(true);
 
         // Fetch user profiles
         const queryParams = new URLSearchParams();
-        if (selectedGender.length > 0) {
-          selectedGender.forEach((gender) => {
+
+        // Handle default gender
+        const resolvedGenders = sendSelectedGender.map((gender) =>
+          gender === "Default" ? state.user?.sexual_preference || "" : gender,
+        );
+
+        // Add genders to queryParams
+        resolvedGenders
+          .filter((gender) => gender)
+          .forEach((gender) => {
             queryParams.append("gender", gender);
           });
-        }
-        if (age[0]) queryParams.append("minAge", age[0]);
-        if (age[1]) queryParams.append("maxAge", age[1]);
+
+        // Add age range to queryParams
+        if (sendAge[0]) queryParams.append("minAge", sendAge[0]);
+        if (sendAge[1]) queryParams.append("maxAge", sendAge[1]);
+
+        console.log(
+          `/api/matches/profiles?userMasterId=${userId}&${queryParams.toString()}`,
+        );
 
         const profileResponse = await apiClient.get(
-          `/api/matches/profiles?userMasterId=${state.user?.id}&${queryParams.toString()}`,
+          `/api/matches/profiles?userMasterId=${userId}&${queryParams.toString()}`,
         );
 
         setUserProfiles(profileResponse.data);
@@ -296,7 +356,7 @@ export default function Matches() {
     };
 
     fetchData();
-  }, [isAuthenticated, state.loading, selectedGender, age, router]);
+  }, [userId, sendSelectedGender, sendAge]);
 
   if (!isAuthenticated) {
     return null;
@@ -335,6 +395,10 @@ export default function Matches() {
             genderList={genderList}
             selectedGender={selectedGender}
             setSelectedGender={setSelectedGender}
+            setSendAge={setSendAge}
+            setSendSelectedGender={setSendSelectedGender}
+            inputValues={inputValues}
+            setInputValues={setInputValues}
           />
         </div>
       </div>
@@ -343,13 +407,19 @@ export default function Matches() {
       <div className="relative flex min-h-screen flex-col lg:hidden">
         <NavBar />
 
-        <div className="w-full">
-          <CardSwiperMobile
-            userId={userId}
-            userProfiles={userProfiles}
-            setUserProfiles={setUserProfiles}
-          />
-        </div>
+        {matchesLoading ? (
+          <div className="flex flex-grow flex-col items-center justify-center text-utility-primary">
+            <TbLoader2 className="size-20 animate-spin" />
+          </div>
+        ) : (
+          <div className="w-full">
+            <CardSwiperMobile
+              userId={userId}
+              userProfiles={userProfiles}
+              setUserProfiles={setUserProfiles}
+            />
+          </div>
+        )}
 
         <div className="absolute bottom-5 z-20 flex w-full justify-between px-4 md:px-14">
           <button
@@ -405,7 +475,12 @@ export default function Matches() {
 
                 <p className="text-xl text-[#191C77]">Filter</p>
                 <Link
-                  href="#"
+                  href=""
+                  onClick={() => {
+                    setSelectedGender([]);
+                    setAge([18, 50]);
+                    setInputValues([18, 50]);
+                  }}
                   className="font-bold text-primary-500 transition-colors duration-300 hover:text-primary-600"
                 >
                   Clear
@@ -418,6 +493,10 @@ export default function Matches() {
                 genderList={genderList}
                 selectedGender={selectedGender}
                 setSelectedGender={setSelectedGender}
+                setSendAge={setSendAge}
+                setSendSelectedGender={setSendSelectedGender}
+                inputValues={inputValues}
+                setInputValues={setInputValues}
               />
             </div>
           </div>

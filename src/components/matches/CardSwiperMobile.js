@@ -5,7 +5,7 @@ import { HiMiniMapPin } from "react-icons/hi2";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 
 import { DetailProfile } from "./DetailProfile";
@@ -16,6 +16,9 @@ export default function CardSwiperMobile({
   setUserProfiles,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const modalRef = useRef(null);
+
+  const activeProfile = userProfiles[activeIndex];
 
   const handleLikeUser = async (otherUserId) => {
     const response = await axios.post("/api/matches/likes", {
@@ -39,8 +42,6 @@ export default function CardSwiperMobile({
 
     setUserProfiles(newuserProfiles);
   };
-
-  const activeProfile = userProfiles[activeIndex];
 
   return (
     <>
@@ -87,7 +88,6 @@ export default function CardSwiperMobile({
                 <button
                   className={`flex aspect-square items-center justify-center rounded-full bg-utility-primary p-2 transition-colors duration-300 hover:bg-opacity-25 ${activeIndex !== index ? "bg-opacity-0" : "bg-opacity-20"}`}
                   onClick={() => {
-                    console.log("Button clicked!"); // เพิ่ม log เพื่อตรวจสอบการคลิก
                     document
                       .getElementById("preview-profile-mobile")
                       .showModal();
@@ -139,6 +139,7 @@ export default function CardSwiperMobile({
       {/* Profile modal */}
       <dialog
         id="preview-profile-mobile"
+        ref={modalRef}
         className="no-scrollbar modal overflow-y-auto"
       >
         {activeProfile && (
@@ -154,6 +155,10 @@ export default function CardSwiperMobile({
             aboutMe={activeProfile.about_me}
             hobby={activeProfile.hobbies}
             image={activeProfile.image_profile}
+            userId={activeProfile.user_id}
+            onDislike={handleDislikeUser}
+            onLike={handleLikeUser}
+            closeModal={() => modalRef.current?.close()}
           />
         )}
       </dialog>

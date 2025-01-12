@@ -17,6 +17,10 @@ export function DetailProfileDesktop({
   aboutMe,
   hobby,
   image,
+  userId,
+  onDislike,
+  onLike,
+  closeModal,
 }) {
   const [hobbyList, setHobbyList] = useState([]); // เก็บ hobby
   const [imageList, setImageList] = useState([]); // เก็บ image
@@ -97,10 +101,22 @@ export function DetailProfileDesktop({
 
             <div className="dislike-like-button absolute left-1/2 top-[285px] flex -translate-x-1/2 flex-row gap-6 lg:top-[404px]">
               {/* onclick  */}
-              <button className="dislike btn h-[60px] w-[60px] rounded-2xl bg-white drop-shadow-xl">
+              <button
+                className="dislike btn h-[60px] w-[60px] rounded-2xl bg-white drop-shadow-xl"
+                onClick={() => {
+                  onDislike(userId);
+                  closeModal();
+                }}
+              >
                 <RxCross2 className="text-5xl text-fourth-700" />
               </button>
-              <button className="like btn h-[60px] w-[60px] rounded-2xl bg-white drop-shadow-xl">
+              <button
+                className="like btn h-[60px] w-[60px] rounded-2xl bg-white drop-shadow-xl"
+                onClick={() => {
+                  onLike(userId);
+                  closeModal();
+                }}
+              >
                 <IoHeart className="text-5xl text-primary-500" />
               </button>
             </div>
