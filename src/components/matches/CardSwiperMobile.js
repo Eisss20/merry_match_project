@@ -5,43 +5,30 @@ import { HiMiniMapPin } from "react-icons/hi2";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
-import { useState, useRef } from "react";
-import axios from "axios";
+import { useState, useRef, useEffect } from "react";
 
 import { DetailProfile } from "./DetailProfile";
+import MatchAnimation from "./MatchAnimation";
 
 export default function CardSwiperMobile({
-  userId,
   userProfiles,
-  setUserProfiles,
+  handleLikeUser,
+  handleDislikeUser,
+  isMatchAnimation,
+  matchChatId,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [swiperInstance, setSwiperInstance] = useState(null);
   const modalRef = useRef(null);
 
   const activeProfile = userProfiles[activeIndex];
 
-  const handleLikeUser = async (otherUserId) => {
-    const response = await axios.post("/api/matches/likes", {
-      user_master: userId,
-      user_other: otherUserId,
-    });
-
-    console.log("response:", response);
-
-    const newuserProfiles = [...userProfiles].filter(
-      (profile) => profile.user_id !== otherUserId,
-    );
-
-    setUserProfiles(newuserProfiles);
-  };
-
-  const handleDislikeUser = async (otherUserId) => {
-    const newuserProfiles = [...userProfiles].filter(
-      (profile) => profile.user_id !== otherUserId,
-    );
-
-    setUserProfiles(newuserProfiles);
-  };
+  useEffect(() => {
+    if (swiperInstance) {
+      swiperInstance.allowSlideNext = !isMatchAnimation;
+      swiperInstance.allowSlidePrev = !isMatchAnimation;
+    }
+  }, [isMatchAnimation, swiperInstance]);
 
   return (
     <>
@@ -49,55 +36,65 @@ export default function CardSwiperMobile({
         spaceBetween={0}
         slidesPerView={1}
         onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+        onSwiper={(swiper) => setSwiperInstance(swiper)}
         className="h-[75vh] w-full rounded-b-3xl"
       >
         {userProfiles.map((profile, index) => (
           <SwiperSlide key={index} className="!flex h-full">
             <div className="relative min-w-full">
               {/* Text */}
-              <div
-                className={`absolute bottom-0 z-20 flex w-full items-center justify-between gap-3 px-4 pb-14 text-4xl font-semibold transition-colors md:px-14 ${activeIndex !== index ? "bg-opacity-0 text-opacity-0" : "bg-opacity-0 text-opacity-0"}`}
-              >
-                {/* Name, age */}
-                <div className="flex flex-col">
-                  <p
-                    className={`text-utility-primary duration-300 ${activeIndex !== index && "text-opacity-0"}`}
-                  >
-                    {profile.name}{" "}
-                    <span
-                      className={`text-fourth-400 duration-300 ${activeIndex !== index && "text-opacity-0"}`}
-                    >
-                      {profile.age}
-                    </span>{" "}
-                    {profile.gender}
-                  </p>
-
-                  {/* Location */}
-                  <div className="flex items-center gap-1 font-medium">
-                    <HiMiniMapPin
-                      className={`size-6 text-[#BEBFF1] duration-300 ${activeIndex !== index && "text-opacity-0"}`}
-                    />
-                    <p
-                      className={`text-lg text-[#D6D9E4] duration-300 ${activeIndex !== index && "text-opacity-0"}`}
-                    >
-                      Bangkok, Thailand
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  className={`flex aspect-square items-center justify-center rounded-full bg-utility-primary p-2 transition-colors duration-300 hover:bg-opacity-25 ${activeIndex !== index ? "bg-opacity-0" : "bg-opacity-20"}`}
-                  onClick={() => {
-                    document
-                      .getElementById("preview-profile-mobile")
-                      .showModal();
-                  }}
+              {!isMatchAnimation && (
+                <div
+                  className={`absolute bottom-0 z-20 flex w-full items-center justify-between gap-3 px-4 pb-14 text-4xl font-semibold transition-colors md:px-14 ${activeIndex !== index ? "bg-opacity-0 text-opacity-0" : "bg-opacity-0 text-opacity-0"}`}
                 >
-                  <IoMdEye
-                    className={`size-4 text-utility-primary duration-300 ${activeIndex !== index && "text-opacity-0"}`}
-                  />
-                </button>
-              </div>
+                  {/* Name, age */}
+                  <div className="flex flex-col">
+                    <p
+                      className={`text-utility-primary duration-300 ${activeIndex !== index && "text-opacity-0"}`}
+                    >
+                      {profile.name}{" "}
+                      <span
+                        className={`text-fourth-400 duration-300 ${activeIndex !== index && "text-opacity-0"}`}
+                      >
+                        {profile.age}
+                      </span>{" "}
+                      {profile.gender}
+                    </p>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-1 font-medium">
+                      <HiMiniMapPin
+                        className={`size-6 text-[#BEBFF1] duration-300 ${activeIndex !== index && "text-opacity-0"}`}
+                      />
+                      <p
+                        className={`text-lg text-[#D6D9E4] duration-300 ${activeIndex !== index && "text-opacity-0"}`}
+                      >
+                        Bangkok, Thailand
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    className={`flex aspect-square items-center justify-center rounded-full bg-utility-primary p-2 transition-colors duration-300 hover:bg-opacity-25 ${activeIndex !== index ? "bg-opacity-0" : "bg-opacity-20"}`}
+                    onClick={() => {
+                      document
+                        .getElementById("preview-profile-mobile")
+                        .showModal();
+                    }}
+                  >
+                    <IoMdEye
+                      className={`size-4 text-utility-primary duration-300 ${activeIndex !== index && "text-opacity-0"}`}
+                    />
+                  </button>
+                </div>
+              )}
+
+              {/* Match animation */}
+              {isMatchAnimation && activeIndex === index && (
+                <div className="absolute top-0 z-50 flex h-full w-full translate-y-1/2 items-center justify-center">
+                  <MatchAnimation matchChatId={matchChatId} />
+                </div>
+              )}
 
               {/* Div gradient */}
               <div
@@ -117,7 +114,7 @@ export default function CardSwiperMobile({
       </Swiper>
 
       {/* Like/dislike button */}
-      {activeProfile && (
+      {!isMatchAnimation && activeProfile && (
         <div className="absolute z-20 flex w-full -translate-y-1/2 items-center justify-center gap-5">
           <button
             type="button"

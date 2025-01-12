@@ -20,7 +20,7 @@
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
     "firebase-admin": "^13.0.2",
-    "framer-motion": "^11.16.1",
+    "framer-motion": "^11.17.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
     "mongodb": "^6.11.0",

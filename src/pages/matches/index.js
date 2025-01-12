@@ -7,6 +7,7 @@ import LeftSidebar from "@/components/matches/LeftSidebar";
 import CardSwiperMobile from "@/components/matches/CardSwiperMobile";
 
 import apiClient from "@/utils/jwtInterceptor";
+import axios from "axios";
 
 import { useEffect, useState } from "react";
 import { Range } from "react-range";
@@ -289,7 +290,47 @@ export default function Matches() {
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [isfilterMobileOpen, setIsfilterMobileOpen] = useState(false);
 
+  const [isMatchAnimation, setIsMatchAnimation] = useState(false);
+  const [matchChatId, setMatchChatId] = useState("");
+
   const genderList = ["Default", "Male", "Female", "Other"];
+
+  const handleLikeUser = async (otherUserId) => {
+    const response = await axios.post("/api/matches/likes", {
+      user_master: userId,
+      user_other: otherUserId,
+    });
+
+    console.log("response:", response);
+
+    if (response.data.status === "match") {
+      setIsMatchAnimation(true);
+      setMatchChatId(response.data?.chatRoomId);
+
+      setTimeout(() => {
+        const newuserProfiles = [...userProfiles].filter(
+          (profile) => profile.user_id !== otherUserId,
+        );
+
+        setUserProfiles(newuserProfiles);
+        setIsMatchAnimation(false);
+      }, 5000);
+    } else {
+      const newuserProfiles = [...userProfiles].filter(
+        (profile) => profile.user_id !== otherUserId,
+      );
+
+      setUserProfiles(newuserProfiles);
+    }
+  };
+
+  const handleDislikeUser = async (otherUserId) => {
+    const newuserProfiles = [...userProfiles].filter(
+      (profile) => profile.user_id !== otherUserId,
+    );
+
+    setUserProfiles(newuserProfiles);
+  };
 
   // Remove scrollbar from daisy modal
   useEffect(() => {
@@ -339,10 +380,6 @@ export default function Matches() {
         if (sendAge[0]) queryParams.append("minAge", sendAge[0]);
         if (sendAge[1]) queryParams.append("maxAge", sendAge[1]);
 
-        console.log(
-          `/api/matches/profiles?userMasterId=${userId}&${queryParams.toString()}`,
-        );
-
         const profileResponse = await apiClient.get(
           `/api/matches/profiles?userMasterId=${userId}&${queryParams.toString()}`,
         );
@@ -381,6 +418,10 @@ export default function Matches() {
                 userId={userId}
                 userProfiles={userProfiles}
                 setUserProfiles={setUserProfiles}
+                handleLikeUser={handleLikeUser}
+                handleDislikeUser={handleDislikeUser}
+                isMatchAnimation={isMatchAnimation}
+                matchChatId={matchChatId}
               />
 
               <p className="absolute bottom-5 z-30 w-full text-center text-fourth-700">
@@ -417,6 +458,10 @@ export default function Matches() {
               userId={userId}
               userProfiles={userProfiles}
               setUserProfiles={setUserProfiles}
+              handleLikeUser={handleLikeUser}
+              handleDislikeUser={handleDislikeUser}
+              isMatchAnimation={isMatchAnimation}
+              matchChatId={matchChatId}
             />
           </div>
         )}

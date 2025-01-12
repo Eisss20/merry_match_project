@@ -108,11 +108,12 @@ export default async function handler(req, res) {
 
         return res.status(201).json({
           message: "Matches and created chat room successfully",
+          status: "match",
           chatRoomId,
         });
       }
 
-      res.status(201).json({
+      return res.status(201).json({
         message: "Match successfully created.",
         data: insertResult.rows[0],
       });

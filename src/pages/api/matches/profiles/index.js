@@ -56,7 +56,7 @@ export default async function handler(req, res) {
           AND User_Profiles.user_id NOT IN (
             SELECT user_other
             FROM matching
-            WHERE user_master = $1 AND is_match = TRUE
+            WHERE user_master = $1
           )
       `;
 
