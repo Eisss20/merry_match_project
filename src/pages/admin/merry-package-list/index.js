@@ -134,12 +134,12 @@ function MerryPackageList() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
       <AdminSideBar logout={logout} />
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 bg-fourth-100">
         {/* Header */}
 
         <AdminHeader
@@ -156,15 +156,15 @@ function MerryPackageList() {
         />
 
         {/* Table */}
-        <div className="overflow-x-auto px-12 py-4">
+        <div className="mt-12 overflow-x-auto px-16">
           {dataLoading ? (
             <div></div>
           ) : (
-            <table className="min-w-full rounded-lg bg-white shadow-md">
+            <table className="min-w-full rounded-2xl bg-white shadow-md">
               <thead className="bg-fourth-400">
                 <tr>
-                  <th className="rounded-tl-lg px-6 py-3 text-center font-medium text-gray-600"></th>
-                  <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800"></th>
+                  <th className="rounded-tl-2xl px-6 py-3 text-center text-gray-600"></th>
+                  <th className="px-6 py-3 text-center text-sm leading-5 text-fourth-800"></th>
                   <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
                     Icon
                   </th>
@@ -180,7 +180,7 @@ function MerryPackageList() {
                   <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
                     Updated Date
                   </th>
-                  <th className="rounded-tr-lg px-6 py-3 text-center font-medium text-gray-600"></th>
+                  <th className="rounded-tr-2xl px-6 py-3 text-center text-gray-600"></th>
                 </tr>
               </thead>
 
@@ -241,7 +241,7 @@ function MerryPackageList() {
           )}
 
           {/* ✅ Pagination Controls */}
-          <div className="mt-4 flex justify-center">
+          <div className="mt-8 flex justify-center">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(
               (number) => (
                 <button

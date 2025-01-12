@@ -16,7 +16,7 @@ export default function AdminHeader({
   const isDetailPage = router.pathname === "/admin/complaint-list/[id]";
 
   return (
-    <header className="mb-6 flex items-center justify-between border-b border-gray-300 bg-white px-6 py-4">
+    <header className="mb-6 flex items-center justify-between border-b border-gray-300 bg-white px-16 py-4">
       {/* Title */}
       <div className="flex items-center space-x-2">
         {backButton && ( // แสดงปุ่ม Back เฉพาะในหน้า detail

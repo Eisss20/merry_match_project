@@ -21,7 +21,7 @@ function ComplaintList() {
 
   // 🟢 Pagination State P'ChatGPT
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15; // จำนวนรายการที่แสดงต่อหน้า
+  const itemsPerPage = 10; // จำนวนรายการที่แสดงต่อหน้า
 
   /// ฟังก์ชันสำหรับกรองข้อมูลตามสถานะและข้อความค้นหา
   // ฟังก์ชันสำหรับกรองข้อมูลตามสถานะและข้อความค้นหา
@@ -188,9 +188,9 @@ function ComplaintList() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <AdminSideBar />
-      <main className="flex-1">
+      <main className="flex-1 bg-fourth-100">
         <AdminHeader
           title="Complaint list"
           searchPlaceholder="Search..."
@@ -211,11 +211,11 @@ function ComplaintList() {
         />
 
         {/* Table */}
-        <div className="max-w-full overflow-x-auto px-12 py-4">
-          <table className="min-w-full table-fixed rounded-lg bg-white shadow-md">
+        <div className="mt-12 max-w-full overflow-x-auto px-16">
+          <table className="min-w-full table-fixed rounded-2xl bg-white shadow-md">
             <thead className="bg-fourth-400 text-left">
               <tr>
-                <th className="w-[10%] rounded-tl-lg px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
+                <th className="w-[10%] rounded-tl-2xl px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
                   User
                 </th>
                 <th className="w-[20%] px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
@@ -227,7 +227,7 @@ function ComplaintList() {
                 <th className="w-[15%] px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
                   Date Submitted
                 </th>
-                <th className="w-[10%] rounded-tr-lg px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
+                <th className="w-[10%] rounded-tr-2xl px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
                   Status
                 </th>
               </tr>
@@ -285,7 +285,7 @@ function ComplaintList() {
           </table>
 
           {/* 🔘 Pagination Controls */}
-          <div className="mt-4 flex justify-center space-x-2">
+          <div className="mt-8 flex justify-center space-x-2">
             {/* 
             ปุ่ม Prev
             <button
