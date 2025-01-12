@@ -160,84 +160,86 @@ function MerryPackageList() {
           {dataLoading ? (
             <div></div>
           ) : (
-            <table className="min-w-full rounded-2xl bg-white shadow-md">
-              <thead className="bg-fourth-400">
-                <tr>
-                  <th className="rounded-tl-2xl px-6 py-3 text-center text-gray-600"></th>
-                  <th className="px-6 py-3 text-center text-sm leading-5 text-fourth-800"></th>
-                  <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                    Icon
-                  </th>
-                  <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                    Package Name
-                  </th>
-                  <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                    Merry Limit
-                  </th>
-                  <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                    Created Date
-                  </th>
-                  <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                    Updated Date
-                  </th>
-                  <th className="rounded-tr-2xl px-6 py-3 text-center text-gray-600"></th>
-                </tr>
-              </thead>
-
-              {/* ของเก่า {filteredPackages.map((pkg, index) => ( */}
-              <tbody>
-                {currentPackages.map((pkg, index) => (
-                  <tr
-                    key={pkg.package_id}
-                    className="border-t text-center align-middle hover:bg-gray-50"
-                  >
-                    <td className="px-6 py-4 align-middle">
-                      <span className="cursor-move">⋮⋮</span>
-                    </td>
-                    <td className="px-6 py-4 align-middle">{index + 1}</td>
-                    <td className="px-6 py-4 align-middle">
-                      {pkg.icon_url ? (
-                        <img
-                          src={pkg.icon_url}
-                          alt="Package Icon"
-                          className="mx-auto h-8 w-8 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <span className="text-gray-500">No Image</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 align-middle">
-                      {pkg.name_package}
-                    </td>
-                    <td className="px-6 py-4 align-middle">
-                      {pkg.limit_match}
-                    </td>
-                    <td className="px-6 py-4 align-middle">
-                      {pkg.created_date}
-                    </td>
-                    <td className="px-6 py-4 align-middle">
-                      {pkg.updated_date ? pkg.updated_date : "Not updated"}
-                    </td>
-                    <td className="px-6 py-4 align-middle">
-                      <div className="flex items-center justify-center gap-4">
-                        <FaTrashAlt
-                          className="cursor-pointer text-2xl text-primary-300"
-                          onClick={() => confirmDelete(pkg.package_id)}
-                        />
-                        <FaEdit
-                          className="cursor-pointer text-2xl text-primary-300"
-                          onClick={() =>
-                            router.push(
-                              `/admin/merry-package-list/${pkg.package_id}`,
-                            )
-                          }
-                        />
-                      </div>
-                    </td>
+            <div className="min-h-[700px] overflow-auto">
+              <table className="min-w-full rounded-2xl bg-white shadow-md">
+                <thead className="bg-fourth-400">
+                  <tr>
+                    <th className="rounded-tl-2xl px-6 py-3 text-center text-gray-600"></th>
+                    <th className="px-6 py-3 text-center text-sm leading-5 text-fourth-800"></th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Icon
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Package Name
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Merry Limit
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Created Date
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Updated Date
+                    </th>
+                    <th className="rounded-tr-2xl px-6 py-3 text-center text-gray-600"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                {/* ของเก่า {filteredPackages.map((pkg, index) => ( */}
+                <tbody>
+                  {currentPackages.map((pkg, index) => (
+                    <tr
+                      key={pkg.package_id}
+                      className="border-t text-center align-middle hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-4 align-middle">
+                        <span className="cursor-move">⋮⋮</span>
+                      </td>
+                      <td className="px-6 py-4 align-middle">{index + 1}</td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.icon_url ? (
+                          <img
+                            src={pkg.icon_url}
+                            alt="Package Icon"
+                            className="mx-auto h-8 w-8 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="text-gray-500">No Image</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.name_package}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.limit_match}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.created_date}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.updated_date ? pkg.updated_date : "Not updated"}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        <div className="flex items-center justify-center gap-4">
+                          <FaTrashAlt
+                            className="cursor-pointer text-2xl text-primary-300"
+                            onClick={() => confirmDelete(pkg.package_id)}
+                          />
+                          <FaEdit
+                            className="cursor-pointer text-2xl text-primary-300"
+                            onClick={() =>
+                              router.push(
+                                `/admin/merry-package-list/${pkg.package_id}`,
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
 
           {/* ✅ Pagination Controls */}

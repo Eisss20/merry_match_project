@@ -261,50 +261,53 @@ function PaymentMembership() {
             </h3>
           </div>
           <div className="mt-4 shadow lg:rounded-2xl lg:p-6">
-            <table className="w-full text-sm lg:text-base">
-              <thead>
-                <tr>
-                  <th className="0 mb-4 hidden text-sm font-semibold text-gray-500 lg:flex lg:text-lg">
-                    <div>Next billing :&nbsp;</div>
+            {/* กำหนดความสูงคงที่ให้ตาราง */}
+            <div className="min-h-[450px] overflow-auto">
+              <table className="w-full text-sm lg:text-base">
+                <thead>
+                  <tr>
+                    <th className="0 mb-4 hidden text-sm font-semibold text-gray-500 lg:flex lg:text-lg">
+                      <div>Next billing :&nbsp;</div>
 
-                    <div>
-                      {endDate
-                        ? new Date(endDate).toLocaleDateString("en-GB")
-                        : "N/A"}
-                    </div>
-                  </th>
-                </tr>
-              </thead>
+                      <div>
+                        {endDate
+                          ? new Date(endDate).toLocaleDateString("en-GB")
+                          : "N/A"}
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
 
-              {/* ของเดิม
+                {/* ของเดิม
               {paymentHistory.length > 0 ? (
                   paymentHistory.map((history, index) => (
               */}
-              <tbody>
-                {currentHistory.length > 0 ? (
-                  currentHistory.map((history, index) => (
-                    <tr
-                      key={index}
-                      className={index % 2 === 0 ? "bg-gray-100" : ""}
-                    >
-                      <td className="p-2">
-                        {new Date(history.payment_date).toLocaleDateString(
-                          "en-GB",
-                        )}
+                <tbody>
+                  {currentHistory.length > 0 ? (
+                    currentHistory.map((history, index) => (
+                      <tr
+                        key={index}
+                        className={index % 2 === 0 ? "bg-gray-100" : ""}
+                      >
+                        <td className="p-2">
+                          {new Date(history.payment_date).toLocaleDateString(
+                            "en-GB",
+                          )}
+                        </td>
+                        <td className="pl-3">{history.name_package}</td>
+                        <td className="pr-5 text-right">THB {history.price}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="py-3 text-center">
+                        No billing history found
                       </td>
-                      <td className="pl-3">{history.name_package}</td>
-                      <td className="pr-5 text-right">THB {history.price}</td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="3" className="py-3 text-center">
-                      No billing history found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
             {/* Pagination */}
             {paymentHistory.length > itemsPerPage && (

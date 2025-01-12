@@ -211,78 +211,83 @@ function ComplaintList() {
         />
 
         {/* Table */}
+
         <div className="mt-12 max-w-full overflow-x-auto px-16">
-          <table className="min-w-full table-fixed rounded-2xl bg-white shadow-md">
-            <thead className="bg-fourth-400 text-left">
-              <tr>
-                <th className="w-[10%] rounded-tl-2xl px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  User
-                </th>
-                <th className="w-[20%] px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Issue
-                </th>
-                <th className="w-[45%] px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Description
-                </th>
-                <th className="w-[15%] px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Date Submitted
-                </th>
-                <th className="w-[10%] rounded-tr-2xl px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Status
-                </th>
-              </tr>
-            </thead>
+          <div className="min-h-[630px] overflow-auto">
+            <table className="min-w-full table-fixed rounded-2xl bg-white shadow-md">
+              <thead className="bg-fourth-400 text-left">
+                <tr>
+                  <th className="w-[10%] rounded-tl-2xl px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    User
+                  </th>
+                  <th className="w-[20%] px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Issue
+                  </th>
+                  <th className="w-[45%] px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Description
+                  </th>
+                  <th className="w-[15%] px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Date Submitted
+                  </th>
+                  <th className="w-[10%] rounded-tr-2xl px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Status
+                  </th>
+                </tr>
+              </thead>
 
-            {/*  ของเดิม filteredData.length > 0  และ  filteredData.map((item)  */}
-            <tbody>
-              {currentItems.length > 0 ? (
-                currentItems.map((item) => (
-                  <tr
-                    key={item.complaint_id}
-                    className="cursor-pointer border-t hover:bg-gray-50"
-                    onClick={() => handleStatusChangeOnClick(item.complaint_id)}
-                  >
-                    <td className="px-12 py-4">{item.name}</td>
-                    <td className="max-w-[150px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
-                      {item.issue}
-                    </td>
-                    <td className="max-w-[250px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
-                      {item.description}
-                    </td>
+              {/*  ของเดิม filteredData.length > 0  และ  filteredData.map((item)  */}
+              <tbody>
+                {currentItems.length > 0 ? (
+                  currentItems.map((item) => (
+                    <tr
+                      key={item.complaint_id}
+                      className="cursor-pointer border-t hover:bg-gray-50"
+                      onClick={() =>
+                        handleStatusChangeOnClick(item.complaint_id)
+                      }
+                    >
+                      <td className="px-12 py-4">{item.name}</td>
+                      <td className="max-w-[150px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
+                        {item.issue}
+                      </td>
+                      <td className="max-w-[250px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
+                        {item.description}
+                      </td>
 
-                    <td className="px-12 py-4">
-                      {(() => {
-                        const date = new Date(item.submited_date); // แปลงเป็น Date object
-                        if (isNaN(date)) return "Invalid Date"; // ตรวจสอบว่าข้อมูลวันที่ถูกต้องหรือไม่
-                        const day = String(date.getDate()).padStart(2, "0");
-                        const month = String(date.getMonth() + 1).padStart(
-                          2,
-                          "0",
-                        );
-                        const year = date.getFullYear();
-                        return `${day}/${month}/${year}`; // รวมเป็นรูปแบบ DD/MM/YYYY
-                      })()}
-                    </td>
+                      <td className="px-12 py-4">
+                        {(() => {
+                          const date = new Date(item.submited_date); // แปลงเป็น Date object
+                          if (isNaN(date)) return "Invalid Date"; // ตรวจสอบว่าข้อมูลวันที่ถูกต้องหรือไม่
+                          const day = String(date.getDate()).padStart(2, "0");
+                          const month = String(date.getMonth() + 1).padStart(
+                            2,
+                            "0",
+                          );
+                          const year = date.getFullYear();
+                          return `${day}/${month}/${year}`; // รวมเป็นรูปแบบ DD/MM/YYYY
+                        })()}
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span className={getStatusClassName(item.status)}>
-                        {item.status}
-                      </span>
+                      <td className="px-6 py-4">
+                        <span className={getStatusClassName(item.status)}>
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="3"
+                      className="border border-gray-200 px-4 py-2 text-center"
+                    >
+                      No data found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="3"
-                    className="border border-gray-200 px-4 py-2 text-center"
-                  >
-                    No data found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {/* 🔘 Pagination Controls */}
           <div className="mt-8 flex justify-center space-x-2">
