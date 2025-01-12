@@ -230,7 +230,7 @@ function PaymentMembership() {
                   cancelLoading ||
                   paymentMembership.subscription_status === "Cancelled"
                 }
-                className={`hidden text-base font-semibold text-white hover:text-primary-200 lg:block lg:pt-5 ${
+                className={`hidden text-base font-semibold text-white lg:block lg:pt-5 ${
                   cancelLoading ? "cursor-not-allowed opacity-50" : ""
                 }`}
               >
@@ -287,7 +287,7 @@ function PaymentMembership() {
                     currentHistory.map((history, index) => (
                       <tr
                         key={index}
-                        className={index % 2 === 0 ? "bg-gray-100" : ""}
+                        className={index % 2 !== 0 ? "bg-gray-100" : ""}
                       >
                         <td className="p-2">
                           {new Date(history.payment_date).toLocaleDateString(
@@ -308,30 +308,30 @@ function PaymentMembership() {
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination */}
-            {paymentHistory.length > itemsPerPage && (
-              <div className="mt-4 flex justify-center space-x-2">
-                {Array.from({
-                  length: Math.ceil(paymentHistory.length / itemsPerPage),
-                }).map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => paginate(index + 1)}
-                    className={`rounded-md px-3 py-1 ${
-                      currentPage === index + 1
-                        ? "bg-primary-500 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* End Pagination */}
           </div>
+
+          {/* Pagination */}
+          {paymentHistory.length > itemsPerPage && (
+            <div className="mt-8 flex justify-center space-x-2">
+              {Array.from({
+                length: Math.ceil(paymentHistory.length / itemsPerPage),
+              }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => paginate(index + 1)}
+                  className={`rounded-md px-3 py-1 ${
+                    currentPage === index + 1
+                      ? "bg-primary-500 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* End Pagination */}
         </section>
       </div>
 

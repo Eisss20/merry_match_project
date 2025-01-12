@@ -308,7 +308,7 @@ function PaymentPage({
           </div>
 
           {/* Buttons */}
-          <div className="container mt-5 flex flex-row justify-center gap-24 pb-10 pt-5 lg:mt-0 lg:gap-72 lg:border-t">
+          <div className="container mt-5 flex flex-row justify-between px-4 pb-10 pt-5 lg:mt-0 lg:border-t lg:px-8">
             <button
               type="button"
               className="transform rounded text-base font-bold text-primary-500 transition-transform duration-200 hover:scale-105 hover:text-primary-700 lg:font-bold"

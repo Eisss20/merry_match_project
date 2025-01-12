@@ -305,7 +305,7 @@ function ComplaintList() {
               <button
                 key={i}
                 onClick={() => handlePageChange(i + 1)}
-                className={`px-3 py-1 ${
+                className={`rounded-md px-3 py-1 ${
                   currentPage === i + 1
                     ? "bg-primary-500 text-white"
                     : "bg-gray-200 hover:bg-gray-300"

@@ -249,7 +249,7 @@ function MerryPackageList() {
                 <button
                   key={number}
                   onClick={() => handlePageChange(number)}
-                  className={`mx-1 rounded px-3 py-1 ${
+                  className={`mx-1 rounded-md px-3 py-1 ${
                     number === currentPage
                       ? "bg-primary-500 text-white"
                       : "bg-gray-200"
