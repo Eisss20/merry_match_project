@@ -23,6 +23,7 @@ export const NotificationProvider = ({ children }) => {
       const unread = data.filter(
         (notification) => !notification.is_read,
       ).length;
+
       setUnreadCount(unread);
     });
 

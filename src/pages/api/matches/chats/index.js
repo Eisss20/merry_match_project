@@ -31,8 +31,6 @@ export default async function handler(req, res) {
       otherUserDataValues,
     );
 
-    console.log("otherUserDataResult", otherUserDataResult.rows);
-
     // Early return if no single match is found
     if (otherUserDataResult.rows.length === 0) {
       return res.status(200).json([]);

@@ -83,8 +83,6 @@ export default function LeftSidebar() {
 
         const [matchesResponse, lastChatsResponse] = responses;
 
-        console.log("matchesResponse:", matchesResponse.data);
-        console.log("lastChatsResponse:", lastChatsResponse.data);
         setMatchesList(matchesResponse.data);
         setLastChats(lastChatsResponse.data);
       } catch (error) {
