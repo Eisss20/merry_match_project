@@ -85,8 +85,8 @@ export default async function handler(req, res) {
         const chatsQuery = `
           INSERT INTO chats (matching_id, chat_room_id, user_master, user_other, created_at)
           VALUES
-            ($1, $3, $4, $5, $6),
-            ($2, $3, $5, $4, $6);
+            ($1, $3, $5, $4, $6),
+            ($2, $3, $4, $5, $6);
         `;
         const chatsValue = [
           matching_id_1,
@@ -119,10 +119,10 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error("Error processing match:", error);
-      res.status(500).json({ error: "Failed to create match." });
+      return res.status(500).json({ error: "Failed to create match." });
     }
   } else {
     res.setHeader("Allow", ["POST"]);
-    res.status(405).json({ error: `Method ${req.method} Not Allowed.` });
+    return res.status(405).json({ error: `Method ${req.method} Not Allowed.` });
   }
 }

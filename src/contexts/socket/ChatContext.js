@@ -21,12 +21,30 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     if (router.query.id) {
       setChatRoomId(router.query.id);
+    } else {
+      setChatRoomId(null); // Reset chatRoomId when not on a chat page
     }
   }, [router.query.id]);
 
+  // Handle route change to leave the room
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (socket && chatRoomId) {
+        console.log(`User: ${userId} leaving room: ${chatRoomId}`);
+        socket.emit("leaveRoom", chatRoomId);
+      }
+    };
+
+    router.events.on("routeChangeStart", handleRouteChange);
+
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChange);
+    };
+  }, [socket, chatRoomId, userId]);
+
   // Join chat room and listen for messages
   useEffect(() => {
-    if (!socket || !chatRoomId) return;
+    if (!isAuthenticated || !socket || !chatRoomId) return;
 
     console.log(`User: ${userId} joining room: ${chatRoomId}`);
     socket.emit("joinRoom", chatRoomId);
@@ -39,7 +57,7 @@ export const ChatProvider = ({ children }) => {
     return () => {
       socket.off("receiveMessage");
     };
-  }, [socket, chatRoomId, userId, isAuthenticated]);
+  }, [socket, chatRoomId, isAuthenticated, userId]);
 
   // Fetch chat history and other user data
   useEffect(() => {

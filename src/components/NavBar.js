@@ -15,7 +15,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
+import { useSocketConnection } from "@/contexts/socket/SocketConnectionContext";
 import { useNotifications } from "@/contexts/socket/NotificationContext";
+import { useChat } from "@/contexts/socket/ChatContext";
 
 function ContactIcon({ Icon }) {
   return (
@@ -30,6 +32,8 @@ function ContactIcon({ Icon }) {
 
 export function NavBar() {
   const { isAuthenticated, state, logout } = useAuth();
+  const { socket } = useSocketConnection();
+  const { chatRoomId } = useChat();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const router = useRouter();
@@ -177,7 +181,6 @@ export function NavBar() {
                   >
                     {notifications.length > 0 ? (
                       notifications.map((notification, index) => {
-                        console.log("notificationArray:", notification);
                         return (
                           <li key={index}>
                             <Link
@@ -308,7 +311,7 @@ export function NavBar() {
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          logout();
+                          logout(socket, chatRoomId);
                         }}
                         className="flex items-center gap-2 rounded-none px-5 font-semibold text-fourth-700 hover:!bg-fourth-100 focus:bg-utility-primary focus:!text-fourth-700 active:!bg-fourth-200"
                       >
