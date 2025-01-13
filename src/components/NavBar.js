@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 
-import { io } from "socket.io-client";
+import { useNotifications } from "@/contexts/socket/NotificationContext";
 
 function ContactIcon({ Icon }) {
   return (
@@ -55,69 +55,27 @@ export function NavBar() {
   }, [menuOpen]);
 
   // Notification
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [socket, setSocket] = useState(null);
   const [hasDropdownOpened, setHasDropdownOpened] = useState(false);
 
-  // Connect to the socket server
-  useEffect(() => {
-    if (!state.user?.id) return;
+  // Notification socket context
+  const {
+    notifications,
+    unreadCount,
+    markNotifAsReadOnServer,
+    markNotifAsReadOnClient,
+  } = useNotifications();
 
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER_URL, {
-      path: "/socket.io",
-    });
-
-    setSocket(newSocket);
-
-    if (state.user?.id) {
-      // Register the user for notifications
-      newSocket.emit("registerUserForNotifications", state.user.id);
-
-      // Fetch notifications
-      newSocket.emit("fetchNotifications", state.user.id);
-    }
-
-    // Listen for new notifications
-    newSocket.on("newNotifications", (data) => {
-      console.log("New notifications received:", data);
-      setNotifications([...data]);
-      const unread = data.filter(
-        (notification) => !notification.is_read,
-      ).length;
-      setUnreadCount(unread);
-    });
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [state.user?.id]);
-
+  // Mark notifications as read on the server by onClick()
   const handleServerNotif = () => {
-    // Mark notifications as read on the first open
     if (hasDropdownOpened) return;
 
-    if (state.user?.id && socket) {
-      socket.emit("markNotificationsAsRead", state.user.id);
-      setUnreadCount(0);
-    }
-
+    markNotifAsReadOnServer();
     setHasDropdownOpened(true);
   };
 
+  // Mark notifications as read on the client by onBlur()
   const handleClientNotif = () => {
-    const hasUnread = notifications.some(
-      (notification) => !notification.is_read,
-    );
-
-    if (hasUnread) {
-      setNotifications((prevNotifications) =>
-        prevNotifications.map((notification) => ({
-          ...notification,
-          is_read: true,
-        })),
-      );
-    }
+    markNotifAsReadOnClient();
   };
 
   return (

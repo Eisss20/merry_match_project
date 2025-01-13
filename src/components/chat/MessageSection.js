@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { ChatBubble } from "@/components/CustomUi";
+import { useChat } from "@/contexts/socket/ChatContext";
+import { useSocketConnection } from "@/contexts/socket/SocketConnectionContext";
 
-export default function MessageSection({
-  messages,
-  userId,
-  otherUserData,
-  imageFiles,
-  setSelectedImage,
-}) {
+export default function MessageSection() {
   const scrollRef = useRef(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const { userId } = useSocketConnection();
+  const { messages, otherUserData, imageFiles, setSelectedImage } = useChat();
 
   // Scroll to the bottom after fectching old messages
   useEffect(() => {
