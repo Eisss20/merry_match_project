@@ -38,11 +38,7 @@ function MerryCountBox({ count = 0, text = "Merry", twoHearts = false }) {
   );
 }
 
-function ProfileBox({
-  profileData,
-  updateMerryToggle,
-  onPreviewClick,
-}) {
+function ProfileBox({ profileData, updateMerryToggle, onPreviewClick }) {
   const [merryToggle, setMerryToggle] = useState(true);
 
   const ProfileButton = ({ className = "flex" }) => {
@@ -315,10 +311,10 @@ export default function MerryList() {
   }
 
   return (
-    <main className="flex flex-col bg-utility-bgMain">
+    <main className="flex min-h-screen flex-col bg-utility-bgMain">
       <NavBar />
 
-      <section className="container mx-auto flex max-w-[450px] flex-col gap-12 px-4 pb-20 pt-10 md:max-w-[768px] lg:max-w-[1024px] lg:pb-40 lg:pt-20 xl:max-w-[1200px]">
+      <section className="container mx-auto flex max-w-[450px] flex-grow flex-col gap-12 px-4 pb-20 pt-10 md:max-w-[768px] lg:max-w-[1024px] lg:pb-40 lg:pt-20 xl:max-w-[1200px]">
         <header className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <p className="text-sm font-semibold uppercase text-third-700 lg:text-base">
@@ -344,7 +340,7 @@ export default function MerryList() {
               <p className="text-sm text-fourth-700 lg:text-base">
                 Merry limit today{" "}
                 <span className="text-primary-400">
-                  {merryRemainLimit}/{merryTotaLimit}{" "}
+                  {merryRemainLimit}/{merryTotaLimit}
                 </span>
               </p>
               <p className="text-xs text-fourth-600 lg:text-sm">
@@ -354,20 +350,26 @@ export default function MerryList() {
           </div>
         </header>
 
-        <div className="flex flex-col gap-10">
-          {profileDataRaw.map((profileData) => (
-            <Fragment key={profileData.user_other}>
-              <ProfileBox
-                profileData={profileData}
-                updateMerryToggle={updateMerryToggle}
-                merryCurrentTime={merryCurrentTime}
-                onPreviewClick={handlePreviewClick} // ส่งฟังก์ชัน onPreviewClick
-                selectedProfile={selectedProfile}
-              />
-              <div className="h-[1px] w-full bg-fourth-300"></div>
-            </Fragment>
-          ))}
-        </div>
+        {profileDataRaw.length > 0 ? (
+          <div className="flex flex-col gap-10">
+            {profileDataRaw.map((profileData) => (
+              <Fragment key={profileData.user_other}>
+                <ProfileBox
+                  profileData={profileData}
+                  updateMerryToggle={updateMerryToggle}
+                  merryCurrentTime={merryCurrentTime}
+                  onPreviewClick={handlePreviewClick} // ส่งฟังก์ชัน onPreviewClick
+                  selectedProfile={selectedProfile}
+                />
+                <div className="h-[1px] w-full bg-fourth-300"></div>
+              </Fragment>
+            ))}
+          </div>
+        ) : (
+          <p className="text-base font-semibold text-fourth-600 lg:text-xl text-center">
+            Your Merry List is empty. Start matching!
+          </p>
+        )}
       </section>
 
       <dialog id="preview-profile-desktop" className="modal overflow-y-auto">

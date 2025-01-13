@@ -92,13 +92,13 @@ export function NavBar() {
         {/* Desktop */}
         <div className="hidden items-center gap-10 font-bold lg:flex">
           <Link
-            href="/"
+            href="#WhyMerrySection"
             className="text-second-800 transition-colors duration-300 hover:text-second-500"
           >
             Why Merry Match?
           </Link>
           <Link
-            href="/"
+            href="#HowToMerrySection"
             className="text-second-800 transition-colors duration-300 hover:text-second-500"
           >
             How to Merry
