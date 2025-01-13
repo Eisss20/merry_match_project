@@ -28,6 +28,7 @@ import {
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableItem from "@/components/register/SortableItem";
+// import Loading from "@/components/loading/loading";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
@@ -59,8 +60,9 @@ export default function ProfilePage() {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  console.log("state avatar", avatar);
+  // console.log("state avatar", avatar);
 
   const { deleteuser } = useAuth();
   const router = useRouter();
@@ -262,6 +264,8 @@ export default function ProfilePage() {
 
   // function handler update user profile
   const handleUpdateProfile = async () => {
+    setIsLoading(true);
+
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You are not logged in. Please log in again.");
@@ -315,6 +319,7 @@ export default function ProfilePage() {
         "Please provide all the required information accurately and completely",
       );
       setAlertVisible(true);
+      setIsLoading(false); // จบโหลด
 
       setNameError(errorMessages.name || "");
       setDateError(errorMessages.date || "");
@@ -362,6 +367,8 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile.");
+    } finally {
+      setIsLoading(false); // จบโหลด
     }
   };
 
@@ -547,8 +554,9 @@ export default function ProfilePage() {
                     buttonType="primary"
                     customStyle="w-[162px] text-base font-bold"
                     onClick={handleUpdateProfile}
+                    disabled={isLoading}
                   >
-                    Update Profile
+                    {isLoading ? "Updating..." : "Update Profile"}
                   </CustomButton>
                 </div>
               </div>
@@ -967,8 +975,9 @@ export default function ProfilePage() {
               buttonType="primary"
               customStyle="w-[162px] text-base font-bold"
               onClick={handleUpdateProfile}
+              disabled={isLoading}
             >
-              Update Profile
+              {isLoading ? "Updating..." : "Update Profile"}
             </CustomButton>
           </div>
 

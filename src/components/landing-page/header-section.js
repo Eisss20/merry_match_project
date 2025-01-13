@@ -52,7 +52,7 @@ export default function HeaderSection() {
               new people in your area! <br />
               Don't forget to get Merry with us
             </h2>
-            <div className="mt-12">
+            <div className="mt-12 relative z-50">
               <CustomButton
                 type="submit"
                 buttonType="primary"
