@@ -7,7 +7,7 @@ import { TiStarOutline } from "react-icons/ti";
 export default function WhyMerrySection() {
   return (
     <>
-      <section className="flex flex-col items-center justify-center bg-utility-bg lg:flex-row lg:gap-28">
+      <section id="WhyMerrySection" className="flex flex-col items-center justify-center bg-utility-bg lg:flex-row lg:gap-28">
         {/* Left Content */}
         <article className="max-w-lg p-8 text-white lg:p-8">
           <h1 className="mb-6 text-4xl font-extrabold text-second-300 lg:mb-10 lg:text-5xl">

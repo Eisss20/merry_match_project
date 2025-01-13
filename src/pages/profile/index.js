@@ -28,7 +28,7 @@ import {
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableItem from "@/components/register/SortableItem";
-// import Loading from "@/components/loading/loading";
+import LoadingMerry from "@/components/custom-loading/LoadingMerry";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
@@ -61,6 +61,7 @@ export default function ProfilePage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
 
   // console.log("state avatar", avatar);
 
@@ -483,6 +484,15 @@ export default function ProfilePage() {
   );
   // console.log("sensors", sensors);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setIsCheckingToken(false); // หยุดสถานะเช็ค token เมื่อ token มีอยู่
+    }
+  }, []);
+
   // เมื่อเปิดหน้าเว็บให้ function getProfileData ทำงาน
   useEffect(() => {
     getUsersById();
@@ -519,6 +529,10 @@ export default function ProfilePage() {
       setFilterCity([]);
     }
   }, [location, allCity]);
+
+  if (isCheckingToken) {
+    return <LoadingMerry />;
+  }
 
   return (
     <>
