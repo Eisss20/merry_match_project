@@ -1,82 +1,113 @@
 import { Footer, NavBar } from "@/components/NavBar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CustomButton, CardImage } from "@/components/CustomUi";
-import axios from "axios"; // นำเข้า axios
+import axios from "axios";
+import ShowAlertAndOpenModal from "@/components/Alertbox";
+import { useRouter } from "next/router";
+import LoadingMerry from "@/components/custom-loading/LoadingMerry";
 
 export default function Complaint() {
+  const router = useRouter();
+
   const [issue, setIssue] = useState("");
   const [description, setDescription] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalNotice, setModalNotice] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCheckingToken, setIsCheckingToken] = useState(true); // ใช้สถานะนี้เฉพาะตอนเช็ค token
+
+  // ตรวจสอบ token เพื่อเช็คว่า user ล็อคอินหรือไม่
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setIsCheckingToken(false); // หยุดสถานะเช็ค token เมื่อ token มีอยู่
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!issue || !description) {
+      setModalNotice("Missing Information");
+      setModalMessage("Please fill in all required fields so we can assist you better.");
+      setIsModalOpen(true);
+      return;
+    }
+
     const complaintData = { issue, description };
 
     try {
-      // ดึง JWT token จาก localStorage
       const token = localStorage.getItem("token");
 
-      // หากไม่มี token ให้แสดงข้อความแจ้งเตือน
       if (!token) {
-        window.alert("Please log in first!"); // เพิ่ม alert เมื่อไม่มี token
+        setModalNotice("Error");
+        setModalMessage("Please log in first!");
+        setIsModalOpen(true);
         return;
       }
 
-      // ใช้ axios  เพื่อส่งข้อมูล complaint ไปยัง API โดยมี Authorization header
       const res = await axios.post("/api/complaint", complaintData, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ส่ง token ใน Authorization header
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("API Response:", res.data); // เพื่อตรวจสอบ response จาก API
-
       if (res.status === 201) {
-        window.alert("Complaint submitted successfully!"); 
-        setIssue("");       // ล้างค่าช่อง issue
-        setDescription(""); // เพิ่ม alert เมื่อสำเร็จ
+        setModalNotice("Success!");
+        setModalMessage("Complaint submitted. We’ll review it soon");
+        setIsModalOpen(true);
+        setIssue("");
+        setDescription("");
       } else {
-        // ตรวจสอบค่า res.data ว่ามี error หรือไม่
-        window.alert("Error: " + (res.data?.error || "Unexpected error")); // เพิ่ม alert เมื่อมี error
+        const errorMessage = res.data?.error || "Unexpected error";
+        setModalNotice("Error");
+        setModalMessage(`Error: ${errorMessage}`);
+        setIsModalOpen(true);
       }
     } catch (error) {
-      window.alert("Error: " + (error.response?.data?.error || error.message)); // เพิ่ม alert เมื่อมีข้อผิดพลาด
+      const errorMessage = error.response?.data?.error || error.message;
+      setModalNotice("Error");
+      setModalMessage(`${errorMessage}`);
+      setIsModalOpen(true);
     }
   };
+
+  if (isCheckingToken) {
+    return (
+<LoadingMerry/>
+    );
+  }
 
   return (
     <>
       <NavBar />
-      <div className="bg-utility-primary lg:flex-row lg:flex lg:items-center lg:justify-center gap-32 pt-10 min-h-screen lg:pb-48  ">
-      <figure className="flex items-center justify-center  lg:px-12 lg:order-2  ">
+      <div className="min-h-screen gap-32 bg-utility-primary pt-10 lg:flex lg:flex-row lg:items-center lg:justify-center lg:pb-48">
+        <figure className="flex items-center justify-center lg:order-2 lg:px-12">
           <CardImage className="h-[25rem] w-[15rem] lg:h-[40rem] lg:w-[25rem]">
             <img
               src="/images/login_page_man.jpg"
               alt="Man smiling while using laptop"
-              className={`h-full w-full object-cover object-right grayscale`}
+              className="h-full w-full object-cover object-right grayscale"
             />
           </CardImage>
         </figure>
 
-        
-        <div className="w-full max-w-md bg-white p-6 rounded-lg lg:order-1  ">
-          {/* Header */}
-          <h3 className="text-sm text-third-700 mb-1 uppercase font-medium">
+        <div className="w-full max-w-md rounded-lg bg-white p-6 lg:order-1">
+          <h3 className="mb-1 text-sm font-medium uppercase text-third-700">
             Complaint
           </h3>
-          <h1 className="text-3xl font-bold text-second-500 leading-tight mb-6">
-            If you have any trouble <br />
-            Don't be afraid to tell us!
+          <h1 className="mb-6 text-3xl font-bold leading-tight text-second-500">
+            If you have any trouble <br /> Don&apos;t be afraid to tell us!
           </h1>
 
-          {/* Form */}
           <form onSubmit={handleSubmit}>
-            {/* Issue Field */}
             <div className="mb-4">
               <label
                 htmlFor="issue"
-                className="block text-gray-700 font-medium mb-2"
+                className="mb-2 block font-medium text-gray-700"
               >
                 Issue
               </label>
@@ -86,15 +117,14 @@ export default function Complaint() {
                 value={issue}
                 onChange={(e) => setIssue(e.target.value)}
                 placeholder="Please enter the subject of your issue"
-                className="w-full px-3 py-2 border-2 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                className="w-full rounded-lg border-2 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
               />
             </div>
 
-            {/* Description Field */}
             <div className="mb-6">
               <label
                 htmlFor="description"
-                className="block text-gray-700 font-medium mb-2"
+                className="mb-2 block font-medium text-gray-700"
               >
                 Description
               </label>
@@ -104,22 +134,30 @@ export default function Complaint() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Share more information about the issue"
                 rows="5"
-                className="w-full px-3 py-2 border-2 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 resize-none"
+                className="w-full resize-none rounded-lg border-2 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
               ></textarea>
             </div>
 
-            {/* Submit Button */}
-            <CustomButton 
+            <CustomButton
               type="submit"
               buttonType="primary"
+              className="w-full lg:w-24"
             >
               Submit
             </CustomButton>
           </form>
         </div>
-        
       </div>
+
       <Footer />
+
+      <ShowAlertAndOpenModal
+        modalId="modal_complaint"
+        notice={modalNotice}
+        message={modalMessage}
+        isOpen={isModalOpen}
+        closeModal={() => setIsModalOpen(false)}
+      />
     </>
   );
 }
