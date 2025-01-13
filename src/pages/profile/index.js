@@ -63,8 +63,6 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingToken, setIsCheckingToken] = useState(true);
 
-  // console.log("state avatar", avatar);
-
   const { deleteuser } = useAuth();
   const router = useRouter();
 
@@ -305,8 +303,8 @@ export default function ProfilePage() {
       image: avatarError,
     };
 
-    console.log("ALL validationError", allAalidationError); // error กรอกข้อมูลไม่ครบทั้ง form
-    console.log("errorMessages", errorMessages); // error ของแต่ละ input
+    // console.log("ALL validationError", allAalidationError); // error กรอกข้อมูลไม่ครบทั้ง form
+    // console.log("errorMessages", errorMessages); // error ของแต่ละ input
 
     if (
       nameError ||
@@ -427,23 +425,23 @@ export default function ProfilePage() {
     if (!over) return;
     // over คือค่าที่วาง โดยจะเป็นเลข ตำแหน่งที่อยู่ใน Array
     // active คือค่าที่โดนกดลาก โดยจะเป็นเลข ตำแหน่งที่อยู่ใน Array
-    console.log("over", over);
-    console.log("active", active);
+    // console.log("over", over);
+    // console.log("active", active);
 
     const activeIndex = parseInt(active.id, 10); // parseInt แปลง String เป็นตัวเลขแบบเต็มจำนวน จาก id
     const overIndex = parseInt(over.id, 10); // parseInt แปลง String เป็นตัวเลขแบบเต็มจำนวน จาก id
 
-    console.log("activeIndex00000", activeIndex);
-    console.log("overIndex00000", overIndex);
+    // console.log("activeIndex00000", activeIndex);
+    // console.log("overIndex00000", overIndex);
 
     if (activeIndex !== overIndex) {
       // สำเนาของ avatars
       const updatedAvatars = { ...avatar };
-      console.log("updatedAvatars", updatedAvatars);
+      // console.log("updatedAvatars", updatedAvatars);
 
       // ดึงค่าของรูปที่ถูกลาก
       const activeAvatar = updatedAvatars[activeIndex];
-      console.log("activeAvatar", activeAvatar);
+      // console.log("activeAvatar", activeAvatar);
 
       // ลบรูปที่ถูกลากออกจากตำแหน่งเดิม
       delete updatedAvatars[activeIndex];
@@ -466,13 +464,12 @@ export default function ProfilePage() {
       if (overIndex >= Object.keys(updatedAvatars).length) {
         newAvatars[overIndex] = activeAvatar;
       }
-      console.log("Object.keys", Object.keys(updatedAvatars));
-      console.log("updatedAvatars.length", Object.keys(updatedAvatars).length);
-      console.log("Updated avatars after rearranging: ", newAvatars);
+      // console.log("Object.keys", Object.keys(updatedAvatars));
+      // console.log("updatedAvatars.length", Object.keys(updatedAvatars).length);
+      // console.log("Updated avatars after rearranging: ", newAvatars);
       setAvatar(newAvatars); // อัปเดต state avatars
 
       handleAvatarUpdate(newAvatars); // เรียกฟังก์ชันเพิ่มเติมถ้ามี
-      // console.log("handleAvatarUpdate", newAvatars);
     }
   };
 
