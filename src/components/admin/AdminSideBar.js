@@ -46,6 +46,7 @@ export function AdminSideBar() {
               <span className="ml-3 font-extrabold">Complaint</span>
             </Link>
           </li>
+
           <li>
             <button
               onClick={logout}

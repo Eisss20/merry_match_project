@@ -20,7 +20,6 @@ function AdminAuthProvider({ children }) {
   useEffect(() => {
     // ตรวจสอบ token ใน LocalStorage
     const adminToken = localStorage.getItem("adminToken");
-    console.log("Admin Token:", localStorage.getItem("adminToken"));
 
     if (adminToken) {
       try {

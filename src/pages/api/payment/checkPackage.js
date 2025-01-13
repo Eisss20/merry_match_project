@@ -12,13 +12,6 @@ export default async function handler(req, res) {
     }
 
     try {
-      console.log(
-        "Checking package for user_id:",
-        user_id,
-        "package_id:",
-        package_id,
-      );
-
       const checkAnySubscriptionQuery = `
               SELECT s.subscription_status 
               FROM subscriptions s

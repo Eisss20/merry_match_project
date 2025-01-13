@@ -19,6 +19,10 @@ function ComplaintList() {
 
   const { admin, logout } = useAdminAuth();
 
+  // 🟢 Pagination State P'ChatGPT
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // จำนวนรายการที่แสดงต่อหน้า
+
   /// ฟังก์ชันสำหรับกรองข้อมูลตามสถานะและข้อความค้นหา
   // ฟังก์ชันสำหรับกรองข้อมูลตามสถานะและข้อความค้นหา
   const filteredData = complaints.filter((item) => {
@@ -37,6 +41,30 @@ function ComplaintList() {
 
     return statusMatch && searchMatch;
   });
+
+  // 📄 คำนวณหน้าปัจจุบัน  P'ChatGPT
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  // 📌 คำนวณจำนวนหน้าทั้งหมด P'ChatGPT
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงใน Search
   const handleSearchChange = (e) => {
@@ -160,9 +188,9 @@ function ComplaintList() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <AdminSideBar />
-      <main className="flex-1">
+      <main className="flex-1 bg-fourth-100">
         <AdminHeader
           title="Complaint list"
           searchPlaceholder="Search..."
@@ -183,77 +211,122 @@ function ComplaintList() {
         />
 
         {/* Table */}
-        <div className="max-w-full overflow-x-auto px-12 py-4">
-          <table className="min-w-full table-fixed rounded-lg bg-white shadow-md">
-            <thead className="bg-fourth-400 text-left">
-              <tr>
-                <th className="rounded-tl-lg px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  User
-                </th>
-                <th className="px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Issue
-                </th>
-                <th className="px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Date Submitted
-                </th>
-                <th className="rounded-tr-lg px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
-                  Status
-                </th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr
-                    key={item.complaint_id}
-                    className="cursor-pointer border-t hover:bg-gray-50"
-                    onClick={() => handleStatusChangeOnClick(item.complaint_id)}
-                  >
-                    <td className="px-6 py-4">{item.name}</td>
-                    <td className="max-w-[150px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
-                      {item.issue}
-                    </td>
-                    <td className="max-w-[150px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
-                      {item.description}
-                    </td>
+        <div className="mt-12 max-w-full overflow-x-auto px-16">
+          <div className="min-h-[630px] overflow-auto">
+            <table className="min-w-full table-fixed rounded-2xl bg-white shadow-md">
+              <thead className="bg-fourth-400 text-left">
+                <tr>
+                  <th className="w-[10%] rounded-tl-2xl px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    User
+                  </th>
+                  <th className="w-[20%] px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Issue
+                  </th>
+                  <th className="w-[45%] px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Description
+                  </th>
+                  <th className="w-[15%] px-12 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Date Submitted
+                  </th>
+                  <th className="w-[10%] rounded-tr-2xl px-6 py-3 text-sm font-medium leading-5 text-fourth-800">
+                    Status
+                  </th>
+                </tr>
+              </thead>
 
-                    <td className="px-6 py-4">
-                      {(() => {
-                        const date = new Date(item.submited_date); // แปลงเป็น Date object
-                        if (isNaN(date)) return "Invalid Date"; // ตรวจสอบว่าข้อมูลวันที่ถูกต้องหรือไม่
-                        const day = String(date.getDate()).padStart(2, "0");
-                        const month = String(date.getMonth() + 1).padStart(
-                          2,
-                          "0",
-                        );
-                        const year = date.getFullYear();
-                        return `${day}/${month}/${year}`; // รวมเป็นรูปแบบ DD/MM/YYYY
-                      })()}
-                    </td>
+              {/*  ของเดิม filteredData.length > 0  และ  filteredData.map((item)  */}
+              <tbody>
+                {currentItems.length > 0 ? (
+                  currentItems.map((item) => (
+                    <tr
+                      key={item.complaint_id}
+                      className="cursor-pointer border-t hover:bg-gray-50"
+                      onClick={() =>
+                        handleStatusChangeOnClick(item.complaint_id)
+                      }
+                    >
+                      <td className="px-12 py-4">{item.name}</td>
+                      <td className="max-w-[150px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
+                        {item.issue}
+                      </td>
+                      <td className="max-w-[250px] overflow-hidden truncate text-ellipsis whitespace-nowrap px-6 py-4">
+                        {item.description}
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span className={getStatusClassName(item.status)}>
-                        {item.status}
-                      </span>
+                      <td className="px-12 py-4">
+                        {(() => {
+                          const date = new Date(item.submited_date); // แปลงเป็น Date object
+                          if (isNaN(date)) return "Invalid Date"; // ตรวจสอบว่าข้อมูลวันที่ถูกต้องหรือไม่
+                          const day = String(date.getDate()).padStart(2, "0");
+                          const month = String(date.getMonth() + 1).padStart(
+                            2,
+                            "0",
+                          );
+                          const year = date.getFullYear();
+                          return `${day}/${month}/${year}`; // รวมเป็นรูปแบบ DD/MM/YYYY
+                        })()}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <span className={getStatusClassName(item.status)}>
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="3"
+                      className="border border-gray-200 px-4 py-2 text-center"
+                    >
+                      No data found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="3"
-                    className="border border-gray-200 px-4 py-2 text-center"
-                  >
-                    No data found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 🔘 Pagination Controls */}
+          <div className="mt-8 flex justify-center space-x-2">
+            {/* 
+            ปุ่ม Prev
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className="rounded bg-gray-200 px-3 py-1 hover:bg-gray-300"
+            >
+              Prev
+            </button>
+            */}
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => handlePageChange(i + 1)}
+                className={`rounded-md px-3 py-1 ${
+                  currentPage === i + 1
+                    ? "bg-primary-500 text-white"
+                    : "bg-gray-200 hover:bg-gray-300"
+                } rounded`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            {/* 
+            ปุ่ม Next
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="rounded bg-gray-200 px-3 py-1 hover:bg-gray-300"
+            >
+              Next
+            </button>
+            */}
+          </div>
+          {/* End Pagination */}
         </div>
       </main>
     </div>

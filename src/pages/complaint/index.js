@@ -57,7 +57,7 @@ export default function Complaint() {
 
       if (res.status === 201) {
         setModalNotice("Success!");
-        setModalMessage("Complaint submitted. We’ll review it soon");
+        setModalMessage("Complaint submitted. We'll review it soon");
         setIsModalOpen(true);
         setIssue("");
         setDescription("");
@@ -96,11 +96,12 @@ export default function Complaint() {
         </figure>
 
         <div className="w-full max-w-md rounded-lg bg-white p-6 lg:order-1">
+          {/* Header */}
           <h3 className="mb-1 text-sm font-medium uppercase text-third-700">
             Complaint
           </h3>
           <h1 className="mb-6 text-3xl font-bold leading-tight text-second-500">
-            If you have any trouble <br /> Don&apos;t be afraid to tell us!
+            If you have any trouble <br /> Don't be afraid to tell us!
           </h1>
 
           <form onSubmit={handleSubmit}>

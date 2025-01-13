@@ -21,14 +21,12 @@ export default function MerryPackage() {
 
   const router = useRouter(); // ใช้สำหรับ Redirect
 
-  const { state } = useAuth();
+  const { state, logout } = useAuth();
   const userId = state.user?.id;
 
-  console.log("userId = ", userId);
   // ดึงข้อมูลแพ็กเกจ
   const fetchPackages = async () => {
     try {
-      console.log("userId in fetchPackages = ", userId);
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const response = await axios.get(`${apiBaseUrl}/api/packages`, {
         params: { user_id: userId }, // ส่ง user_id ผ่าน Query Params
@@ -46,6 +44,8 @@ export default function MerryPackage() {
     const token = localStorage.getItem("token"); // ตรวจสอบ Token ใน Local Storage
     if (token) {
       setIsMember(true); // หากมี Token ให้ถือว่าเป็นสมาชิก
+    } else {
+      logout();
     }
     if (userId) {
       fetchPackages(); // เรียกเฉพาะเมื่อ userId มีค่า
@@ -55,22 +55,11 @@ export default function MerryPackage() {
   // ฟังก์ชันเมื่อคลิกปุ่ม Choose Package
   const handleChoosePackage = async (pkg) => {
     if (pkg.is_same_package_active) {
-      console.log("This package is already purchased and cannot be chosen.");
       return; // ไม่ทำอะไรถ้าปุ่มถูกปิดการใช้งาน
     }
 
-    console.log("pkg is : ", pkg.id);
-    console.log("id is : ", userId);
-
     if (isMember) {
       try {
-        console.log(
-          "Attempting to choose package:",
-          pkg.id,
-          "for user:",
-          userId,
-        );
-
         // เรียก API เพื่อตรวจสอบว่า Package นี้ซื้อได้หรือไม่
         const response = await axios.post("/api/payment/checkPackage", {
           user_id: userId, // ใช้ state.user?.id แทน currentUser.id
@@ -78,8 +67,6 @@ export default function MerryPackage() {
         });
 
         const { isActive, isSamePackageActive } = response.data;
-
-        console.log("API Response Checkpackage :", response.data);
 
         if (isActive && !isSamePackageActive) {
           // หากมี active package -> แสดง modal เพื่อยืนยันการซื้อ
@@ -90,6 +77,7 @@ export default function MerryPackage() {
           router.push({
             pathname: "/payment",
             query: {
+              icon_url: pkg.icon_url,
               packages_id: pkg.id,
               name_package: pkg.title,
               price: pkg.price,

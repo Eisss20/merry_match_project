@@ -21,11 +21,6 @@ function ComplaintDetail() {
 
   const updateComplaintStatus = async (newStatus) => {
     try {
-      console.log("Sending data to API:", {
-        status: newStatus,
-        adminId: admin.admin_id,
-      });
-
       if (!admin || !admin.admin_id) {
         console.error("Admin ID is missing");
         alert("Admin information is not available. Please try again later.");
@@ -107,11 +102,15 @@ function ComplaintDetail() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <AdminSideBar />
-      <main className="flex-1">
+      <main className="flex-1 bg-fourth-100">
         <AdminHeader
-          title={complaint.issue || "Complaint Detail"}
+          title={
+            complaint.issue.length > 50
+              ? complaint.issue.substring(0, 50) + "..."
+              : complaint.issue
+          }
           backButton={true}
           extraContent={
             <span
@@ -139,43 +138,48 @@ function ComplaintDetail() {
             },
           ]}
         />
-
-        {/* Complaint Detail */}
-        <div className="mx-auto mt-8 max-w-4xl rounded-lg border bg-white p-8 shadow">
-          <h3 className="mb-6 text-xl font-bold text-gray-800">
-            Complaint by:{" "}
-            <span className="text-gray-600">
-              {complaint.user_name || "Unknown User"}
-            </span>
-          </h3>
-          <div className="mb-6 border-t pt-6">
-            <p className="mb-4 text-lg font-semibold text-gray-500">Issue</p>
-            <p className="text-gray-800">
-              {complaint.issue || "No issue provided"}
-            </p>
-          </div>
-          <div className="mb-6 pt-6">
-            <p className="mb-4 text-lg font-semibold text-gray-500">
-              Description
-            </p>
-            <p className="text-gray-800">
-              {complaint.description || "No description provided"}
-            </p>
-          </div>
-          <div className="pt-6">
-            <p className="mb-4 text-lg font-semibold text-gray-500">
-              Date Submitted
-            </p>
-            <p className="text-gray-800">
-              {(() => {
-                const date = new Date(complaint.submited_date);
-                if (isNaN(date)) return "Invalid Date";
-                const day = String(date.getDate()).padStart(2, "0");
-                const month = String(date.getMonth() + 1).padStart(2, "0");
-                const year = date.getFullYear();
-                return `${day}/${month}/${year}`;
-              })()}
-            </p>
+        {/* เพิ่มความสูงให้ main container */}
+        <div className="relative min-h-[120vh]">
+          {/* Complaint Detail */}
+          <div className="ml-16 mt-14 max-w-5xl rounded-2xl border bg-white pb-20 pl-20 pr-20 shadow">
+            <h3 className="my-10 text-xl font-bold text-fourth-700">
+              Complaint by:{" "}
+              <span className="font-normal text-[#000000]">
+                {complaint.user_name || "Unknown User"}
+              </span>
+            </h3>
+            <hr className="w-full"></hr>
+            <div className="py-12">
+              <p className="mb-2 text-lg font-semibold text-fourth-700">
+                Issue
+              </p>
+              <p className="break-words text-[#000000]">
+                {complaint.issue || "No issue provided"}
+              </p>
+            </div>
+            <div className="pb-12">
+              <p className="mb-2 text-lg font-semibold text-fourth-700">
+                Description
+              </p>
+              <p className="break-words text-[#000000]">
+                {complaint.description || "No description provided"}
+              </p>
+            </div>
+            <div>
+              <p className="mb-2 text-lg font-semibold text-fourth-700">
+                Date Submitted
+              </p>
+              <p className="text-[#000000]">
+                {(() => {
+                  const date = new Date(complaint.submited_date);
+                  if (isNaN(date)) return "Invalid Date";
+                  const day = String(date.getDate()).padStart(2, "0");
+                  const month = String(date.getMonth() + 1).padStart(2, "0");
+                  const year = date.getFullYear();
+                  return `${day}/${month}/${year}`;
+                })()}
+              </p>
+            </div>
           </div>
         </div>
       </main>

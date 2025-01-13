@@ -46,11 +46,10 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const { state, error,  login } = useAdminAuth();
+  const { state, error, login } = useAdminAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Login Attempt with:", { username, password });
     await login({ username, password });
   };
 
@@ -112,10 +111,10 @@ export default function Login() {
           </form>
 
           <div className="flex items-center gap-3">
-            <p className="text-utility-second">Don't have an account?</p>
+            <p className="hidden text-utility-second">Don't have an account?</p>
             <Link
               href="/register"
-              className="font-bold text-primary-500 transition-colors duration-300 hover:text-primary-600"
+              className="hidden font-bold text-primary-500 transition-colors duration-300 hover:text-primary-600"
             >
               Register
             </Link>

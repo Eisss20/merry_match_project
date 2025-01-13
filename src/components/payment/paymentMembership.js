@@ -3,14 +3,16 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import { useCallback } from "react";
-import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
+import DeleteConfirmationModal, {
+  SubmitCancelMembershipModal,
+} from "@/components/admin/DeleteConfirmationModal";
 import {
   SkeletonPaymentMembershipPackage,
   SkeletonPaymentMembershipHistory,
 } from "../custom-loading/SkeletonCard";
 
 function PaymentMembership() {
-  const { state } = useAuth();
+  const { state, logout } = useAuth();
   const userId = state.user?.id;
 
   const [paymentMembership, setPaymentMembership] = useState(null);
@@ -23,6 +25,10 @@ function PaymentMembership() {
   const [confirmAction, setConfirmAction] = useState(() => () => {}); // เก็บฟังก์ชันที่ต้องการเรียกเมื่อผู้ใช้กดยืนยัน
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+
+  // เพิ่ม State สำหรับ Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // จำนวนรายการที่แสดงต่อหน้า
 
   const fetchMembership = useCallback(async () => {
     setMembershipLoading(true);
@@ -74,7 +80,7 @@ function PaymentMembership() {
       });
       if (response.data.message) {
         // alert("Package cancelled successfully."); <<<<<<<<<<<<<<<<<<<<<<<<<<<
-        setModalMessage("Package cancelled successfully."); // ตั้งข้อความใน Modal
+        //setModalMessage("Do you sure to cancel Membership to get more Merry"); // ตั้งข้อความใน Modal
         fetchMembership(); // Refresh membership data after cancellation
       }
     } catch (error) {
@@ -86,7 +92,7 @@ function PaymentMembership() {
   };
 
   const openCancelModal = () => {
-    setModalMessage("Are you sure you want to cancel this package?");
+    setModalMessage("Do you sure to cancel Membership to get more Merry?");
     setConfirmAction(() => handleCancelPackage); // เก็บฟังก์ชันสำหรับดำเนินการหลังจากยืนยัน
     setIsModalOpen(true);
   };
@@ -106,9 +112,26 @@ function PaymentMembership() {
     }
   }, [paymentHistory]);
 
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // ตรวจสอบ Token ใน Local Storage
+    if (!token) {
+      logout();
+    }
+  }, []);
+
   let parsedDescription = paymentMembership?.description
     ? JSON.parse(paymentMembership.description)
     : [];
+
+  // คำนวณการแบ่งหน้า
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentHistory = paymentHistory.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
+  // ฟังก์ชันเปลี่ยนหน้า
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (membershipLoading || HistoryLoading) {
     return (
@@ -121,27 +144,27 @@ function PaymentMembership() {
 
   return (
     <>
-      <div className="mx-auto max-w-4xl px-4 py-8 text-gray-700">
-        <h3 className="lg:text-left">MERRY MEMBERSHIP</h3>
-        <h1 className="w-auto text-4xl font-bold text-primary-700 lg:text-left lg:text-4xl">
-          Manage your membership
-        </h1>
-        <h1 className="w-auto text-4xl font-bold text-primary-700 lg:text-left lg:text-4xl">
+      <div className="mx-auto max-w-4xl px-4 py-8 pt-10 text-gray-700 lg:pt-20">
+        <h3 className="text-sm text-third-800 lg:text-left">
+          MERRY MEMBERSHIP
+        </h3>
+        <h1 className="pt-3 text-3xl font-extrabold text-second-500 lg:text-left lg:text-4xl">
+          Manage your membership <br />
           and payment method
         </h1>
 
         {/* Membership Package */}
-        <section className="mt-8">
-          <h2 className="text-lg font-bold lg:text-left lg:text-xl">
+        <section className="pt-7 lg:pt-16">
+          <h2 className="text-xl font-bold text-gray-700 lg:text-left lg:text-xl">
             Merry Membership Package
           </h2>
-          <div className="relative mt-4 rounded-[24px] bg-bg-card p-6 text-white">
+          <div className="relative mt-4 rounded-[24px] bg-bg-card p-6 text-white shadow">
             <div className="flex flex-col gap-4 lg:flex-row">
-              <div className="h-[60px] w-[60px] flex-shrink-0">
+              <div className="border-1 flex h-16 w-16 flex-shrink-0 flex-row items-center justify-center rounded-2xl bg-gray-100">
                 <img
                   src={paymentMembership.icon_url}
                   alt="Package Icon"
-                  className="h-full w-full rounded-lg object-cover"
+                  className="h-12 w-12 object-cover"
                 />
               </div>
 
@@ -150,7 +173,8 @@ function PaymentMembership() {
                   {paymentMembership.name_package}
                 </h3>
                 <p className="lg:text-md mt-1 text-lg">
-                  THB {paymentMembership?.price} / Month
+                  THB {paymentMembership?.price}
+                  <span className="text-sm"> /Month </span>
                 </p>
               </div>
               {/* Detail PackageCard */}
@@ -213,7 +237,7 @@ function PaymentMembership() {
                 {cancelLoading ? "Cancelling..." : "Cancel Package"}
               </button>
             </div>
-            <button className="absolute right-6 top-6 hidden rounded-full bg-rose-50 px-4 py-1 text-sm font-medium text-orange-600 lg:block">
+            <button className="absolute right-6 top-6 hidden rounded-full bg-rose-50 px-4 py-1 text-sm font-bold text-primary-600 hover:bg-primary-100 lg:block">
               {paymentMembership.subscription_status === "Active"
                 ? "Active"
                 : "Inactive"}
@@ -222,12 +246,12 @@ function PaymentMembership() {
         </section>
 
         {/* Billing History */}
-        <section className="mt-8">
-          <h2 className="text-lg font-bold lg:text-left lg:text-xl">
+        <section className="pt-10">
+          <h2 className="text-xl font-bold lg:text-left lg:text-xl">
             Billing History
           </h2>
           <div className="flex lg:hidden">
-            <h3 className="mb-4 text-sm font-semibold text-gray-600 lg:text-lg">
+            <h3 className="mt2 text-lg font-semibold text-gray-600 lg:text-lg">
               <div>
                 Next billing :&nbsp;
                 {endDate
@@ -236,62 +260,93 @@ function PaymentMembership() {
               </div>
             </h3>
           </div>
-          <div className="mt-4 rounded-[24px] bg-white p-6 shadow">
-            <table className="w-full text-sm lg:text-base">
-              <thead>
-                <tr>
-                  <th className="mb-4 hidden text-sm font-semibold text-gray-600 lg:flex lg:text-lg">
-                    <div>Next billing :&nbsp;</div>
-
-                    <div>
-                      {endDate
-                        ? new Date(endDate).toLocaleDateString("en-GB")
-                        : "N/A"}
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {paymentHistory.length > 0 ? (
-                  paymentHistory.map((history, index) => (
-                    <tr
-                      key={index}
-                      className={index % 2 === 0 ? "bg-gray-50" : ""}
-                    >
-                      <td className="py-3">
-                        {new Date(history.payment_date).toLocaleDateString(
-                          "en-GB",
-                        )}
-                      </td>
-                      <td className="py-3">{history.name_package}</td>
-                      <td className="py-3 text-right">THB {history.price}</td>
-                    </tr>
-                  ))
-                ) : (
+          <div className="mt-4 shadow lg:rounded-2xl lg:p-6">
+            {/* กำหนดความสูงคงที่ให้ตาราง */}
+            <div className="min-h-[450px] overflow-auto">
+              <table className="w-full text-sm lg:text-base">
+                <thead>
                   <tr>
-                    <td colSpan="3" className="py-3 text-center">
-                      No billing history found
-                    </td>
+                    <th className="0 mb-4 hidden text-sm font-semibold text-gray-500 lg:flex lg:text-lg">
+                      <div>Next billing :&nbsp;</div>
+
+                      <div>
+                        {endDate
+                          ? new Date(endDate).toLocaleDateString("en-GB")
+                          : "N/A"}
+                      </div>
+                    </th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                {/* ของเดิม
+              {paymentHistory.length > 0 ? (
+                  paymentHistory.map((history, index) => (
+              */}
+                <tbody>
+                  {currentHistory.length > 0 ? (
+                    currentHistory.map((history, index) => (
+                      <tr
+                        key={index}
+                        className={index % 2 !== 0 ? "bg-gray-100" : ""}
+                      >
+                        <td className="p-2">
+                          {new Date(history.payment_date).toLocaleDateString(
+                            "en-GB",
+                          )}
+                        </td>
+                        <td className="pl-3">{history.name_package}</td>
+                        <td className="pr-5 text-right">THB {history.price}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="py-3 text-center">
+                        No billing history found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* Pagination */}
+          {paymentHistory.length > itemsPerPage && (
+            <div className="mt-8 flex justify-center space-x-2">
+              {Array.from({
+                length: Math.ceil(paymentHistory.length / itemsPerPage),
+              }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => paginate(index + 1)}
+                  className={`rounded-md px-3 py-1 ${
+                    currentPage === index + 1
+                      ? "bg-primary-500 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* End Pagination */}
         </section>
       </div>
 
       {/* Modal การลบ */}
-      <DeleteConfirmationModal
+      <SubmitCancelMembershipModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)} // ปิด Modal
         onConfirm={() => {
           confirmAction(); // เรียกฟังก์ชันที่ตั้งไว้ (handleCancelPackage)
           setIsModalOpen(false); // ปิด Modal
         }}
-        title="Confirm Cancellation"
+        title="Confirm Confirmation"
         message={modalMessage}
-        confirmLabel="Yes, Cancel"
-        cancelLabel="No, Keep it"
+        confirmLabel="Yes, I want to cancel"
+        cancelLabel="No, I still want to be member"
       />
     </>
   );
