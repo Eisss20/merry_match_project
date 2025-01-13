@@ -17,13 +17,6 @@ export default function Homepage() {
   // แปลง `price` เป็นตัวเลข
   const numericPrice = parseFloat(price);
 
-  console.log("icon_url before Child is : ", icon_url);
-  console.log("Package_id : ", packages_id);
-  console.log("name_package : ", name_package);
-  console.log("price : ", price);
-  console.log("description : ", description);
-  console.log("stripe_price_id : ", stripe_price_id);
-
   return (
     <>
       <NavBar />

@@ -50,7 +50,6 @@ export default function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Login Attempt with:", { username, password });
     await login({ username, password });
   };
 

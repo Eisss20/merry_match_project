@@ -21,11 +21,6 @@ function ComplaintDetail() {
 
   const updateComplaintStatus = async (newStatus) => {
     try {
-      console.log("Sending data to API:", {
-        status: newStatus,
-        adminId: admin.admin_id,
-      });
-
       if (!admin || !admin.admin_id) {
         console.error("Admin ID is missing");
         alert("Admin information is not available. Please try again later.");

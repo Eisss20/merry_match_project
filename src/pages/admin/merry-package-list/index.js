@@ -31,7 +31,6 @@ function MerryPackageList() {
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const res = await axios.get(`${apiBaseUrl}/api/admin/packages`);
-      console.log("Fetched Packages:", res.data); // ตรวจสอบข้อมูลที่ได้
       setPackages(res.data); // เก็บข้อมูลใน state
     } catch (error) {
       console.error("Error fetching packages:", error);

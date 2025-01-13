@@ -135,8 +135,6 @@ function PaymentPage({
     }
   }, []);
 
-  console.log("icon in PaymentContainer is ", icon_url);
-
   return (
     <>
       <form

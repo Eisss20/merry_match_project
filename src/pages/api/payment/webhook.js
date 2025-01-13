@@ -25,11 +25,6 @@ async function handleEvent(event) {
     const packageId = paymentIntent.metadata.packages_id;
     const userId = paymentIntent.metadata.user_id;
 
-    console.log("Webhook received:", event.type);
-    console.log("Metadata:", paymentIntent.metadata);
-    console.log("Database operation started");
-    console.log("Database operation completed");
-
     // ตรวจสอบ Metadata
     if (!packageId || !userId) {
       console.error("Missing metadata in paymentIntent:", {
@@ -83,9 +78,6 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const sig = req.headers["stripe-signature"];
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    console.log("Stripe Signature:", sig);
-    console.log("Incoming Request Headers:", req.headers);
-    console.log("Incoming Request Method:", req.method);
 
     try {
       // อ่าน rawBody จาก request

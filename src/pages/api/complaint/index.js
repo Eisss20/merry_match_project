@@ -17,7 +17,6 @@ export default async function handler(req, res) {
       // ตรวจสอบและ decode Token
       try {
         const decodedToken = jwt.verify(token, process.env.SECRET_KEY); // ตรวจสอบความถูกต้องของ Token
-        console.log("Decoded Token:", decodedToken);
 
         userId = decodedToken.id; // ดึง ID ผู้ใช้จาก payload ของ Token
       } catch (err) {
@@ -57,9 +56,6 @@ export default async function handler(req, res) {
           });
       }
 
-      // แสดงข้อมูลที่ได้รับจาก frontend ใน console
-      console.log("Received data:", { userId, issue, description });
-
       // Query SQL สำหรับเพิ่มข้อมูลการร้องเรียนลงในตาราง "complaint"
       const query = `
         INSERT INTO complaint (user_id, issue, description)
@@ -70,9 +66,6 @@ export default async function handler(req, res) {
 
       // รันคำสั่ง SQL เพื่อเพิ่มข้อมูล
       const result = await connectionPool.query(query, values);
-
-      // แสดงข้อมูลที่ถูกเพิ่มใน console
-      console.log("Inserted complaint:", result.rows[0]);
 
       // ตอบกลับสถานะ 201 (Created) พร้อมกับข้อมูลที่ถูกเพิ่มในฐานข้อมูล
       res.status(201).json(result.rows[0]);
