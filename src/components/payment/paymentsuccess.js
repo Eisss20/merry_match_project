@@ -10,6 +10,7 @@ function PaymentSuccess({ name_package, price, description }) {
   const { icon_url } = router.query;
 
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
+  const [dataLoading, setDatalLoading] = useState(true);
 
   // ดึง userId จาก state ใน context ที่ได้มาจากการรับค่าของ Token ตอน login เข้ามาและเก็บเข้าไปใน state ในหน้า context
   // ทำการดึงมาใช้โดยผ่าน useAuth และทำการเข้าถึง state
@@ -43,9 +44,8 @@ function PaymentSuccess({ name_package, price, description }) {
         }
       } catch (error) {
         console.error("Error fetching subscription details:", error);
-        setErrorMessage(
-          "Failed to load subscription details. Please try again.",
-        );
+      } finally {
+        setDatalLoading(false);
       }
     };
     if (userId) {
@@ -59,6 +59,8 @@ function PaymentSuccess({ name_package, price, description }) {
       logout();
     }
   }, []);
+
+  if (dataLoading) return <div></div>;
 
   return (
     <>
