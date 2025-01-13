@@ -71,7 +71,7 @@ export function DetailProfile({
   const currentImage = imageList[currentImageIndex];
 
   return (
-    <>
+    <div className="h-full w-full">
       <div className="w-full lg:hidden">
         <NavBar />
       </div>
@@ -237,6 +237,6 @@ export function DetailProfile({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

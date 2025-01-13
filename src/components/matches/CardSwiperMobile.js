@@ -69,7 +69,7 @@ export default function CardSwiperMobile({
                       <p
                         className={`text-lg text-[#D6D9E4] duration-300 ${activeIndex !== index && "text-opacity-0"}`}
                       >
-                        Bangkok, Thailand
+                        {profile.city}, {profile.location}
                       </p>
                     </div>
                   </div>
