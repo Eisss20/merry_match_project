@@ -1,15 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { validateHobbies } from "@/utils/validateProfilePage";
 
-export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
+export default function HobbiesProfilePage({
+  updateHobbies,
+  onOptionsChange,
+  updateHobbiesError,
+  disabled,
+  hobbieError,
+}) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState("");
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [hobbiesError, setHobbiesError] = useState("");
 
   const dropdownRef = useRef(null);
+
+  const validateSelectedOptions = (options) => {
+    const error = validateHobbies(options); // ใช้ validatehobbies จาก utils
+    return error;
+  };
 
   // ส่งค่าทุกครั้งที่ selectedOptions เปลี่ยน
   useEffect(() => {
@@ -103,27 +116,41 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
 
   const handleSelectOption = (option) => {
     if (selectedOptions.length >= 10) {
-      alert("You can select up to 10 options only.");
+      const errorMessage = "You can only select up to 10 hobbies / interests";
+      setHobbiesError(errorMessage);
       setIsDropdownOpen(false);
       return;
     }
     const newSelectedOptions = [...selectedOptions, option];
     setSelectedOptions(newSelectedOptions);
+
     setInputValue("");
     setIsDropdownOpen(false);
-
     updateHobbies(newSelectedOptions);
   };
  
 
+  // ส่ง hobbiesError กลับไปให้กับ parent
+  useEffect(() => {
+    updateHobbiesError(hobbiesError);
+  }, [hobbiesError]);
+
   const handleRemoveOption = (value) => {
-    setSelectedOptions(
-      selectedOptions.filter((option) => option.value !== value),
+    const updatedOptions = selectedOptions.filter(
+      (option) => option.value !== value,
     );
+    setSelectedOptions(updatedOptions);
+    // ตรวจสอบข้อผิดพลาด
+    const error = validateSelectedOptions(updatedOptions);
+    setHobbiesError(error); // อัปเดตข้อความ error
+    updateHobbies(updatedOptions); // ส่งข้อมูลไปยังฟังก์ชันหลัก
   };
 
   return (
-    <div className="relative w-full flex flex-col gap-1" ref={dropdownRef}>
+    <div
+      className="container relative flex w-full flex-col gap-1"
+      ref={dropdownRef}
+    >
       {" "}
       {/* ใช้ ref ที่นี่ */}
       <label
@@ -132,7 +159,7 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
       >
         Hobbies / Interests (Maximum 10)
       </label>
-      <div className="flex flex-col gap-2">
+      <div className="container flex flex-col gap-2">
         <input
           type="text"
           id="hobbies"
@@ -140,13 +167,18 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
           value={inputValue}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
-          className="rounded-lg border border-fourth-400 bg-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 h-12"
+          disabled={disabled}
+          className={`input h-12 rounded-lg border border-fourth-400 bg-white p-2 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400 ${
+            disabled
+              ? "cursor-not-allowed bg-gray-100" // เมื่อ disabled จะไม่เปลี่ยนสีเส้นขอบ
+              : `border-gray-300 bg-white focus:ring-blue-400 ${hobbieError ? "border-utility-third" : ""}` // เมื่อไม่ disabled ถ้ามี error ให้เปลี่ยนเส้นขอบเป็นสีแดง
+          }`}
         />
 
         {/* อันนี้ตัวแก้ไขโดยไม่ให้เพิ่ม option */}
         {isDropdownOpen && (
           <ul className="absolute top-full z-10 mt-2 max-h-40 w-full overflow-y-auto rounded-lg border border-gray-300 bg-white">
-            {filteredOptions.length > 0 ? (
+            {filteredOptions.length > 10 ? (
               filteredOptions.map((option) => (
                 <li
                   key={option.value}
@@ -165,7 +197,7 @@ export default function HobbiesProfilePage({ updateHobbies, onOptionsChange }) {
           </ul>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex max-w-full flex-wrap gap-2 lg:flex-wrap">
           {selectedOptions.map((option) => (
             <div
               key={option.value}

@@ -8,11 +8,34 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/router";
+import {
+  validateName,
+  validateAge,
+  validateHobbies,
+  validateAboutme,
+  validateProfilePicture,
+  validateRequiredFieldsProfilePage,
+} from "@/utils/validateProfilePage";
+import Alert from "@/components/register/AlertRegister";
+import {
+  DndContext,
+  useSensor,
+  useSensors,
+  PointerSensor,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortableItem from "@/components/register/SortableItem";
+// import Loading from "@/components/loading/loading";
 
 export default function ProfilePage() {
   const [date, setDate] = useState("");
+  const [dateError, setDateError] = useState("");
   const [userId, setUserId] = useState("");
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState("");
   const [age, setAge] = useState("");
   const [location, setLocation] = useState([]);
   const [allLocation, setAllLocation] = useState([]);
@@ -26,15 +49,20 @@ export default function ProfilePage() {
   const [racialPref, setRacialPref] = useState("");
   const [meetingInterest, setMeetingInterest] = useState("");
   const [hobbies, setHobbies] = useState([]);
+  const [hobbiesError, setHobbiesError] = useState("");
   const [aboutMe, setAboutMe] = useState("");
-  // const [image, setImage] = useState([]);
-  const [avatar, setAvatars] = useState([]);
+  const [aboutMeError, setAboutMeError] = useState("");
+  const [avatar, setAvatar] = useState([]);
+  const [avatarError, setAvatarError] = useState("");
   const [allGender, setAllGender] = useState([]);
   const [allMeeting, setAllMeeting] = useState([]);
   const [allRacial, setAllRacial] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // console.log("image in state avatar", avatar);
+  // console.log("state avatar", avatar);
 
   const { deleteuser } = useAuth();
   const router = useRouter();
@@ -48,6 +76,12 @@ export default function ProfilePage() {
   // update keyword hobby
   const updateHobbies = (selectedOptions) => {
     setHobbies(selectedOptions);
+    setHobbiesError("");
+  };
+
+  // hobbies error
+  const updateHobbiesError = (error) => {
+    setHobbiesError(error); // รับค่า error จาก HobbiesProfilePage
   };
 
   // ดึง racial
@@ -105,6 +139,15 @@ export default function ProfilePage() {
     }
   };
 
+  // ตั้งค่า Max date
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // ดึงข้อมูล users โดยระบุ id
   const getUsersById = async () => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -133,10 +176,10 @@ export default function ProfilePage() {
         .split("T")[0];
 
       // ตรวจสอบว่าข้อมูลที่ get มาเป็น Array หรือ Object และมีค่า
-      const formattedAvatar = result.data.image_profiles.reduce((acc, img) => {
-        acc[img.image_profile_id] = { image_url: img.image_url };
-        return acc;
-      }, {});
+      // const formattedAvatar = result.data.image_profiles.reduce((acc, img) => {
+      //   acc[img.image_profile_id] = { image_url: img.image_url };
+      //   return acc;
+      // }, {});
 
       // เก็บค่าของ result ไว้ใน state
       setUserId(result.data.user_id);
@@ -152,7 +195,7 @@ export default function ProfilePage() {
       setRacialPref(result.data.racial_preference);
       setMeetingInterest(result.data.meeting_interest);
       setAboutMe(result.data.about_me);
-      setAvatars(formattedAvatar);
+      setAvatar(result.data.image_profiles);
     } catch (error) {
       console.log(error);
     }
@@ -200,8 +243,29 @@ export default function ProfilePage() {
   // console.log("Valid URLs:", validUrls); // แสดง URL ที่ถูกต้อง
   // console.log("Files to upload:", filesToUpload); // แสดงไฟล์ที่ต้องอัปโหลด
 
+  // function คำนวณอายุไว้แสดงใน modal แบบ real time
+  const calculateAge = (birthdate) => {
+    const birthDate = new Date(birthdate);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    // ตรวจสอบว่าครบรอบวันเกิดแล้วหรือยัง
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
   // function handler update user profile
   const handleUpdateProfile = async () => {
+    setIsLoading(true);
+
     const token = localStorage.getItem("token");
     if (!token) {
       alert("You are not logged in. Please log in again.");
@@ -212,6 +276,56 @@ export default function ProfilePage() {
     const { id } = jwtDecode(token);
     if (!id) {
       alert("Invalid user ID.");
+      return;
+    }
+
+    // validate แต่ละช่อง input ว่าตรงตามเงื่อนไขหรือไม่
+    const nameError = validateName(name);
+    const dateError = validateAge(date);
+    const hobbiesError = validateHobbies(selectedOptions);
+    const aboutmeError = validateAboutme(aboutMe);
+    const avatarError = validateProfilePicture(avatar);
+
+    // validate ทั้งหน้า ว่ากรอกข้อมูลครบทุก input หรือไม่
+    const allAalidationError = validateRequiredFieldsProfilePage({
+      name,
+      date,
+      selectedOptions,
+      value: aboutMe,
+      fields: { avatar: avatar },
+    });
+
+    // error message
+    const errorMessages = {
+      name: nameError,
+      date: dateError,
+      hobbies: hobbiesError,
+      aboutme: aboutmeError,
+      image: avatarError,
+    };
+
+    console.log("ALL validationError", allAalidationError); // error กรอกข้อมูลไม่ครบทั้ง form
+    console.log("errorMessages", errorMessages); // error ของแต่ละ input
+
+    if (
+      nameError ||
+      dateError ||
+      hobbiesError ||
+      aboutmeError ||
+      avatarError ||
+      allAalidationError
+    ) {
+      setErrorMessage(
+        "Please provide all the required information accurately and completely",
+      );
+      setAlertVisible(true);
+      setIsLoading(false); // จบโหลด
+
+      setNameError(errorMessages.name || "");
+      setDateError(errorMessages.date || "");
+      setHobbiesError(errorMessages.hobbies || "");
+      setAboutMeError(errorMessages.aboutme || "");
+      setAvatarError(errorMessages.image || "");
       return;
     }
 
@@ -253,6 +367,8 @@ export default function ProfilePage() {
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile.");
+    } finally {
+      setIsLoading(false); // จบโหลด
     }
   };
 
@@ -269,7 +385,19 @@ export default function ProfilePage() {
       }
     });
 
-    setAvatars(updatedAvatars);
+    // แปลง newAvatars เป็น avatarsObject
+    const avatarsArray = Object.values(updatedAvatars);
+    const avatarsObject = avatarsArray.reduce((acc, file, index) => {
+      acc[index] = file;
+      return acc;
+    }, {});
+
+    // อัปเดต state
+    setAvatar(avatarsObject);
+
+    if (Object.keys(avatarsObject).length >= 2) {
+      setAvatarError(""); // ล้างข้อความ error
+    }
   };
 
   // กดลบรูปภาพ
@@ -279,8 +407,81 @@ export default function ProfilePage() {
     delete updatedAvatars[avatarKey]; // ลบรูปถาพที่ถูกเลือก
 
     // อัปเดต state
-    setAvatars(updatedAvatars);
+    setAvatar(updatedAvatars);
+
+    // ใช้ validateProfilePicture เพื่อตรวจสอบข้อผิดพลาด
+    const error = validateProfilePicture(updatedAvatars);
+    setAvatarError(error); // อัพเดตข้อความ error
   };
+
+  const handleAvatarUpdate = (updatedAvatars) => {
+    setAvatar(updatedAvatars); // อัปเดตค่าของ avatar ใน parent
+  };
+
+  // console.log(" updated state avatar", avatar);
+
+  // drag and drop รูปภาพ
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over) return;
+    // over คือค่าที่วาง โดยจะเป็นเลข ตำแหน่งที่อยู่ใน Array
+    // active คือค่าที่โดนกดลาก โดยจะเป็นเลข ตำแหน่งที่อยู่ใน Array
+    console.log("over", over);
+    console.log("active", active);
+
+    const activeIndex = parseInt(active.id, 10); // parseInt แปลง String เป็นตัวเลขแบบเต็มจำนวน จาก id
+    const overIndex = parseInt(over.id, 10); // parseInt แปลง String เป็นตัวเลขแบบเต็มจำนวน จาก id
+
+    console.log("activeIndex00000", activeIndex);
+    console.log("overIndex00000", overIndex);
+
+    if (activeIndex !== overIndex) {
+      // สำเนาของ avatars
+      const updatedAvatars = { ...avatar };
+      console.log("updatedAvatars", updatedAvatars);
+
+      // ดึงค่าของรูปที่ถูกลาก
+      const activeAvatar = updatedAvatars[activeIndex];
+      console.log("activeAvatar", activeAvatar);
+
+      // ลบรูปที่ถูกลากออกจากตำแหน่งเดิม
+      delete updatedAvatars[activeIndex];
+
+      // จัดเรียงลำดับใหม่และแทรกรูปที่ถูกลากในตำแหน่งใหม่
+      const newAvatars = {};
+      let currentIndex = 0;
+      Object.keys(updatedAvatars).forEach((key, index) => {
+        if (currentIndex === overIndex) {
+          newAvatars[overIndex] = activeAvatar;
+          currentIndex++;
+        }
+        if (key !== String(activeIndex)) {
+          newAvatars[currentIndex] = updatedAvatars[key];
+          currentIndex++;
+        }
+      });
+
+      // กรณีที่ลากไปยังตำแหน่งสุดท้าย
+      if (overIndex >= Object.keys(updatedAvatars).length) {
+        newAvatars[overIndex] = activeAvatar;
+      }
+      console.log("Object.keys", Object.keys(updatedAvatars));
+      console.log("updatedAvatars.length", Object.keys(updatedAvatars).length);
+      console.log("Updated avatars after rearranging: ", newAvatars);
+      setAvatar(newAvatars); // อัปเดต state avatars
+
+      handleAvatarUpdate(newAvatars); // เรียกฟังก์ชันเพิ่มเติมถ้ามี
+      // console.log("handleAvatarUpdate", newAvatars);
+    }
+  };
+
+  // Sensors สำหรับการลาก
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 10 },
+    }),
+  );
+  // console.log("sensors", sensors);
 
   // เมื่อเปิดหน้าเว็บให้ function getProfileData ทำงาน
   useEffect(() => {
@@ -327,8 +528,8 @@ export default function ProfilePage() {
       <main className="info-section">
         {/* Profile-section */}
         <div className="profile flex flex-col items-center gap-10 bg-utility-bgMain px-4 py-10">
-          <div className="profile-section flex flex-col gap-10 lg:mx-auto lg:gap-20">
-            <div className="title-section flex flex-col gap-2 lg:flex-row lg:gap-20">
+          <div className="profile-section flex w-full max-w-[931px] flex-col gap-10 lg:mx-auto lg:gap-20">
+            <div className="title-section flex flex-col gap-2 lg:flex-row lg:justify-between lg:gap-20">
               <div className="title lg:flex lg:w-[517px] lg:flex-col lg:gap-2">
                 <span className="text-sm font-semibold text-third-700">
                   PROFILE
@@ -343,71 +544,23 @@ export default function ProfilePage() {
                     buttonType="secondary"
                     customStyle="w-[162px] text-base font-bold"
                     onClick={() =>
-                      document
-                        .getElementById("preview-profile-desktop")
-                        .showModal()
+                      document.getElementById("preview-profile").showModal()
                     }
                   >
                     Preview Profile
                   </CustomButton>
 
-                  {/* popup preview profile desktop*/}
-                  <dialog
-                    id="preview-profile-desktop"
-                    className="modal overflow-y-auto"
-                  >
-                    <div className="">
-                      <PreviewProfile
-                        name={name}
-                        age={age}
-                        city={city}
-                        location={location}
-                        sexIdentity={sexIdentity}
-                        sexPref={sexPref}
-                        racialPref={racialPref}
-                        meetingInterest={meetingInterest}
-                        aboutMe={aboutMe}
-                        hobby={selectedOptions}
-                        image={avatar}
-                      />
-                    </div>
-                  </dialog>
                   <CustomButton
                     buttonType="primary"
                     customStyle="w-[162px] text-base font-bold"
                     onClick={handleUpdateProfile}
+                    disabled={isLoading}
                   >
-                    Update Profile
+                    {isLoading ? "Updating..." : "Update Profile"}
                   </CustomButton>
                 </div>
               </div>
             </div>
-
-            {/* Update success modal */}
-            <dialog
-              id="update-success-modal"
-              className="modal fixed flex items-center justify-center"
-            >
-              <div className="modal-content w-[530px] rounded-2xl bg-white p-6">
-                <h3 className="mb-4 text-center text-xl font-semibold text-gray-800">
-                  Success!
-                </h3>
-                <p className="test-base mb-6 text-center font-normal text-gray-600">
-                  Your profile has been successfully updated.
-                </p>
-                <div className="flex justify-center">
-                  <CustomButton
-                    buttonType="primary"
-                    className="w-[125px] px-4 py-2 text-base font-bold"
-                    onClick={() =>
-                      document.getElementById("update-success-modal").close()
-                    }
-                  >
-                    Close
-                  </CustomButton>
-                </div>
-              </div>
-            </dialog>
 
             {/* Basic Information */}
             <div className="basic-information-section flex flex-col gap-6">
@@ -424,10 +577,29 @@ export default function ProfilePage() {
                     <input
                       type="date"
                       name="date"
+                      max={getCurrentDate()}
                       value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="input input-bordered h-12 w-full rounded-[8px] border-[1px] border-fourth-400 py-3 pl-3 pr-4 lg:w-full"
+                      onChange={(e) => {
+                        const selectedDate = e.target.value;
+                        setDate(selectedDate);
+
+                        // ตรวจสอบอายุและอัปเดต state
+                        const calculatedAge = calculateAge(selectedDate);
+                        setAge(calculatedAge);
+
+                        // ตรวจสอบอายุ
+                        const error = validateAge(e.target.value);
+                        setDateError(error);
+                      }}
+                      disabled={alertVisible}
+                      className={`input h-12 w-full rounded-[8px] border-[1px] border-fourth-400 bg-utility-primary py-3 pl-3 pr-4 text-utility-second transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400 lg:w-full ${dateError ? "border-utility-third" : ""}`}
                     />
+                    {dateError && (
+                      <small className="ml-2 pt-2 text-red-600">
+                        {dateError}
+                      </small>
+                    )}{" "}
+                    {/* แสดงข้อผิดพลาด */}
                   </label>
                   <label className="name-section flex w-full flex-col gap-1 lg:order-1 lg:w-full">
                     <span className="text-base font-normal text-utility-second">
@@ -435,10 +607,23 @@ export default function ProfilePage() {
                     </span>
                     <input
                       type="text"
-                      className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-400 lg:w-full"
+                      disabled={alertVisible}
+                      className={`input h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400 lg:w-full ${nameError ? "border-utility-third" : ""}`}
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        setName(e.target.value);
+                        // bg-utility-primary transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none ${nameError ? "border-utility-third" : ""}
+                        // เรียกใช้ validate name
+                        const error = validateName(e.target.value);
+                        setNameError(error || "");
+                      }}
                     />
+                    {nameError && (
+                      <small className="ml-2 pt-2 text-red-600">
+                        {nameError}
+                      </small>
+                    )}{" "}
+                    {/* แสดงข้อผิดพลาดขณะพิมพ์ */}
                   </label>
                 </div>
 
@@ -448,9 +633,10 @@ export default function ProfilePage() {
                       City
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{city}</option>
                       {filterCity
@@ -470,9 +656,10 @@ export default function ProfilePage() {
                       Location
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{location}</option>
                       {allLocation
@@ -488,13 +675,13 @@ export default function ProfilePage() {
 
                 <div className="flex flex-col gap-6 lg:flex-row lg:gap-6">
                   <label className="email-section flex w-full flex-col gap-1 lg:order-2">
-                    <span className="text-base font-normal text-fourth-600">
+                    <span className="text-base font-normal text-utility-second">
                       Email
                     </span>
                     <input
                       type="text"
                       placeholder="name@website.com"
-                      className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 placeholder-fourth-900"
+                      className="input h-12 w-full rounded-[8px] border py-3 pl-3 pr-4 text-fourth-600 placeholder-fourth-900 disabled:border-fourth-400"
                       value={email}
                       disabled
                     />
@@ -506,8 +693,9 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       placeholder="At least 6 character"
-                      className="h-12 w-full rounded-[8px] border border-fourth-400 py-3 pl-3 pr-4 placeholder-fourth-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="input h-12 w-full rounded-[8px] border py-3 pl-3 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:border-fourth-400"
                       value={username}
+                      disabled
                       onChange={(e) => setUsername(e.target.value)}
                     />
                   </label>
@@ -528,9 +716,10 @@ export default function ProfilePage() {
                       Sexual preferences
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={sexPref}
                       onChange={(e) => setSexPref(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{sexPref}</option>
                       {allGender
@@ -547,9 +736,10 @@ export default function ProfilePage() {
                       Sexual identities
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={sexIdentity}
                       onChange={(e) => setSexIdentity(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{sexIdentity}</option>
                       {allGender
@@ -569,9 +759,10 @@ export default function ProfilePage() {
                       Meeting interests
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={meetingInterest}
                       onChange={(e) => setMeetingInterest(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{meetingInterest}</option>
                       {allMeeting
@@ -591,9 +782,10 @@ export default function ProfilePage() {
                       Racial preferences
                     </span>
                     <select
-                      className="select select-bordered h-12 w-full border-fourth-400"
+                      className="select select-bordered h-12 w-full border-fourth-400 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400"
                       value={racialPref}
                       onChange={(e) => setRacialPref(e.target.value)}
+                      disabled={alertVisible}
                     >
                       <option value="">{racialPref}</option>
                       {allRacial
@@ -610,23 +802,22 @@ export default function ProfilePage() {
                   </label>
                 </div>
 
-                {/* <label className="hobbies-section flex w-full flex-col gap-1">
-                  <span className="text-base font-normal text-utility-second">
-                    Hobbies / Interests (Maximum 10)
-                  </span>
-                  <input
-                    type="text"
-                    className="h-14 w-full rounded-[8px] border border-fourth-400 px-4 py-3 placeholder-fourth-900"
-                    value={hobbies}
-                    onChange={(e) => setHobbies(e.target.value)}
-                  />
-                </label> */}
-
                 <div className="hobby-input">
                   <HobbiesProfilePage
                     updateHobbies={updateHobbies}
                     onOptionsChange={handleUpdateOptions}
+                    updateHobbiesError={updateHobbiesError}
+                    disabled={alertVisible}
+                    hobbieError={hobbiesError}
+                    className={`${
+                      hobbiesError ? "border-utility-third" : "" // เปลี่ยนเส้นขอบตาม error
+                    }`}
                   />
+                  {hobbiesError && (
+                    <small className="ml-2 pt-2 text-red-600">
+                      {hobbiesError}
+                    </small>
+                  )}
                 </div>
               </div>
 
@@ -634,13 +825,27 @@ export default function ProfilePage() {
                 <span className="text-base font-normal text-utility-second">
                   About me (Maximum 150 characters)
                 </span>
-                <input
+                <textarea
+                  name="aboutme"
                   type="text"
                   placeholder="Write something about yourself"
-                  className="h-28 w-full rounded-[8px] border border-fourth-400 px-4 pb-14 placeholder-fourth-900"
+                  className={`input h-28 w-full resize-none rounded-[8px] border border-fourth-400 px-4 py-3 placeholder-fourth-900 transition-colors duration-300 hover:border-second-500 focus:border-second-500 focus:outline-none disabled:border-fourth-400 ${aboutMeError ? "border-utility-third" : ""}`}
+                  disabled={alertVisible}
                   value={aboutMe}
-                  onChange={(e) => setAboutMe(e.target.value)}
+                  onChange={(e) => {
+                    const { name, value } = e.target;
+                    if (name === "aboutme") {
+                      setAboutMe(value);
+                      const error = validateAboutme(value);
+                      setAboutMeError(error);
+                    }
+                  }}
                 />
+                {aboutMeError && (
+                  <small className="ml-2 pt-2 text-red-600">
+                    {aboutMeError}
+                  </small>
+                )}
               </label>
             </div>
 
@@ -655,35 +860,45 @@ export default function ProfilePage() {
                 </h1>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <label className="form-control">
-                    <span className="label-text">Upload at least 2 photos</span>
-                  </label>
+                  {avatarError && (
+                    <small className="ml-2 pt-2 text-red-600">
+                      {avatarError}
+                    </small>
+                  )}
                 </div>
                 <div className="mx-auto flex h-auto w-full flex-wrap gap-4 rounded-lg border-gray-300 px-0 lg:w-[931px]">
                   {/* แสดงรูปภาพจาก State avatar */}
-                  {Object.keys(avatar).map((avatarKey) => (
-                    <div
-                      key={avatarKey}
-                      className="relative h-[120px] w-[120px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-gray-300 sm:h-[140px] sm:w-[140px] lg:h-[167px] lg:w-[167px]"
+                  <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+                    <SortableContext
+                      items={Object.keys(avatar)}
+                      strategy={horizontalListSortingStrategy} // ใช้ horizontal list
                     >
-                      <img
-                        src={
-                          avatar[avatarKey] instanceof File
-                            ? URL.createObjectURL(avatar[avatarKey]) // Preview สำหรับภาพใหม่
-                            : avatar[avatarKey].image_url // URL สำหรับภาพจาก Database
-                        }
-                        alt={`profile-${avatarKey}`}
-                        className="h-full w-full rounded-lg object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(avatarKey)} // ฟังก์ชั่นลบรูปภาพ
-                        className="absolute right-[-5px] top-[-10px] flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xl text-white hover:bg-red-700"
-                      >
-                        x
-                      </button>
-                    </div>
-                  ))}
+                      {Object.entries(avatar).map(([key, value]) => {
+                        return (
+                          <SortableItem key={key} id={key}>
+                            <img
+                              src={
+                                value instanceof File
+                                  ? URL.createObjectURL(value) // Preview สำหรับภาพใหม่
+                                  : value.image_url // URL สำหรับภาพจาก Database
+                              }
+                              alt={`profile-${key}`}
+                              className="h-full w-full rounded-lg object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(key)} // ฟังก์ชั่นลบรูปภาพ
+                              className="absolute right-[-5px] top-[-10px] flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xl text-white hover:bg-red-700"
+                            >
+                              x
+                            </button>
+                          </SortableItem>
+                        );
+                      })}
+                    </SortableContext>
+                  </DndContext>
+
+                  {/* ถ้าจำนวนรูปน้อยกว่า 5 ให้โชว์ปุ่มอัปโหลด */}
                   {Object.keys(avatar).length < 5 && (
                     <div className="relative h-[120px] w-[120px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-gray-300 sm:h-[140px] sm:w-[140px] lg:h-[167px] lg:w-[167px]">
                       <label
@@ -691,15 +906,28 @@ export default function ProfilePage() {
                         className="flex h-full w-full items-center justify-center text-sm text-gray-500"
                       >
                         {Object.keys(avatar).length === 0 ? (
-                          <span>คลิกเพื่อเลือกไฟล์</span>
+                          <div className="flex h-full items-center justify-center">
+                            <span className="flex flex-col items-center justify-center">
+                              +
+                              <p className="text-lg font-medium">
+                                Upload photo
+                              </p>
+                            </span>
+                          </div>
                         ) : (
-                          <span>เลือกไฟล์ใหม่</span>
+                          <div className="flex h-full items-center justify-center">
+                            <span className="flex flex-col items-center justify-center">
+                              +
+                              <p className="text-lg font-medium">
+                                Upload photo
+                              </p>
+                            </span>
+                          </div>
                         )}
                         <input
                           id="upload"
                           name="avatar"
                           type="file"
-                          placeholder="Enter last name here"
                           onChange={handleFileChange}
                           className="absolute z-10 h-full w-full cursor-pointer opacity-0"
                         />
@@ -709,59 +937,25 @@ export default function ProfilePage() {
                 </div>
               </form>
             </div>
+            <div className="pt-10">
+              {alertVisible && (
+                <Alert
+                  message={errorMessage}
+                  onClose={() => setAlertVisible(false)}
+                />
+              )}
+            </div>
 
             {/* Button: Delete account desktop */}
             <div className="delete-account hidden lg:flex lg:justify-end">
               <button
                 className="text-base font-bold text-fourth-700"
                 onClick={() =>
-                  document.getElementById("delete-confirm-desktop").showModal()
+                  document.getElementById("delete-confirm").showModal()
                 }
               >
                 Delete account
               </button>
-              {/* popup delete confirm */}
-              <dialog id="delete-confirm-desktop" className="modal px-4">
-                <div className="delete-popup w-[530px] rounded-2xl bg-white">
-                  <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-6 py-2">
-                    <h3 className="text-xl font-semibold">
-                      Delete Confirmation
-                    </h3>
-                    <form method="dialog">
-                      <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
-                        x
-                      </button>
-                    </form>
-                  </div>
-                  <div className="flex flex-col gap-6 p-6">
-                    <p className="text-base font-normal text-fourth-700">
-                      Do you sure to delete account?
-                    </p>
-                    <div className="flex flex-row gap-4">
-                      <CustomButton
-                        buttonType="secondary"
-                        className="w-[200px] text-base font-bold"
-                        onClick={() => {
-                          deleteuser(userId);
-                        }}
-                      >
-                        Yes, I want to delete
-                      </CustomButton>
-                      <CustomButton
-                        buttonType="primary"
-                        className="w-[125px] text-base font-bold"
-                        onClick={() =>
-                          document
-                            .getElementById("delete-confirm-desktop")
-                            .close()
-                        }
-                      >
-                        No, I don't
-                      </CustomButton>
-                    </div>
-                  </div>
-                </div>
-              </dialog>
             </div>
           </div>
 
@@ -771,40 +965,19 @@ export default function ProfilePage() {
               buttonType="secondary"
               customStyle="w-[162px] text-base font-bold"
               onClick={() =>
-                document.getElementById("preview-profile-mobile").showModal()
+                document.getElementById("preview-profile").showModal()
               }
             >
               Preview Profile
             </CustomButton>
 
-            {/* popup preview profile mobile*/}
-            <dialog
-              id="preview-profile-mobile"
-              className="modal overflow-y-auto"
-            >
-              <div className="w-full">
-                <PreviewProfile
-                  name={name}
-                  age={age}
-                  city={city}
-                  location={location}
-                  sexIdentity={sexIdentity}
-                  sexPref={sexPref}
-                  racialPref={racialPref}
-                  meetingInterest={meetingInterest}
-                  aboutMe={aboutMe}
-                  hobby={selectedOptions}
-                  image={avatar}
-                />
-              </div>
-            </dialog>
-
             <CustomButton
               buttonType="primary"
               customStyle="w-[162px] text-base font-bold"
               onClick={handleUpdateProfile}
+              disabled={isLoading}
             >
-              Update Profile
+              {isLoading ? "Updating..." : "Update Profile"}
             </CustomButton>
           </div>
 
@@ -813,51 +986,100 @@ export default function ProfilePage() {
             <button
               className="text-base font-bold text-fourth-700"
               onClick={() =>
-                document.getElementById("delete-confirm-mobile").showModal()
+                document.getElementById("delete-confirm").showModal()
               }
             >
               Delete account
             </button>
-
-            {/* popup delete confirm */}
-            <dialog id="delete-confirm-mobile" className="modal px-4">
-              <div className="delete-popup w-full rounded-2xl bg-white">
-                <div className="delete-title flex flex-row items-center justify-between border-b border-fourth-300 px-4 py-2">
-                  <h3 className="text-xl font-semibold">Delete Confirmation</h3>
-                  <form method="dialog">
-                    <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
-                      x
-                    </button>
-                  </form>
-                </div>
-                <div className="flex flex-col gap-6 p-4">
-                  <p className="text-base font-normal text-fourth-700">
-                    Do you sure to delete account?
-                  </p>
-                  <CustomButton
-                    buttonType="secondary"
-                    className="text-base font-bold"
-                    onClick={() => {
-                      deleteuser(userId);
-                    }}
-                  >
-                    Yes, I want to delete
-                  </CustomButton>
-                  <CustomButton
-                    buttonType="primary"
-                    className="text-base font-bold"
-                    onClick={() =>
-                      document.getElementById("delete-confirm-mobile").close()
-                    }
-                  >
-                    No, I don't
-                  </CustomButton>
-                </div>
-              </div>
-            </dialog>
           </div>
         </div>
       </main>
+
+      {/* Update success modal */}
+      <dialog
+        id="update-success-modal"
+        className="modal fixed flex items-center justify-center px-4"
+      >
+        <div className="modal-content w-[530px] rounded-2xl bg-white p-6">
+          <h3 className="mb-4 text-center text-xl font-semibold text-gray-800">
+            Success !
+          </h3>
+          <p className="test-base mb-6 text-center font-normal text-gray-600">
+            Your profile has been successfully updated.
+          </p>
+          <div className="flex justify-center">
+            <CustomButton
+              buttonType="primary"
+              className="w-[125px] px-4 py-2 text-base font-bold"
+              onClick={() =>
+                document.getElementById("update-success-modal").close()
+              }
+            >
+              Close
+            </CustomButton>
+          </div>
+        </div>
+      </dialog>
+
+      {/* modal preview profile */}
+      <dialog
+        id="preview-profile"
+        className="modal fixed inset-0 overflow-y-auto"
+      >
+        <PreviewProfile
+          name={name}
+          age={age}
+          city={city}
+          location={location}
+          sexIdentity={sexIdentity}
+          sexPref={sexPref}
+          racialPref={racialPref}
+          meetingInterest={meetingInterest}
+          aboutMe={aboutMe}
+          hobby={selectedOptions}
+          image={avatar}
+        />
+      </dialog>
+
+      {/* modal delete confirm */}
+      <dialog id="delete-confirm" className="modal px-4">
+        <div className="delete-popup w-full max-w-[530px] rounded-2xl bg-white shadow-xl">
+          <div className="delete-title flex items-center justify-between border-b border-fourth-300 px-4 py-2 md:px-6">
+            <h3 className="text-xl font-semibold">Delete Confirmation</h3>
+            <form method="dialog">
+              <button className="btn btn-circle btn-ghost btn-sm text-xl text-fourth-500">
+                x
+              </button>
+            </form>
+          </div>
+          <div className="flex flex-col gap-6 p-4 md:p-6">
+            <p className="text-base font-normal text-fourth-700">
+              Do you sure to delete account?
+            </p>
+            <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+              <CustomButton
+                buttonType="secondary"
+                className="w-full text-base font-bold md:w-[200px]"
+                onClick={() => {
+                  deleteuser(userId);
+                }}
+              >
+                Yes, I want to delete
+              </CustomButton>
+              <CustomButton
+                buttonType="primary"
+                className="w-full text-base font-bold md:w-[125px]"
+                onClick={() =>
+                  document.getElementById("delete-confirm").close()
+                }
+              >
+                No, I don't
+              </CustomButton>
+            </div>
+          </div>
+        </div>
+      </dialog>
+
       <footer className="footer-section">
         <Footer />
       </footer>

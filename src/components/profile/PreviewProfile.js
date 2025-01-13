@@ -5,6 +5,7 @@ import { RxCross2 } from "react-icons/rx";
 import { IoHeart } from "react-icons/io5";
 import { useState, useEffect } from "react";
 import { HobbyBlog } from "../HobbyBlog";
+import { NavBar } from "../NavBar";
 
 export function PreviewProfile({
   name,
@@ -70,7 +71,7 @@ export function PreviewProfile({
 
   return (
     <>
-      <div className="preview-card bg-white lg:w-[1140px] lg:rounded-[32px]">
+      <div className="preview-card h-full w-full bg-white shadow-xl lg:h-auto lg:w-[1140px] lg:rounded-[32px]">
         <form
           method="dialog"
           className="hidden lg:flex lg:flex-row lg:justify-end lg:px-3 lg:py-2"
@@ -132,7 +133,7 @@ export function PreviewProfile({
             </div>
 
             {/* information-section */}
-            <div className="information flex flex-col gap-6 px-4 py-6 lg:w-full lg:gap-10 lg:pb-0 lg:pl-[60px] lg:pt-6">
+            <div className="information flex w-full flex-col gap-6 px-4 py-6 lg:w-full lg:gap-10 lg:pb-0 lg:pl-[60px] lg:pt-6">
               {/* head */}
               <header className="head-section flex flex-col gap-3 lg:gap-2">
                 <div className="name-age flex flex-row gap-4">
@@ -152,7 +153,7 @@ export function PreviewProfile({
               </header>
 
               {/* sexual-prefer */}
-              <div className="sexual-preference flex flex-col">
+              <div className="sexual-preference flex w-full flex-col">
                 <label className="sexual-identities flex flex-row gap-2 py-[6px]">
                   <span className="w-2/5 text-base font-normal text-fourth-900">
                     Sexual identities
@@ -188,7 +189,7 @@ export function PreviewProfile({
               </div>
 
               {/* about-me */}
-              <div className="about-me flex flex-col gap-3 lg:gap-4">
+              <div className="about-me flex w-full flex-col gap-3 lg:gap-4">
                 <h4 className="text-2xl font-bold text-fourth-900">About me</h4>
                 <span className="text-base font-normal text-fourth-900">
                   {aboutMe}
@@ -196,11 +197,11 @@ export function PreviewProfile({
               </div>
 
               {/* hobbies-interests */}
-              <div className="hobbies-interests flex flex-col gap-3 lg:gap-6">
+              <div className="hobbies-interests flex w-full flex-col gap-3 lg:gap-6">
                 <h4 className="text-2xl font-bold text-fourth-900">
                   Hobbies and Interests
                 </h4>
-                <div className="hobby-list flex flex-row gap-3">
+                <div className="hobby-list flex flex-wrap gap-3">
                   {hobbyList.map((option) => {
                     return (
                       <HobbyBlog key={option.value} hobbyName={option.label} />
