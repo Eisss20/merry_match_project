@@ -112,7 +112,7 @@ export default async function handler(req, res) {
         usersQuery += " AND " + conditions.join(" AND ");
       }
 
-      usersQuery += " ORDER BY User_Profiles.user_id ASC";
+      usersQuery += " ORDER BY RANDOM()";
 
       const results = await connectionPool.query(usersQuery, values);
 

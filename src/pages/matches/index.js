@@ -5,21 +5,17 @@ import { NavBar } from "@/components/NavBar";
 import { CustomButton } from "@/components/CustomUi";
 import LeftSidebar from "@/components/matches/LeftSidebar";
 import CardSwiperMobile from "@/components/matches/CardSwiperMobile";
+import CardSwiper from "@/components/CardSwiper";
 
 import apiClient from "@/utils/jwtInterceptor";
 import axios from "axios";
 
 import { useEffect, useState } from "react";
 import { Range } from "react-range";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/router";
-
-const LazyCardSwiper = dynamic(() => import("@/components/CardSwiper"), {
-  ssr: false,
-});
 
 function AgeRangeSlider({ age, setAge, inputValues, setInputValues }) {
   const handleInputChange = (index, value) => {
@@ -402,10 +398,10 @@ export default function Matches() {
   return (
     <main className="bg-utility-bg">
       {/* Desktop version */}
-      <div className="hidden min-h-screen flex-col lg:flex">
+      <div className="hidden h-screen flex-col lg:flex">
         <NavBar />
 
-        <div className="flex flex-grow">
+        <div className="flex min-h-0 flex-grow">
           <LeftSidebar />
 
           {matchesLoading ? (
@@ -414,7 +410,7 @@ export default function Matches() {
             </div>
           ) : (
             <section className="relative flex w-[20rem] flex-grow flex-col justify-center">
-              <LazyCardSwiper
+              <CardSwiper
                 userId={userId}
                 userProfiles={userProfiles}
                 setUserProfiles={setUserProfiles}

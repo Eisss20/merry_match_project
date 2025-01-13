@@ -10,60 +10,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 
-const ChatsSwiper = ({ lastChats, userId, chatRoomId }) => {
-  const router = useRouter();
-
-  return (
-    <Swiper
-      direction="vertical"
-      spaceBetween={5}
-      slidesPerView={3}
-      className="h-[17.5rem] w-full"
-    >
-      {lastChats.map((chat, index) => {
-        const { type: messageType, sender_id, content } = chat.lastMessage;
-        const isSenderUser = sender_id === userId;
-
-        const messageDisplay = (() => {
-          if (messageType.includes("text")) {
-            return isSenderUser ? `You: ${content}` : content;
-          }
-
-          if (messageType.includes("image")) {
-            return isSenderUser
-              ? "You sent a picture."
-              : `${chat.name} sent a picture.`;
-          }
-
-          return "Unknown message type.";
-        })();
-
-        return (
-          <SwiperSlide key={index}>
-            <div
-              className={`flex w-full cursor-pointer items-center gap-4 rounded-2xl border p-3 transition-colors duration-300 hover:bg-fourth-100 ${chatRoomId === chat.chat_room_id ? "border-second-500 bg-fourth-100" : "border-transparent"} `}
-              onClick={() => router.push(`/chat/${chat.chat_room_id}`)}
-            >
-              <div className="flex size-14 overflow-hidden rounded-full">
-                <img
-                  src={chat.image_profile}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              </div>
-
-              <div className="text-start font-semibold">
-                <p className="text-sm text-fourth-900">{chat.name}</p>
-                <p className="text-xs text-fourth-700">{messageDisplay}</p>
-              </div>
-            </div>
-          </SwiperSlide>
-        );
-      })}
-    </Swiper>
-  );
-};
-
 const MatchesSwiper = ({ matchesList }) => {
   const router = useRouter();
 
@@ -116,7 +62,7 @@ export default function LeftSidebar() {
   const [lastChats, setLastChats] = useState([]);
   const [matchesList, setMatchesList] = useState([]);
 
-  const { state, isAuthenticated } = useAuth();
+  const { state } = useAuth();
 
   const router = useRouter();
   const { id: chatRoomId } = router.query;
@@ -150,7 +96,7 @@ export default function LeftSidebar() {
   }, []);
 
   return (
-    <aside className="hidden min-w-[18.5rem] max-w-[18.5rem] border-r-2 border-fourth-300 bg-utility-primary lg:inline">
+    <aside className="hidden min-w-[18.5rem] max-w-[18.5rem] border-r-2 border-fourth-300 bg-utility-primary lg:flex lg:flex-col">
       <div className="px-4 py-7">
         <button
           type="button"
@@ -176,7 +122,7 @@ export default function LeftSidebar() {
 
       <div className="h-[2px] w-full bg-fourth-300"></div>
 
-      <div className="flex flex-col gap-10 px-4 py-7">
+      <div className="flex min-h-0 flex-grow flex-col gap-10 px-4 py-7">
         {/* Merry Match! carousel*/}
         <div className="flex flex-col gap-3">
           <p className="text-xl font-bold text-fourth-900">Merry Match!</p>
@@ -186,18 +132,56 @@ export default function LeftSidebar() {
         </div>
 
         {/* Chat with Merry Match */}
-        <div className="flex flex-col gap-3">
+        <div className="flex min-h-0 flex-grow flex-col gap-3">
           <p className="text-xl font-bold text-fourth-900">
             Chat with Merry Match
           </p>
 
           {/* Chat */}
-          <div className="flex flex-col gap-4">
-            <ChatsSwiper
-              lastChats={lastChats}
-              userId={userId}
-              chatRoomId={chatRoomId}
-            />
+          <div className="flex flex-col gap-2 overflow-y-auto py-2">
+            {lastChats.map((chat, index) => {
+              const {
+                type: messageType,
+                sender_id,
+                content,
+              } = chat.lastMessage;
+              const isSenderUser = sender_id === userId;
+
+              const messageDisplay = (() => {
+                if (messageType.includes("text")) {
+                  return isSenderUser ? `You: ${content}` : content;
+                }
+
+                if (messageType.includes("image")) {
+                  return isSenderUser
+                    ? "You sent a picture."
+                    : `${chat.name} sent a picture.`;
+                }
+
+                return "Unknown message type.";
+              })();
+
+              return (
+                <div
+                  key={index}
+                  className={`flex w-full cursor-pointer items-center gap-4 rounded-2xl border p-3 transition-colors duration-300 hover:bg-fourth-100 ${chatRoomId === chat.chat_room_id ? "border-second-500 bg-fourth-100" : "border-transparent"} `}
+                  onClick={() => router.push(`/chat/${chat.chat_room_id}`)}
+                >
+                  <div className="flex size-14 overflow-hidden rounded-full">
+                    <img
+                      src={chat.image_profile}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <div className="text-start font-semibold">
+                    <p className="text-sm text-fourth-900">{chat.name}</p>
+                    <p className="text-xs text-fourth-700">{messageDisplay}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
