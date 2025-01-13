@@ -19,6 +19,8 @@ import { useSocketConnection } from "@/contexts/socket/SocketConnectionContext";
 import { useNotifications } from "@/contexts/socket/NotificationContext";
 import { useChat } from "@/contexts/socket/ChatContext";
 
+import LeftSidebar from "./matches/LeftSidebar";
+
 function ContactIcon({ Icon }) {
   return (
     <button
@@ -37,6 +39,7 @@ export function NavBar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuNotifOpen, setMenuNotifOpen] = useState(false);
+  const [menuChatOpen, setMenuChatOpen] = useState(false);
 
   const router = useRouter();
 
@@ -49,7 +52,7 @@ export function NavBar() {
 
   // Disable scroll on mobile dropdown
   useEffect(() => {
-    if (menuOpen) {
+    if (menuOpen || menuNotifOpen || menuChatOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -58,7 +61,7 @@ export function NavBar() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [menuOpen]);
+  }, [menuOpen, menuNotifOpen, menuChatOpen]);
 
   // Notification
   // Notification socket context
@@ -95,6 +98,11 @@ export function NavBar() {
           <button
             type="button"
             className="flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
+            onClick={() => {
+              if (menuOpen) setMenuOpen(false);
+              if (menuNotifOpen) setMenuNotifOpen(false);
+              setMenuChatOpen(!menuChatOpen);
+            }}
           >
             <AiFillMessage className="size-4" />
           </button>
@@ -105,6 +113,7 @@ export function NavBar() {
               className="flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
               onClick={() => {
                 if (menuOpen) setMenuOpen(false);
+                if (menuChatOpen) setMenuChatOpen(false);
                 setMenuNotifOpen(!menuNotifOpen);
               }}
             >
@@ -117,6 +126,7 @@ export function NavBar() {
             className="text-fourth-700 transition-colors duration-300 hover:text-fourth-900"
             onClick={() => {
               if (menuNotifOpen) setMenuNotifOpen(false);
+              if (menuChatOpen) setMenuChatOpen(false);
               setMenuOpen(!menuOpen);
             }}
           >
@@ -329,7 +339,7 @@ export function NavBar() {
                     <div className="h-[1px] w-full bg-fourth-300"></div>
                     <li>
                       <Link
-                        href="#"
+                        href=""
                         onClick={(e) => {
                           e.preventDefault();
                           logout(socket, chatRoomId);
@@ -355,7 +365,7 @@ export function NavBar() {
             <ul className="mt-24 flex flex-col gap-3">
               <li>
                 <Link
-                  href="#"
+                  href=""
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center justify-center rounded-full bg-gradient-to-r from-[#742138] to-[#A878BF] py-3 font-semibold text-utility-primary transition-colors duration-200 hover:!text-fourth-300 focus:text-utility-primary active:!text-fourth-400"
                 >
@@ -383,7 +393,7 @@ export function NavBar() {
               <div className="h-[1px] w-full bg-fourth-300"></div>
               <li>
                 <Link
-                  href="#"
+                  href=""
                   onClick={(e) => {
                     setMenuOpen(false);
                     e.preventDefault();
@@ -423,13 +433,14 @@ export function NavBar() {
       {/* Mobile notification menu */}
       {menuNotifOpen && (
         <div className="fixed inset-0 z-40 mt-16 min-h-0 bg-utility-primary lg:hidden">
-          <div className="flex h-full min-h-0 w-full flex-col gap-3 overflow-y-scroll px-4 py-6">
+          <div className="flex h-full min-h-0 w-full flex-col gap-3 overflow-y-auto px-4 py-6">
             {notifications.length > 0 ? (
               notifications.map((notification, index) => {
                 return (
                   <div key={index} className="w-full">
                     <Link
                       href={`/chat/${notification.chat_room_id}`}
+                      onClick={() => setMenuNotifOpen(false)}
                       className={`group flex items-center rounded-lg p-2 font-medium text-fourth-700 transition-colors duration-200 hover:!bg-fourth-200 focus:bg-utility-primary focus:!text-fourth-700 active:!bg-fourth-200`}
                     >
                       <div className="flex w-full items-center justify-between gap-2">
@@ -513,6 +524,19 @@ export function NavBar() {
                 <p className="whitespace-nowrap">No notifications</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile chat menu */}
+      {menuChatOpen && (
+        <div className="fixed inset-0 z-40 mt-16 min-h-0 bg-utility-primary lg:hidden">
+          <div className="flex h-full min-h-0 w-full flex-col gap-3 overflow-y-auto">
+            <LeftSidebar
+              type={"mobile"}
+              menuChatOpen={menuChatOpen}
+              setMenuChatOpen={setMenuChatOpen}
+            />
           </div>
         </div>
       )}

@@ -57,8 +57,7 @@ export default function CardSwiperMobile({
                         className={`text-fourth-400 duration-300 ${activeIndex !== index && "text-opacity-0"}`}
                       >
                         {profile.age}
-                      </span>{" "}
-                      {profile.gender}
+                      </span>
                     </p>
 
                     {/* Location */}

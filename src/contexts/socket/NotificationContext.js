@@ -2,13 +2,46 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useSocketConnection } from "./SocketConnectionContext";
 import { useAuth } from "../AuthContext";
 
+import axios from "axios";
+
 const NotificationContext = createContext();
 
 export const NotificationProvider = ({ children }) => {
   const { socket, userId } = useSocketConnection();
-
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const [matchesList, setMatchesList] = useState([]);
+  const [lastChats, setLastChats] = useState([]);
+
+  const { state } = useAuth();
+
+  // Fetch notification on the first time on page
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchChatsData = async () => {
+      try {
+        const fetchUrls = {
+          matches: `/api/matches/chats/?userMasterId=${userId}&filter=matches`,
+          lastChats: `/api/matches/chats/?userMasterId=${userId}&filter=lastChats`,
+        };
+
+        const responses = await Promise.all(
+          Object.values(fetchUrls).map((url) => axios.get(url)),
+        );
+
+        const [matchesResponse, lastChatsResponse] = responses;
+
+        setMatchesList(matchesResponse.data);
+        setLastChats(lastChatsResponse.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchChatsData();
+  }, [userId]);
 
   useEffect(() => {
     if (!socket || !userId) return;
@@ -27,8 +60,31 @@ export const NotificationProvider = ({ children }) => {
       setUnreadCount(unread);
     });
 
+    // Listen for update events and refetch notifications
+    socket.on("updateMatches", async () => {
+      console.log("Matches notification updated");
+
+      const response = await axios.get(
+        `/api/matches/chats/?userMasterId=${state.user?.id}&filter=matches`,
+      );
+
+      setMatchesList(response.data);
+    });
+
+    socket.on("updateChats", async () => {
+      console.log("Chats notification updated");
+
+      const response = await axios.get(
+        `/api/matches/chats/?userMasterId=${state.user?.id}&filter=lastChats`,
+      );
+
+      setLastChats(response.data);
+    });
+
     return () => {
       socket.off("newNotifications");
+      socket.off("updateMatches");
+      socket.off("updateChats");
     };
   }, [socket, userId]);
 
@@ -61,6 +117,8 @@ export const NotificationProvider = ({ children }) => {
       value={{
         notifications,
         unreadCount,
+        matchesList,
+        lastChats,
         markNotifAsReadOnServer,
         markNotifAsReadOnClient,
       }}

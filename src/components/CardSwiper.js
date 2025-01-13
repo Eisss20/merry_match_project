@@ -70,12 +70,17 @@ function CardSwiper({
             <div className="relative mx-auto aspect-square w-full min-w-[10rem] max-w-[32.5rem] rounded-3xl 2xl:w-[60%] 2xl:max-w-full">
               {/* Text */}
               {!isMatchAnimation && (
-                <div className="absolute bottom-0 z-20 flex w-full items-center justify-between px-10 pb-14">
+                <div className="absolute bottom-0 z-20 flex w-full items-center justify-between px-10 pb-16">
                   <div className="flex items-center gap-4 text-3xl font-medium">
                     <p
                       className={`text-utility-primary duration-300 ${activeIndex !== index ? "pointer-events-none text-opacity-0" : ""}`}
                     >
-                      {profile.name} {profile.age} {profile.gender}
+                      {profile.name}{" "}
+                      <span
+                        className={`text-fourth-400 duration-300 ${activeIndex !== index && "text-opacity-0"}`}
+                      >
+                        {profile.age}
+                      </span>
                     </p>
                     <button
                       className={`flex aspect-square items-center justify-center rounded-full bg-utility-primary p-2 transition-colors duration-300 hover:bg-opacity-25 ${activeIndex !== index ? "bg-opacity-0" : "bg-opacity-20"}`}
