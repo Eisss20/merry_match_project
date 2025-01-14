@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const passwordQuery =
-      "SELECT user_id, password FROM users WHERE username = $1";
+      "SELECT user_id, password FROM users WHERE username = $1 OR email = $1";
     const passwordResult = await connectionPool.query(passwordQuery, [
       username,
     ]);
