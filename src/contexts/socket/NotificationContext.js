@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useSocketConnection } from "./SocketConnectionContext";
 import { useAuth } from "../AuthContext";
 
-import axios from "axios";
+import apiClient from "@/utils/jwtInterceptor";
 
 const NotificationContext = createContext();
 
@@ -28,7 +28,7 @@ export const NotificationProvider = ({ children }) => {
         };
 
         const responses = await Promise.all(
-          Object.values(fetchUrls).map((url) => axios.get(url)),
+          Object.values(fetchUrls).map((url) => apiClient.get(url)),
         );
 
         const [matchesResponse, lastChatsResponse] = responses;
@@ -63,7 +63,7 @@ export const NotificationProvider = ({ children }) => {
     socket.on("updateMatches", async () => {
       console.log("Matches notification updated");
 
-      const response = await axios.get(
+      const response = await apiClient.get(
         `/api/matches/chats/?userMasterId=${state.user?.id}&filter=matches`,
       );
 
@@ -71,9 +71,7 @@ export const NotificationProvider = ({ children }) => {
     });
 
     socket.on("updateChats", async () => {
-      console.log("Chats notification updated");
-
-      const response = await axios.get(
+      const response = await apiClient.get(
         `/api/matches/chats/?userMasterId=${state.user?.id}&filter=lastChats`,
       );
 

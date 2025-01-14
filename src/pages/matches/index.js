@@ -9,7 +9,6 @@ import CardSwiper from "@/components/CardSwiper";
 import LoadingMerry from "@/components/custom-loading/LoadingMerry";
 
 import apiClient from "@/utils/jwtInterceptor";
-import axios from "axios";
 
 import { useEffect, useState, useRef } from "react";
 import { Range } from "react-range";
@@ -315,7 +314,7 @@ export default function Matches() {
         matchesRemaining: prevData.matchesRemaining - 1,
       }));
 
-      const response = await axios.post("/api/matches/likes", {
+      const response = await apiClient.post("/api/matches/likes", {
         user_master: userId,
         user_other: otherUserId,
       });
@@ -371,7 +370,9 @@ export default function Matches() {
 
     const fetchMatchData = async () => {
       try {
-        const response = await axios.get(`/api/matches/merryLimit/${userId}`);
+        const response = await apiClient.get(
+          `/api/matches/merryLimit/${userId}`,
+        );
 
         setMerryLimitData({
           matchesRemaining: response.data.matches_remaining,
@@ -379,7 +380,7 @@ export default function Matches() {
           subscriptionId: response.data.subscription_id,
         });
       } catch (error) {
-        console.error("Error fetching match data:", error);
+        console.log("Error fetching match data:", error);
       }
     };
 
@@ -419,7 +420,7 @@ export default function Matches() {
 
         setUserProfiles(profileResponse.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log("Error fetching data:", error);
       } finally {
         setMatchesLoading(false);
       }

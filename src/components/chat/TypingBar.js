@@ -66,7 +66,6 @@ export default function TypingBar() {
       );
 
       const validImageUrls = uploadedImageUrls.filter((url) => url !== null);
-      console.log("Valid Image URLs:", validImageUrls);
 
       messageType.push("image");
       imageUrls.push(...validImageUrls);

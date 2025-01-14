@@ -242,23 +242,25 @@ function MerryPackageList() {
           )}
 
           {/* ✅ Pagination Controls */}
-          <div className="mt-8 flex justify-center">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              (number) => (
-                <button
-                  key={number}
-                  onClick={() => handlePageChange(number)}
-                  className={`mx-1 rounded-md px-3 py-1 ${
-                    number === currentPage
-                      ? "bg-primary-500 text-white"
-                      : "bg-gray-200"
-                  }`}
-                >
-                  {number}
-                </button>
-              ),
-            )}
-          </div>
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (number) => (
+                  <button
+                    key={number}
+                    onClick={() => handlePageChange(number)}
+                    className={`mx-1 rounded-md px-3 py-1 ${
+                      number === currentPage
+                        ? "bg-primary-500 text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                ),
+              )}
+            </div>
+          )}
         </div>
       </main>
 

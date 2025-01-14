@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import axios from "axios";
+import apiClient from "@/utils/jwtInterceptor";
 
 import { useSocketConnection } from "@/contexts/socket/SocketConnectionContext";
 import { useNotifications } from "@/contexts/socket/NotificationContext";
@@ -101,7 +101,7 @@ export function NavBar() {
 
     const fetchMatchData = async () => {
       try {
-        const response = await axios.get(
+        const response = await apiClient.get(
           `/api/matches/merryLimit/${state.user?.id}`,
         );
 

@@ -119,101 +119,106 @@ export default function MerryPackage() {
 
   return (
     <>
-      <NavBar />
-      <section className="bg-utility-primary p-5">
-        <article className="flex flex-col gap-2 bg-utility-primary p-4 pb-5 pt-5 lg:pb-14 lg:pl-52 lg:pt-10">
-          <div>
-            <h3 className="font-medium text-third-700">MERRY MEMBERSHIP</h3>
+      <main className="flex min-h-screen flex-col">
+        <NavBar />
+
+        <section className="flex-grow flex items-center justify-center flex-col bg-utility-primary p-5">
+          <article className="container mx-auto flex flex-col gap-2 bg-utility-primary p-4 pb-5 pt-5 lg:max-w-[1250px] lg:pb-14 lg:pt-10">
+            <div>
+              <h3 className="font-medium text-third-700">MERRY MEMBERSHIP</h3>
+            </div>
+            <div className="text-4xl font-bold text-second-500">
+              <h1 className="lg:hidden">
+                Join us and start <br /> matching
+              </h1>
+              <h1 className="hidden font-extrabold lg:block">
+                Be part of Merry Membership <br /> to make more Merry!
+              </h1>
+            </div>
+          </article>
+
+          <div className="container mx-auto w-full items-center justify-center lg:flex lg:max-w-[1250px] lg:flex-row">
+            <figure className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+              {packages.map((pkg, index) => (
+                <div
+                  className="lg:flex lg:flex-row lg:justify-around"
+                  key={pkg.id} // ใช้ id ผสมกับ index เพื่อให้ key unique
+                >
+                  <article className="flex flex-col gap-3 rounded-3xl border-2 bg-utility-primary pb-6 pl-10 pr-6 pt-6 shadow-md lg:h-[26rem] lg:w-[100%] lg:pl-10 lg:pr-8">
+                    {/* icon package */}
+                    <div className="border-1 flex h-16 w-16 flex-row items-center justify-center rounded-2xl bg-gray-100">
+                      {/* แสดงรูปภาพ icon */}
+                      <img
+                        src={pkg.icon_url}
+                        alt={pkg.title}
+                        className="h-12 w-12 object-cover"
+                      />
+                    </div>
+                    {/* Title package */}
+                    <div>
+                      <h1 className="mt-2 text-3xl font-bold">{pkg.title}</h1>
+                    </div>
+                    <div className="flex gap-2">
+                      {/* Currency data */}
+                      <h2 className="text-2xl text-black">
+                        {pkg.currency_code}
+                      </h2>
+                      <h2 className="text-2xl text-black">{pkg.price}</h2>
+                      <h2 className="text-2xl text-gray-400">/Month</h2>
+                    </div>
+                    {/* Cost package */}
+                    <div>
+                      <h1>
+                        {pkg.cost} <span>{pkg.duration}</span>
+                      </h1>
+                    </div>
+                    {/* Details */}
+                    <div className="flex-grow">
+                      {pkg.details &&
+                      Array.isArray(pkg.details) &&
+                      pkg.details.length > 0 ? (
+                        pkg.details.map((detail, index) => (
+                          <div
+                            className="mt-1 flex items-center gap-2"
+                            key={index}
+                          >
+                            <IoIosCheckmarkCircle className="mr-2 text-pink-500" />
+                            <p className="text-gray-700">{detail}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-gray-400">No details available</p>
+                      )}
+                    </div>
+
+                    <hr className="mb-3 mt-3" />
+
+                    {/* Button */}
+                    <CustomButton
+                      className={`flex flex-shrink-0 font-bold shadow-sm ${
+                        pkg.is_same_package_active ? "cursor-not-allowed" : ""
+                      }`}
+                      buttonType="secondary"
+                      onClick={() => {
+                        if (!pkg.is_same_package_active) {
+                          handleChoosePackage(pkg); // เรียกฟังก์ชันเฉพาะเมื่อปุ่มไม่ถูกปิดการใช้งาน
+                        }
+                      }}
+                      disabled={pkg.is_same_package_active} // ปิดการใช้งานถ้า is_same_package_active เป็น true
+                    >
+                      {pkg.is_same_package_active
+                        ? "Purchased"
+                        : "Choose Package"}
+                    </CustomButton>
+                  </article>
+                </div>
+              ))}
+            </figure>
           </div>
-          <div className="text-4xl font-bold text-second-500">
-            <h1 className="lg:hidden">
-              Join us and start <br /> matching
-            </h1>
-            <h1 className="hidden font-extrabold lg:block">
-              Be part of Merry Membership <br /> to make more Merry!
-            </h1>
-          </div>
-        </article>
+        </section>
 
-        <div className="items-center justify-center lg:flex lg:flex-row">
-          <figure className="container grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-6 lg:p-20">
-            {packages.map((pkg, index) => (
-              <div
-                className="lg:flex lg:flex-row lg:justify-around"
-                key={pkg.id} // ใช้ id ผสมกับ index เพื่อให้ key unique
-              >
-                <article className="flex flex-col gap-3 rounded-3xl border-2 bg-utility-primary pb-6 pl-10 pr-6 pt-6 shadow-md lg:h-[26rem] lg:w-[100%] lg:pl-10 lg:pr-8">
-                  {/* icon package */}
-                  <div className="border-1 flex h-16 w-16 flex-row items-center justify-center rounded-2xl bg-gray-100">
-                    {/* แสดงรูปภาพ icon */}
-                    <img
-                      src={pkg.icon_url}
-                      alt={pkg.title}
-                      className="h-12 w-12 object-cover"
-                    />
-                  </div>
-                  {/* Title package */}
-                  <div>
-                    <h1 className="mt-2 text-3xl font-bold">{pkg.title}</h1>
-                  </div>
-                  <div className="flex gap-2">
-                    {/* Currency data */}
-                    <h2 className="text-2xl text-black">{pkg.currency_code}</h2>
-                    <h2 className="text-2xl text-black">{pkg.price}</h2>
-                    <h2 className="text-2xl text-gray-400">/Month</h2>
-                  </div>
-                  {/* Cost package */}
-                  <div>
-                    <h1>
-                      {pkg.cost} <span>{pkg.duration}</span>
-                    </h1>
-                  </div>
-                  {/* Details */}
-                  <div className="flex-grow">
-                    {pkg.details &&
-                    Array.isArray(pkg.details) &&
-                    pkg.details.length > 0 ? (
-                      pkg.details.map((detail, index) => (
-                        <div
-                          className="mt-1 flex items-center gap-2"
-                          key={index}
-                        >
-                          <IoIosCheckmarkCircle className="mr-2 text-pink-500" />
-                          <p className="text-gray-700">{detail}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-400">No details available</p>
-                    )}
-                  </div>
-
-                  <hr className="mb-3 mt-3" />
-
-                  {/* Button */}
-                  <CustomButton
-                    className={`flex flex-shrink-0 font-bold shadow-sm ${
-                      pkg.is_same_package_active ? "cursor-not-allowed" : ""
-                    }`}
-                    buttonType="secondary"
-                    onClick={() => {
-                      if (!pkg.is_same_package_active) {
-                        handleChoosePackage(pkg); // เรียกฟังก์ชันเฉพาะเมื่อปุ่มไม่ถูกปิดการใช้งาน
-                      }
-                    }}
-                    disabled={pkg.is_same_package_active} // ปิดการใช้งานถ้า is_same_package_active เป็น true
-                  >
-                    {pkg.is_same_package_active
-                      ? "Purchased"
-                      : "Choose Package"}
-                  </CustomButton>
-                </article>
-              </div>
-            ))}
-          </figure>
-        </div>
-      </section>
-
-      <Footer />
+        <Footer />
+      </main>
 
       {/* Modal ยืนยันการซื้อ */}
       <DeleteConfirmationModal2

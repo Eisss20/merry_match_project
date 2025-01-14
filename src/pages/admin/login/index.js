@@ -76,7 +76,7 @@ export default function Login() {
             <h2 className="text-third-700">LOGIN</h2>
             <h1 className="text-3xl font-extrabold leading-tight text-second-500 lg:text-5xl">
               Welcome <br className="hidden lg:inline xl:hidden" /> back to
-              <br className="inline sm:hidden lg:inline" /> Merry Match
+              <br className="inline sm:hidden lg:inline" /> Admin system
             </h1>
           </header>
 

@@ -84,9 +84,9 @@ export default function Complaint() {
   }
 
   return (
-    <>
+    <main className="flex flex-col min-h-screen">
       <NavBar />
-      <div className="min-h-screen gap-32 bg-utility-primary pt-10 lg:flex lg:flex-row lg:items-center lg:justify-center lg:pb-48">
+      <div className="gap-32 flex-grow bg-utility-primary pt-10 lg:flex lg:flex-row lg:items-center lg:justify-center lg:pb-48">
         <figure className="flex items-center justify-center lg:order-2 lg:px-12">
           <CardImage className="h-[25rem] w-[15rem] lg:h-[40rem] lg:w-[25rem]">
             <img
@@ -97,7 +97,7 @@ export default function Complaint() {
           </CardImage>
         </figure>
 
-        <div className="w-full max-w-md rounded-lg bg-white p-6 lg:order-1">
+        <div className="w-full max-w-md mx-auto lg:mx-0 rounded-lg bg-white p-6 lg:order-1">
           {/* Header */}
           <h3 className="mb-1 text-sm font-medium uppercase text-third-700">
             Complaint
@@ -161,6 +161,6 @@ export default function Complaint() {
         message={modalMessage}
         closeModal={() => modalRef.current?.close()}
       />
-    </>
+    </main>
   );
 }

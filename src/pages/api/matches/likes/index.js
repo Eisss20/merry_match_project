@@ -1,11 +1,24 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "@/utils/adminFirebase";
 import connectionPool from "@/utils/db";
+import { protectUser } from "@/middleware/protectUser";
+
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
-      console.log("req.body:", req.body);
+      await runMiddleware(req, res, protectUser);
+
       // ดึง user_master, user_other จาก Body
       const { user_master, user_other } = req.body;
 
