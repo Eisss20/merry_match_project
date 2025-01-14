@@ -121,7 +121,14 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      backgroundImage: {
+        "bg-card":
+          "radial-gradient(circle at 3.13% 0%, #742138 23.43%, #A878BF 100%)",
+      },
     },
   },
   plugins: [daisyui, require("tailwindcss-animate")],
+  daisyui: {
+    themes: ["light"],
+  },
 };

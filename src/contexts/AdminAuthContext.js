@@ -19,10 +19,11 @@ function AdminAuthProvider({ children }) {
 
   useEffect(() => {
     // ตรวจสอบ token ใน LocalStorage
-    const token = localStorage.getItem("token");
-    if (token) {
+    const adminToken = localStorage.getItem("adminToken");
+
+    if (adminToken) {
       try {
-        const userData = jwtDecode(token);
+        const userData = jwtDecode(adminToken);
         const now = Date.now() / 1000; // เวลาในหน่วยวินาที
 
         if (userData.exp > now) {
@@ -31,12 +32,12 @@ function AdminAuthProvider({ children }) {
             loading: false,
             isAuthenticated: true,
             admin: userData,
-            token,
+            token: adminToken,
             error: null,
           });
         } else {
           // หากโทเค็นหมดอายุ
-          localStorage.removeItem("token");
+          localStorage.removeItem("adminToken");
           setState({
             loading: false,
             isAuthenticated: false,
@@ -47,7 +48,7 @@ function AdminAuthProvider({ children }) {
         }
       } catch (error) {
         console.error("Token decoding error:", error);
-        localStorage.removeItem("token");
+        localStorage.removeItem("adminToken");
         setState({
           loading: false,
           isAuthenticated: false,
@@ -69,38 +70,39 @@ function AdminAuthProvider({ children }) {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const login = async (data) => {
+    setState((prevState) => ({ ...prevState, loading: true }));
     try {
       const result = await axios.post(
         `${apiBaseUrl}/api/auth/admin/login`,
         data,
       );
-      const token = result.data.token; // รับ Token back จาก api/auth/admin/login
-      localStorage.setItem("token", token); // บันทึกโทเค็นใน Local Storage
+      const adminToken = result.data.adminToken; // รับ Token back จาก api/auth/admin/login
+      localStorage.setItem("adminToken", adminToken); // บันทึกโทเค็นใน Local Storage
 
-      const userDataFromToken = jwtDecode(token);
+      const userDataFromToken = jwtDecode(adminToken);
 
       setState({
         loading: false,
         success: result.data.message,
         admin: userDataFromToken,
         isAuthenticated: true,
-        token,
+        token: adminToken,
         error: null,
       });
       router.push("/admin/merry-package-list");
     } catch (error) {
-      console.error("Login error:", error);
+      const apiError = error.response?.data?.message;
       setState((prevState) => ({
         ...prevState,
         loading: false,
-        error: error.response?.data?.message || "Login failed",
+        error: typeof apiError === "object" ? apiError : { general: apiError },
       }));
     }
   };
 
   // เพิ่มฟังก์ชัน logout
   const logout = () => {
-    localStorage.removeItem("token"); // ลบ token ออกจาก LocalStorage
+    localStorage.removeItem("adminToken"); // ลบ token ออกจาก LocalStorage
     setState({
       loading: false,
       success: null,

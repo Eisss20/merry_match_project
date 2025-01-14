@@ -6,6 +6,31 @@
 body {
   font-family: "Nunito", sans-serif;
 }
+html {
+  scroll-behavior: smooth;
+}
+
+/* Chat scrollbar */
+.scrollable-element {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease-in-out;
+}
+
+.scrollable-element:hover,
+.scrollable-element:focus-within {
+  scrollbar-color: #2a2e3f transparent;
+}
+
+/* Hide scrollbar */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Remove scrollbar from daisy modal on matching-page */
+html.matches-page {
+  scrollbar-gutter: auto !important;
+}
 
 @layer base {
   :root {

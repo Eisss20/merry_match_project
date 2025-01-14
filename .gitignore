@@ -1,7 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# firebase service account key
+/src/utils/serviceAccountKey.json
+
 # dependencies
-/.env.local
 /node_modules
 /.pnp
 .pnp.*

@@ -12,6 +12,7 @@ function CustomInput({
   label = "Label",
   placeholder,
   className = "",
+  value,
   error = null,
 }) {
   let customStyle =
@@ -31,6 +32,7 @@ function CustomInput({
           type={type}
           placeholder={placeholder}
           className={customStyle}
+          value={value}
           onChange={onChange}
         />
         {error && <MdError className="absolute right-3 text-utility-third" />}
@@ -44,11 +46,10 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const { state, login } = useAdminAuth();
+  const { state, error, login } = useAdminAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Login Attempt with:", { username, password });
     await login({ username, password });
   };
 
@@ -75,7 +76,7 @@ export default function Login() {
             <h2 className="text-third-700">LOGIN</h2>
             <h1 className="text-3xl font-extrabold leading-tight text-second-500 lg:text-5xl">
               Welcome <br className="hidden lg:inline xl:hidden" /> back to
-              <br className="inline sm:hidden lg:inline" /> Merry Match
+              <br className="inline sm:hidden lg:inline" /> Admin system
             </h1>
           </header>
 
@@ -89,8 +90,9 @@ export default function Login() {
               label="Username or Email"
               placeholder="Enter Username or Email"
               className="w-full"
+              value={username}
               onChange={(e) => setUsername(e.target.value)}
-              //error={state.error?.username}
+              error={error?.username || error?.general} // แสดงข้อความ error ของ username
             />
 
             <CustomInput
@@ -98,8 +100,9 @@ export default function Login() {
               label="Password"
               placeholder="Enter password"
               className="w-full"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
-              //error={state.error?.password}
+              error={error?.password || error?.general} // แสดงข้อความ error ของ password
             />
 
             <CustomButton type="submit" buttonType="primary" className="w-full">
@@ -108,10 +111,10 @@ export default function Login() {
           </form>
 
           <div className="flex items-center gap-3">
-            <p className="text-utility-second">Don't have an account?</p>
+            <p className="hidden text-utility-second">Don't have an account?</p>
             <Link
               href="/register"
-              className="font-bold text-primary-500 transition-colors duration-300 hover:text-primary-600"
+              className="hidden font-bold text-primary-500 transition-colors duration-300 hover:text-primary-600"
             >
               Register
             </Link>

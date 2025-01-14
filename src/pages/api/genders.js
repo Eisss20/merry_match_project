@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
       const results = await connectionPool.query(
-        "SELECT gender_name FROM gender",
+        "SELECT gender_id, gender_name FROM gender",
       );
 
       return res.status(200).json(results.rows);

@@ -7,8 +7,9 @@ import { AdminSideBar } from "@/components/admin/AdminSideBar";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
+import { SubmitConfirmationModal } from "@/components/admin/DeleteConfirmationModal";
 import { jwtDecode } from "jwt-decode";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
 function MerryPackageList() {
   const [packages, setPackages] = useState([]);
@@ -16,26 +17,26 @@ function MerryPackageList() {
   const [searchQuery, setSearchQuery] = useState(""); // for Search
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [detailToDelete, setDetailToDelete] = useState(null); // state สำหรับ delete โดยเก็บค่า id ของแถวนั้นๆ
-  const [loading, setLoading] = useState(true); // State for loading
+  const [authLoading, setAuthLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  const { logout } = useAdminAuth(); // ดึง logout จาก Context
+
+  // ✅ State สำหรับ Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // เปลี่ยนเป็น 15 ได้ตามต้องการ
 
   // ฟังก์ชันดึงข้อมูล package
   const fetchPackages = async () => {
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      setLoading(true);
       const res = await axios.get(`${apiBaseUrl}/api/admin/packages`);
       setPackages(res.data); // เก็บข้อมูลใน state
     } catch (error) {
       console.error("Error fetching packages:", error);
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
-  };
-
-  // Logout function in case token is invalid
-  const logout = () => {
-    localStorage.removeItem("token");
-    router.push("/admin/login");
   };
 
   // ฟังก์ชันสำหรับจัดการการเปลี่ยนแปลงใน Search
@@ -48,23 +49,20 @@ function MerryPackageList() {
     (pkg) => pkg.name_package.toLowerCase().includes(searchQuery.toLowerCase()), // กรองชื่อแพ็กเกจตาม searchQuery
   );
 
-  // ฟังก์ชันสำหรับลบ package  old
-  const deletePackage = async (id) => {
-    if (window.confirm("Are you sure you want to delete this package?")) {
-      try {
-        // ลบข้อมูลจาก database ผ่าน API
-        await axios.delete("/api/admin/packages", { data: { id } });
+  // ✅ ตัดข้อมูลตามหน้าปัจจุบัน
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentPackages = filteredPackages.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
 
-        // อัปเดต state ให้ลบรายการที่ถูกลบออก
-        //setPackages(packages.filter((pkg) => pkg.id_package !== id));
-        fetchPackages();
+  // ✅ คำนวณจำนวนหน้าทั้งหมด
+  const totalPages = Math.ceil(filteredPackages.length / itemsPerPage);
 
-        alert("Package deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting package:", error);
-        alert("Failed to delete package.");
-      }
-    }
+  // ✅ เปลี่ยนหน้าปัจจุบัน
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   // deleteDetail Step2:
@@ -108,7 +106,7 @@ function MerryPackageList() {
 
   // Verify authentication
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("adminToken");
 
     if (!token) {
       router.push("/admin/login");
@@ -116,10 +114,11 @@ function MerryPackageList() {
       try {
         const decodedToken = jwtDecode(token);
         const now = Date.now() / 1000;
-
         if (decodedToken.exp < now) {
+          alert("Session expired. Please login again.");
           logout(); // Token expired, redirect to login
         } else {
+          setAuthLoading(false);
           fetchPackages(); // Fetch package data
         }
       } catch (error) {
@@ -129,13 +128,17 @@ function MerryPackageList() {
     }
   }, [router]);
 
+  if (authLoading) {
+    return <div></div>; // แสดง Loading Spinner หรือข้อความขณะกำลังตรวจสอบ
+  }
+
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
       <AdminSideBar logout={logout} />
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 bg-fourth-100">
         {/* Header */}
 
         <AdminHeader
@@ -152,90 +155,122 @@ function MerryPackageList() {
         />
 
         {/* Table */}
-        <div className="overflow-x-auto px-12 py-4">
-          <table className="min-w-full rounded-lg bg-white shadow-md">
-            <thead className="bg-fourth-400">
-              <tr>
-                <th className="rounded-tl-lg px-6 py-3 text-center font-medium text-gray-600"></th>
-                <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800"></th>
-                <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                  Icon
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                  Package Name
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                  Merry Limit
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                  Created Date
-                </th>
-                <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
-                  Updated Date
-                </th>
-                <th className="rounded-tr-lg px-6 py-3 text-center font-medium text-gray-600"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPackages.map((pkg, index) => (
-                <tr
-                  key={pkg.package_id}
-                  className="border-t text-center align-middle hover:bg-gray-50"
-                >
-                  <td className="px-6 py-4 align-middle">
-                    <span className="cursor-move">⋮⋮</span>
-                  </td>
-                  <td className="px-6 py-4 align-middle">{index + 1}</td>
-                  <td className="px-6 py-4 align-middle">
-                    {pkg.icon_url ? (
-                      <img
-                        src={pkg.icon_url}
-                        alt="Package Icon"
-                        className="mx-auto h-8 w-8 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-500">No Image</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 align-middle">{pkg.name_package}</td>
-                  <td className="px-6 py-4 align-middle">{pkg.limit_match}</td>
-                  <td className="px-6 py-4 align-middle">
-                    {new Date(pkg.created_date).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 align-middle">
-                    {pkg.updated_date
-                      ? new Date(pkg.updated_date).toLocaleString()
-                      : "Not updated"}
-                  </td>
-                  <td className="px-6 py-4 align-middle">
-                    <div className="flex items-center justify-center gap-4">
-                      <FaTrashAlt
-                        className="cursor-pointer text-2xl text-primary-300"
-                        onClick={() => confirmDelete(pkg.package_id)}
-                      />
-                      <FaEdit
-                        className="cursor-pointer text-2xl text-primary-300"
-                        onClick={() =>
-                          router.push(
-                            `/admin/merry-package-list/${pkg.package_id}`,
-                          )
-                        }
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-12 overflow-x-auto px-16">
+          {dataLoading ? (
+            <div></div>
+          ) : (
+            <div className="min-h-[700px] overflow-auto">
+              <table className="min-w-full rounded-2xl bg-white shadow-md">
+                <thead className="bg-fourth-400">
+                  <tr>
+                    <th className="rounded-tl-2xl px-6 py-3 text-center text-gray-600"></th>
+                    <th className="px-6 py-3 text-center text-sm leading-5 text-fourth-800"></th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Icon
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Package Name
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Merry Limit
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Created Date
+                    </th>
+                    <th className="px-6 py-3 text-center text-sm font-medium leading-5 text-fourth-800">
+                      Updated Date
+                    </th>
+                    <th className="rounded-tr-2xl px-6 py-3 text-center text-gray-600"></th>
+                  </tr>
+                </thead>
+
+                {/* ของเก่า {filteredPackages.map((pkg, index) => ( */}
+                <tbody>
+                  {currentPackages.map((pkg, index) => (
+                    <tr
+                      key={pkg.package_id}
+                      className="border-t text-center align-middle hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-4 align-middle">
+                        <span className="cursor-move">⋮⋮</span>
+                      </td>
+                      <td className="px-6 py-4 align-middle">{index + 1}</td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.icon_url ? (
+                          <img
+                            src={pkg.icon_url}
+                            alt="Package Icon"
+                            className="mx-auto h-8 w-8 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="text-gray-500">No Image</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.name_package}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.limit_match}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.created_date}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        {pkg.updated_date ? pkg.updated_date : "Not updated"}
+                      </td>
+                      <td className="px-6 py-4 align-middle">
+                        <div className="flex items-center justify-center gap-4">
+                          <FaTrashAlt
+                            className="cursor-pointer text-2xl text-primary-300"
+                            onClick={() => confirmDelete(pkg.package_id)}
+                          />
+                          <FaEdit
+                            className="cursor-pointer text-2xl text-primary-300"
+                            onClick={() =>
+                              router.push(
+                                `/admin/merry-package-list/${pkg.package_id}`,
+                              )
+                            }
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* ✅ Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (number) => (
+                  <button
+                    key={number}
+                    onClick={() => handlePageChange(number)}
+                    className={`mx-1 rounded-md px-3 py-1 ${
+                      number === currentPage
+                        ? "bg-primary-500 text-white"
+                        : "bg-gray-200"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                ),
+              )}
+            </div>
+          )}
         </div>
       </main>
 
       {/* Delete Confirm Modal */}
-      <DeleteConfirmationModal
+      <SubmitConfirmationModal
         isOpen={isModalOpen} // isModalOpen = true เปิดใช้งาน
         onClose={closeModal} // deleteDetail Step3.2: เรียกใช้ function closeModal เพื่อยกเลิก
         onConfirm={handleDelete} // ลบรายการโดยกดยืนยัน deleteDetail Step5: เรียกใข้ function: handleDelete
-        message="Are you sure you want to delete this detail?"
+        title="Delete Confirmation"
+        message="Do you sure to delete this Package?"
         confirmLabel="Yes, I want to delete"
         cancelLabel="No, I don't want"
       />

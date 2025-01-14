@@ -35,14 +35,16 @@ export default async function handler(req, res) {
       },
       process.env.SECRET_KEY,
       {
-        expiresIn: "15m", //900000
+        expiresIn: "60000m",
       },
     );
 
     // เพิ่มการส่ง role กลับไป
     //return res.status(200).json({ message: "Login successful", role: user.role });
 
-    return res.status(200).json({ message: "Login successful", token });
+    return res
+      .status(200)
+      .json({ message: "Login successful", adminToken: token });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });

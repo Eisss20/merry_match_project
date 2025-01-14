@@ -32,6 +32,27 @@ const cloudinaryUpload = (fileBuffer) => {
   });
 };
 
+// ฟังก์ชันฟอร์แมตวันที่และเวลา
+const formatToThailandTime = (utcDate) => {
+  if (!utcDate) return "Invalid Date";
+
+  const date = new Date(utcDate); // แปลงเป็น Date object
+  const formattedDate = date.toLocaleString("en-GB", {
+    timeZone: "Asia/Bangkok",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true, // ใช้ AM/PM
+  });
+
+  // เอา `,` ออกและปรับ AM/PM เป็นตัวใหญ่
+  return formattedDate.replace(",", "").replace("am", "AM").replace("pm", "PM");
+};
+
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 export default async function handle(req, res) {
   if (req.method === "POST") {
     // ใช้ multerUpload จัดการอัปโหลดไฟล์จาก FormData
@@ -90,9 +111,10 @@ export default async function handle(req, res) {
           iconUrl = uploadResult.url; // เก็บเฉพาะ URL ของรูปภาพ
         }
 
+        const currency_id = "11"; //THB
         const query = `
-            INSERT INTO packages (name_package, description, limit_match, price, icon_url, created_date, updated_date, created_by)
-            VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), $6)
+            INSERT INTO packages (name_package, description, limit_match, price, icon_url, created_date, updated_date, created_by, currency_id)
+            VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), $6, $7) RETURNING package_id  
           `;
         const values = [
           package_name,
@@ -101,9 +123,30 @@ export default async function handle(req, res) {
           numericPrice,
           iconUrl,
           adminId, // ใช้ adminId จาก token
+          currency_id,
         ];
 
-        await connectionPool.query(query, values);
+        const result = await connectionPool.query(query, values);
+        const packageId = result.rows[0].package_id;
+
+        // เพิ่ม Package ใน Stripe
+        const product = await stripe.products.create({
+          name: package_name,
+          description: `Limit: ${merry_limit}, Price: ${numericPrice}`,
+          images: iconUrl ? [iconUrl] : [],
+        });
+
+        const stripePrice = await stripe.prices.create({
+          product: product.id,
+          unit_amount: numericPrice * 100, // ราคาในหน่วย cents
+          currency: "thb",
+        });
+
+        // บันทึก price_id ของ Stripe ลงใน Database
+        await connectionPool.query(
+          `UPDATE packages SET stripe_price_id = $1 WHERE package_id = $2`,
+          [stripePrice.id, packageId],
+        );
 
         return res.status(201).json({ message: "Package added successfully!" });
       } catch (error) {
@@ -115,9 +158,33 @@ export default async function handle(req, res) {
   } else if (req.method === "GET") {
     // ดึงข้อมูลแพ็กเกจทั้งหมด
     try {
-      const query = `SELECT * FROM packages ORDER BY created_date DESC`;
+      const query = `
+      SELECT 
+        package_id, 
+        name_package, 
+        description, 
+        limit_match, 
+        price, 
+        icon_url, 
+        created_date,
+        updated_date,
+        created_by, 
+        currency_id 
+      FROM packages 
+      ORDER BY created_date DESC
+    `;
       const { rows } = await connectionPool.query(query);
-      return res.status(200).json(rows);
+
+      // ฟอร์แมตวันที่สำหรับทุกแถว
+      const formattedRows = rows.map((row) => ({
+        ...row,
+        created_date: formatToThailandTime(row.created_date),
+        updated_date: row.updated_date
+          ? formatToThailandTime(row.updated_date)
+          : "Not updated",
+      }));
+
+      return res.status(200).json(formattedRows);
     } catch (error) {
       console.error("Database Error: ", error.message);
       return res.status(500).json({ error: "Failed to fetch packages." });

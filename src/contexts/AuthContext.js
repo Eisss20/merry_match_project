@@ -107,23 +107,51 @@ function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = (socket, chatRoomId) => {
+    if (socket) {
+      chatRoomId && socket.emit("leaveRoom", chatRoomId);
+
+      socket.disconnect();
+    }
+
     localStorage.removeItem("token");
 
-    setState({
-      ...state,
+    setState((prevState) => ({
+      ...prevState,
       success: "Logout successful.",
       error: null,
       user: null,
-    });
+    }));
 
     setIsAuthenticated(false);
     router.push("/");
   };
 
+  const deleteuser = async (id) => {
+    try {
+      localStorage.removeItem("token");
+      setState({
+        ...state,
+        success: "Delete account successful.",
+        error: null,
+        user: null,
+      });
+
+      await axios.delete(`${apiBaseUrl}/api/users/profile/${id}`);
+
+      setIsAuthenticated(false);
+      router.push("/");
+    } catch (error) {
+      console.log(
+        "Delete account failed:",
+        error.response?.data || error.message,
+      );
+    }
+  };
+
   return (
     <AuthContext.Provider
-      value={{ state, login, logout, register, isAuthenticated }}
+      value={{ state, login, logout, register, deleteuser, isAuthenticated }}
     >
       {children}
     </AuthContext.Provider>
