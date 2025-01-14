@@ -942,7 +942,7 @@ function RegisterPage() {
 
                 <div className="container">
                   <div>
-                    {step === 3 && (
+                    {step === 3 && !isLoading && (
                       <div className="grid grid-cols-1 gap-6 text-2xl sm:grid-cols-2 lg:flex">
                         <ProfilePicturesForm
                           avatar={avatar}
