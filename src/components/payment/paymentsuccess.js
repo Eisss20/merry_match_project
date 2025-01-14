@@ -49,7 +49,7 @@ function PaymentSuccess({ name_package, price, description }) {
           console.warn("Response is empty or invalid:", response);
         }
       } catch (error) {
-        console.error("Error fetching subscription details:", error);
+        console.log("Error fetching subscription details:", error);
       } finally {
         setDatalLoading(false);
       }

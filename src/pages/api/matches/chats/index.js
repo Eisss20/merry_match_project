@@ -1,5 +1,17 @@
 import { db, adminSdk } from "@/utils/adminFirebase";
 import connectionPool from "@/utils/db";
+import { protectUser } from "@/middleware/protectUser";
+
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -7,6 +19,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    await runMiddleware(req, res, protectUser);
+
     const { userMasterId, filter } = req.query;
 
     if (!filter) {

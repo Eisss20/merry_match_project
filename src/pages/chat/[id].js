@@ -1,7 +1,5 @@
 import { IoIosArrowBack } from "react-icons/io";
 
-import { io } from "socket.io-client";
-import apiClient from "@/utils/jwtInterceptor";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 

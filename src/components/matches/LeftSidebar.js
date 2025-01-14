@@ -1,11 +1,7 @@
 import { GoHeartFill } from "react-icons/go";
 import { FiSearch } from "react-icons/fi";
 
-import axios from "axios";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-
-import { useAuth } from "@/contexts/AuthContext";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";

@@ -1,8 +1,22 @@
 import connectionPool from "@/utils/db";
+import { protectUser } from "@/middleware/protectUser";
+
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
+      await runMiddleware(req, res, protectUser);
+
       const { id: userId } = req.query;
 
       const query = `

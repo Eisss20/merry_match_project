@@ -301,19 +301,23 @@ function ComplaintList() {
               Prev
             </button>
             */}
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => handlePageChange(i + 1)}
-                className={`rounded-md px-3 py-1 ${
-                  currentPage === i + 1
-                    ? "bg-primary-500 text-white"
-                    : "bg-gray-200 hover:bg-gray-300"
-                } rounded`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handlePageChange(i + 1)}
+                    className={`rounded-md px-3 py-1 ${
+                      currentPage === i + 1
+                        ? "bg-primary-500 text-white"
+                        : "bg-gray-200 hover:bg-gray-300"
+                    } rounded`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* 
             ปุ่ม Next

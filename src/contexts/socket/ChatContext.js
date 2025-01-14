@@ -30,7 +30,6 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     const handleRouteChange = () => {
       if (socket && chatRoomId) {
-        console.log(`User: ${userId} leaving room: ${chatRoomId}`);
         socket.emit("leaveRoom", chatRoomId);
       }
     };
@@ -46,11 +45,9 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     if (!isAuthenticated || !socket || !chatRoomId) return;
 
-    console.log(`User: ${userId} joining room: ${chatRoomId}`);
     socket.emit("joinRoom", chatRoomId);
 
     socket.on("receiveMessage", (msg) => {
-      console.log("New message received:", msg);
       setMessages((prev) => [...prev, msg]);
     });
 
