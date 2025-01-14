@@ -4,6 +4,11 @@ import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
+// Socket
+import { SocketConnectionProvider } from "@/contexts/socket/SocketConnectionContext";
+import { NotificationProvider } from "@/contexts/socket/NotificationContext";
+import { ChatProvider } from "@/contexts/socket/ChatContext";
+
 export default function App({ Component, pageProps }) {
   const router = useRouter();
 
@@ -31,7 +36,13 @@ export default function App({ Component, pageProps }) {
   // สำหรับหน้า User
   return (
     <AuthProvider>
-      <Component {...pageProps} />
+      <SocketConnectionProvider>
+        <NotificationProvider>
+          <ChatProvider>
+            <Component {...pageProps} />
+          </ChatProvider>
+        </NotificationProvider>
+      </SocketConnectionProvider>
     </AuthProvider>
   );
 }

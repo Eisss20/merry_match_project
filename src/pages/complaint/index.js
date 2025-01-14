@@ -1,5 +1,5 @@
 import { Footer, NavBar } from "@/components/NavBar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CustomButton, CardImage } from "@/components/CustomUi";
 import axios from "axios";
 import ShowAlertAndOpenModal from "@/components/Alertbox";
@@ -13,8 +13,9 @@ export default function Complaint() {
   const [description, setDescription] = useState("");
   const [modalMessage, setModalMessage] = useState("");
   const [modalNotice, setModalNotice] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCheckingToken, setIsCheckingToken] = useState(true); // ใช้สถานะนี้เฉพาะตอนเช็ค token
+
+  const modalRef = useRef();
 
   // ตรวจสอบ token เพื่อเช็คว่า user ล็อคอินหรือไม่
   useEffect(() => {
@@ -31,8 +32,11 @@ export default function Complaint() {
 
     if (!issue || !description) {
       setModalNotice("Missing Information");
-      setModalMessage("Please fill in all required fields so we can assist you better.");
-      setIsModalOpen(true);
+      setModalMessage(
+        "Please fill in all required fields so we can assist you better.",
+      );
+
+      modalRef.current?.showModal();
       return;
     }
 
@@ -44,7 +48,7 @@ export default function Complaint() {
       if (!token) {
         setModalNotice("Error");
         setModalMessage("Please log in first!");
-        setIsModalOpen(true);
+        modalRef.current?.showModal();
         return;
       }
 
@@ -58,27 +62,25 @@ export default function Complaint() {
       if (res.status === 201) {
         setModalNotice("Success!");
         setModalMessage("Complaint submitted. We'll review it soon");
-        setIsModalOpen(true);
+        modalRef.current?.showModal();
         setIssue("");
         setDescription("");
       } else {
         const errorMessage = res.data?.error || "Unexpected error";
         setModalNotice("Error");
         setModalMessage(`Error: ${errorMessage}`);
-        setIsModalOpen(true);
+        modalRef.current?.showModal();
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message;
       setModalNotice("Error");
       setModalMessage(`${errorMessage}`);
-      setIsModalOpen(true);
+      modalRef.current?.showModal();
     }
   };
 
   if (isCheckingToken) {
-    return (
-<LoadingMerry/>
-    );
+    return <LoadingMerry />;
   }
 
   return (
@@ -153,11 +155,11 @@ export default function Complaint() {
       <Footer />
 
       <ShowAlertAndOpenModal
+        modalRef={modalRef}
         modalId="modal_complaint"
         notice={modalNotice}
         message={modalMessage}
-        isOpen={isModalOpen}
-        closeModal={() => setIsModalOpen(false)}
+        closeModal={() => modalRef.current?.close()}
       />
     </>
   );

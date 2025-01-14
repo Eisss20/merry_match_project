@@ -6,16 +6,15 @@ import { FiX } from "react-icons/fi";
 import axios from "axios";
 import { useState } from "react";
 
-export default function TypingBar({
-  socket,
-  chatRoomId,
-  userId,
-  imageFiles,
-  setImageFiles,
-  setSelectedImage,
-}) {
+import { useChat } from "@/contexts/socket/ChatContext";
+import { useSocketConnection } from "@/contexts/socket/SocketConnectionContext";
+
+export default function TypingBar() {
   const [inputMessage, setInputMessage] = useState("");
   const [fileInputKey, setFileInputKey] = useState(Date.now());
+
+  const { socket, userId } = useSocketConnection();
+  const { chatRoomId, imageFiles, setImageFiles, setSelectedImage } = useChat();
 
   // File input handle
   const handleFileChange = (event) => {

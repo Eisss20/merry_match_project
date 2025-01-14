@@ -107,15 +107,21 @@ function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = (socket, chatRoomId) => {
+    if (socket) {
+      chatRoomId && socket.emit("leaveRoom", chatRoomId);
+
+      socket.disconnect();
+    }
+
     localStorage.removeItem("token");
 
-    setState({
-      ...state,
+    setState((prevState) => ({
+      ...prevState,
       success: "Logout successful.",
       error: null,
       user: null,
-    });
+    }));
 
     setIsAuthenticated(false);
     router.push("/");

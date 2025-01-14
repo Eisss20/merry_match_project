@@ -27,9 +27,9 @@ export default function CardSection() {
       {/* renderlists */}
       <div
         id="HowToMerrySection"
-        class="bg-utility-bg p-6 text-white lg:p-0 lg:py-24"
+        className="bg-utility-bg p-6 text-white lg:p-0 lg:py-24"
       >
-        <h2 class="mb-8 text-center text-4xl font-extrabold text-second-300">
+        <h2 className="mb-8 text-center text-4xl font-extrabold text-second-300">
           How to Merry
         </h2>
         <figure className="container mx-auto flex flex-col items-center space-y-6 lg:flex-row lg:justify-center lg:gap-5 lg:space-y-0">

@@ -9,9 +9,6 @@ export default async function handler(req, res) {
       // ดึง user_master, user_other จาก Body
       const { user_master, user_other } = req.body;
 
-      console.log("user_master:", user_master);
-      console.log("user_other:", user_other);
-
       // ตรวจสอบว่า user_master และ user_other มีค่าหรือไม่
       if (!user_master || !user_other) {
         return res.status(400).json({
@@ -42,11 +39,18 @@ export default async function handler(req, res) {
         });
       }
 
-      // Insert ข้อมูลใหม่
+      // Insert ข้อมูลใหม่ พร้อมลดจำนวนการไลค์
       const insertQuery = `
-        INSERT INTO Matching (user_master, user_other)
-        VALUES ($1, $2)
-        RETURNING user_master, user_other;
+        WITH inserted_match AS (
+          INSERT INTO Matching (user_master, user_other)
+          VALUES ($1, $2)
+          RETURNING user_master, user_other
+        )
+        UPDATE user_match_subscription
+        SET matches_remaining = GREATEST(matches_remaining - 1, 0)
+        FROM inserted_match
+        WHERE user_match_subscription.user_id = inserted_match.user_master
+        RETURNING inserted_match.user_master, inserted_match.user_other, user_match_subscription.matches_remaining;
       `;
       const insertResult = await connectionPool.query(insertQuery, [
         user_master,
@@ -66,8 +70,6 @@ export default async function handler(req, res) {
         user_other,
       ]);
 
-      console.log("matchCheckResult:", matchCheckResult.rows);
-
       if (matchCheckResult.rows.length > 0) {
         const chatRoomId = uuidv4();
 
@@ -77,16 +79,12 @@ export default async function handler(req, res) {
         const [{ matching_id: matching_id_1 }, { matching_id: matching_id_2 }] =
           matchCheckResult.rows;
 
-        console.log("date_match:", date_match);
-        console.log("matching_id_1:", matching_id_1);
-        console.log("matching_id_2:", matching_id_2);
-
         // SQL: Add data in chats table
         const chatsQuery = `
           INSERT INTO chats (matching_id, chat_room_id, user_master, user_other, created_at)
           VALUES
-            ($1, $3, $4, $5, $6),
-            ($2, $3, $5, $4, $6);
+            ($1, $3, $5, $4, $6),
+            ($2, $3, $4, $5, $6);
         `;
         const chatsValue = [
           matching_id_1,
@@ -119,10 +117,10 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error("Error processing match:", error);
-      res.status(500).json({ error: "Failed to create match." });
+      return res.status(500).json({ error: "Failed to create match." });
     }
   } else {
     res.setHeader("Allow", ["POST"]);
-    res.status(405).json({ error: `Method ${req.method} Not Allowed.` });
+    return res.status(405).json({ error: `Method ${req.method} Not Allowed.` });
   }
 }

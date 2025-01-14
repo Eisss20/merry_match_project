@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const { userMasterId, filter } = req.query;
 
     if (!filter) {
-      res.status(500).json({ error: "Required filter query" });
+      return res.status(500).json({ error: "Required filter query" });
     }
 
     // SQL: Fetch all matches data
@@ -31,7 +31,10 @@ export default async function handler(req, res) {
       otherUserDataValues,
     );
 
-    console.log("otherUserDataResult", otherUserDataResult.rows);
+    // Early return if no single match is found
+    if (otherUserDataResult.rows.length === 0) {
+      return res.status(200).json([]);
+    }
 
     // Return matches data
     if (filter === "matches") {
@@ -94,10 +97,10 @@ export default async function handler(req, res) {
       });
 
       // Return last messages data
-      res.status(200).json([...lastChats]);
+      return res.status(200).json([...lastChats]);
     }
   } catch (error) {
     console.error("Error fetching matches or chats:", error);
-    res.status(500).json({ error: "Unable to fetch matches or chats" });
+    return res.status(500).json({ error: "Unable to fetch matches or chats" });
   }
 }
