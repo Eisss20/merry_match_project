@@ -8,7 +8,7 @@ export default function PaymentSuccessPage() {
     router.query; // รับข้อมูลผ่าน query parameters
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <NavBar />
       <PaymentSuccess
         name_package={name_package}
@@ -16,6 +16,6 @@ export default function PaymentSuccessPage() {
         description={description}
       />
       <Footer />
-    </>
+    </div>
   );
 }

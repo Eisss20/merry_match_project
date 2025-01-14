@@ -15,7 +15,11 @@ function PaymentSuccess({ name_package, price, description }) {
   // ดึง userId จาก state ใน context ที่ได้มาจากการรับค่าของ Token ตอน login เข้ามาและเก็บเข้าไปใน state ในหน้า context
   // ทำการดึงมาใช้โดยผ่าน useAuth และทำการเข้าถึง state
   const { state, logout } = useAuth();
-  const userId = state.user?.id;
+  const [userId, setUserId] = useState();
+
+  useEffect(() => {
+    setUserId(state.user?.id);
+  }, [state.user?.id]);
 
   // แปลง description เป็น Array ก่อน
   let parsedDescription = [];
@@ -31,6 +35,8 @@ function PaymentSuccess({ name_package, price, description }) {
   }
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchSubscriptionDetails = async () => {
       try {
         const response = await axios.get(`/api/payment/subscription-detail`, {
@@ -64,7 +70,7 @@ function PaymentSuccess({ name_package, price, description }) {
 
   return (
     <>
-      <div className="container flex max-w-full flex-col justify-center p-3 pb-24 lg:flex lg:max-h-screen lg:flex-row lg:pt-20">
+      <div className="container mx-auto flex max-w-fit flex-grow flex-col justify-center p-3 pb-24 lg:flex lg:max-h-screen lg:flex-row lg:items-center lg:pt-20">
         {/* Header */}
         <div className="cotainer flew flex-col p-2 pt-4 lg:pr-24 lg:pt-10">
           <div className="pb-3 lg:mt-5">
@@ -83,7 +89,7 @@ function PaymentSuccess({ name_package, price, description }) {
             </div>
           </div>
 
-          <div className="container flex hidden flex-row gap-5 space-x-6 pb-40 pt-10 lg:block">
+          <div className="container hidden flex-row gap-5 space-x-6 pb-40 pt-10 lg:block">
             <CustomButton
               buttonType="secondary"
               onClick={() => router.push("/")}
@@ -100,9 +106,9 @@ function PaymentSuccess({ name_package, price, description }) {
         </div>
 
         {/* Package Card */}
-        <div className="mt-5 h-[25.5rem] w-[22rem] justify-center rounded-3xl border bg-bg-card p-5 shadow-lg">
+        <div className="mt-5 h-[25.5rem] w-full justify-center rounded-3xl border bg-bg-card p-5 shadow-lg lg:w-[22rem]">
           <div className="border-1 flex h-16 w-16 flex-row items-center justify-center rounded-2xl bg-gray-100">
-            <img src={icon_url} className="h-12 w-12 object-cover" />
+            <img src={icon_url} className="h-12 w-12 rounded-lg object-cover" />
           </div>
           <div className="gap-7 pt-3">
             <h1 className="text-[32px] text-white">{name_package}</h1>
