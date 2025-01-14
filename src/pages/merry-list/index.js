@@ -39,6 +39,8 @@ function MerryCountBox({ count = 0, text = "Merry", twoHearts = false }) {
 }
 
 function ProfileBox({ profileData, updateMerryToggle, onPreviewClick }) {
+  const router = useRouter();
+
   const [merryToggle, setMerryToggle] = useState(true);
 
   const ProfileButton = ({ className = "flex" }) => {
@@ -46,7 +48,11 @@ function ProfileBox({ profileData, updateMerryToggle, onPreviewClick }) {
       // ฟังก์ชันที่ใช้สลับสถานะของปุ่ม Merry ระหว่างสีเทาและสีแดง
       const newToggleState = !merryToggle;
       setMerryToggle(newToggleState);
-      updateMerryToggle(profileData.user_other, newToggleState);
+      updateMerryToggle(
+        profileData.user_other,
+        profileData.chat_room_id,
+        newToggleState,
+      );
       // ส่งข้อมูล user_other และสถานะของปุ่ม Merry ไปยังฟังก์ชัน updateMerryToggle ที่อยู่ใน ProfileBox
     };
 
@@ -78,7 +84,7 @@ function ProfileBox({ profileData, updateMerryToggle, onPreviewClick }) {
           {profileData.is_match === true && (
             <button
               className={`flex size-11 items-center justify-center rounded-2xl bg-utility-primary text-fourth-700 transition-all duration-300 [box-shadow:3px_3px_12.5px_rgba(0,0,0,0.1)] hover:scale-105 md:size-12`}
-              onClick={() => {}}
+              onClick={() => router.push(`/chat/${profileData.chat_room_id}`)}
             >
               <HiMiniChatBubbleOvalLeftEllipsis className="size-5 md:size-6" />
             </button>
@@ -198,6 +204,7 @@ export default function MerryList() {
   const router = useRouter();
   const [profileDataRaw, setProfileDataRaw] = useState([]);
   const [profilesToDelete, setProfilesToDelete] = useState([]);
+  const [chatRoomsToDelete, setChatRoomsToDelete] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalTrue, setTotalTrue] = useState(0);
   const [totalFalse, setTotalFalse] = useState(0);
@@ -260,14 +267,20 @@ export default function MerryList() {
     const storedProfiles = JSON.parse(
       sessionStorage.getItem("profilesToDelete") || "[]", // ดึง profilesToDelete จาก sessionStorage ถ้าไม่มีให้ใช้ค่าเริ่มต้นเป็น []
     );
+
+    const storedChatRoomId = JSON.parse(
+      sessionStorage.getItem("chatRoomsToDelete") || "[]", // ดึง profilesToDelete จาก sessionStorage ถ้าไม่มีให้ใช้ค่าเริ่มต้นเป็น []
+    );
     if (storedProfiles.length > 0) {
-      deleteProfiles(storedProfiles); // ถ้ามี profilesToDelete ใน sessionStorage ให้ลบ profiles ที่อยู่ใน profilesToDelete เมื่อรีเฟรชเว็บเพจ
+      deleteProfiles(storedProfiles, storedChatRoomId); // ถ้ามี profilesToDelete ใน sessionStorage ให้ลบ profiles ที่อยู่ใน profilesToDelete เมื่อรีเฟรชเว็บเพจ
     }
 
     fetchProfiles();
   }, []); // ให้เรียกใช้ฟังก์ชันเมื่อคอมโพเนนต์ถูกโหลดเท่านั้น
 
-  const deleteProfiles = async (profiles) => {
+  console.log("ProfileDataRaw:", profileDataRaw);
+
+  const deleteProfiles = async (profiles, storedChatRoomId) => {
     const token = localStorage.getItem("token"); // ดึง token จาก localStorage
     if (profiles.length === 0 || !token) {
       console.warn("Empty profiles list or missing token.");
@@ -279,25 +292,44 @@ export default function MerryList() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: { users_to_delete: profiles },
+        data: {
+          users_to_delete: profiles,
+          chatroom_to_delete: storedChatRoomId,
+        },
       });
       console.log("Deleted profiles:", profiles);
       console.log("Response status:", response.status);
       console.log("Response data:", response.data);
       sessionStorage.removeItem("profilesToDelete");
+      sessionStorage.removeItem("chatRoomsToDelete");
     } catch (error) {
       console.error("Error deleting profiles:", error);
     }
   };
 
-  const updateMerryToggle = (userOther, isActive) => {
+  const updateMerryToggle = (userOther, chatRoomId, isActive) => {
     // ฟังก์ชันที่ใช้สลับสถานะของปุ่ม Merry ระหว่างสีเทาและสีแดง
     const updatedProfiles = isActive // ถ้าปุ่ม Merry ถูกกด ให้เพิ่ม userOther ลงใน profilesToDelete และบันทึกลง sessionStorage
       ? profilesToDelete.filter((id) => id !== userOther) //  ถูกกดเป็นสีแดง ให้ลบ userOther ออกจาก profilesToDelete และบันทึกลง sessionStorage
       : [...profilesToDelete, userOther]; // ถูกกดเป็นสีเทา ให้เพิ่ม userOther ลงใน profilesToDelete และบันทึกลง sessionStorage เพื่อรอการลบ
 
+    // Update chatRoomsToDelete
+    const updatedChatRooms = isActive
+      ? chatRoomsToDelete.filter((id) => id !== chatRoomId) // Remove if toggled off
+      : chatRoomId !== null
+        ? Array.from(new Set([...chatRoomsToDelete, chatRoomId])) // Add if toggled on, ensuring no duplicates
+        : chatRoomsToDelete; // Skip adding null chatRoomId
+
+    console.log("updatedProfiles:", updatedProfiles);
+
     setProfilesToDelete(updatedProfiles);
+    setChatRoomsToDelete(updatedChatRooms);
+
     sessionStorage.setItem("profilesToDelete", JSON.stringify(updatedProfiles)); // บันทึก profilesToDelete ลงใน sessionStorage
+    sessionStorage.setItem(
+      "chatRoomsToDelete",
+      JSON.stringify(updatedChatRooms),
+    );
   };
 
   if (loading) {
