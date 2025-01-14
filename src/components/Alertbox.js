@@ -1,10 +1,14 @@
-import { useState } from "react";
-
 // คอมโพเนนต์ ShowAlertAndOpenModal
-const ShowAlertAndOpenModal = ({ modalId, notice, message, isOpen, closeModal }) => {
+const ShowAlertAndOpenModal = ({
+  modalId,
+  notice,
+  message,
+  closeModal,
+  modalRef,
+}) => {
   return (
     <>
-      <dialog id={modalId} className="modal" open={isOpen}>
+      <dialog id={modalId} className="modal" ref={modalRef}>
         <div className="modal-box">
           <form method="dialog">
             <button

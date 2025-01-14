@@ -51,7 +51,6 @@ export const NotificationProvider = ({ children }) => {
 
     // Listen for new notifications
     socket.on("newNotifications", (data) => {
-      console.log("New notifications received:", data);
       setNotifications(data);
       const unread = data.filter(
         (notification) => !notification.is_read,

@@ -20,7 +20,6 @@ export const SocketConnectionProvider = ({ children }) => {
     // Register user if authenticated
     if (state.user?.id && isAuthenticated) {
       socketInstance.emit("registerUser", state.user.id);
-      console.log(`User registered globally with WebSocket: ${state.user.id}`);
       setUserId(state.user.id);
     }
 

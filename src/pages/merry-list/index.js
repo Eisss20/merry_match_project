@@ -366,7 +366,7 @@ export default function MerryList() {
             ))}
           </div>
         ) : (
-          <p className="text-base font-semibold text-fourth-600 lg:text-xl text-center">
+          <p className="text-center text-base font-semibold text-fourth-600 lg:text-xl">
             Your Merry List is empty. Start matching!
           </p>
         )}

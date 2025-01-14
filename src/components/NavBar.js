@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import axios from "axios";
 
 import { useSocketConnection } from "@/contexts/socket/SocketConnectionContext";
 import { useNotifications } from "@/contexts/socket/NotificationContext";
@@ -37,6 +38,12 @@ export function NavBar() {
   const { socket } = useSocketConnection();
   const { chatRoomId } = useChat();
 
+  const [merryLimitData, setMerryLimitData] = useState({
+    matchesRemaining: null,
+    totalLimit: null,
+    subscriptionId: null,
+  });
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuNotifOpen, setMenuNotifOpen] = useState(false);
   const [menuChatOpen, setMenuChatOpen] = useState(false);
@@ -46,24 +53,15 @@ export function NavBar() {
   const menuList = [
     { name: "Profile", logo: HiMiniUser, path: "/profile" },
     { name: "Merry list", logo: GoHeartFill, path: "/merry-list" },
-    { name: "Merry Membership", logo: RiBox3Fill, path: "/packages" },
+    { name: "Merry Membership", logo: RiBox3Fill, path: "/payment/membership" },
     { name: "Compliant", logo: IoWarning, path: "/complaint" },
   ];
 
-  // Disable scroll on mobile dropdown
-  useEffect(() => {
-    if (menuOpen || menuNotifOpen || menuChatOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+  const filteredMenuList = menuList.filter(
+    (item) =>
+      !(item.name === "Merry Membership" && !merryLimitData.subscriptionId),
+  );
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen, menuNotifOpen, menuChatOpen]);
-
-  // Notification
   // Notification socket context
   const {
     notifications,
@@ -83,6 +81,49 @@ export function NavBar() {
   const handleClientNotif = () => {
     markNotifAsReadOnClient();
   };
+
+  // Disable scroll on mobile dropdown
+  useEffect(() => {
+    if (menuOpen || menuNotifOpen || menuChatOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen, menuNotifOpen, menuChatOpen]);
+
+  // Fetch merry limit data
+  useEffect(() => {
+    if (!state.user?.id) return;
+
+    const fetchMatchData = async () => {
+      try {
+        const response = await axios.get(
+          `/api/matches/merryLimit/${state.user?.id}`,
+        );
+
+        setMerryLimitData({
+          matchesRemaining: response.data.matches_remaining,
+          totalLimit: response.data.total_limit,
+          subscriptionId: response.data.subscription_id,
+        });
+      } catch (error) {
+        console.error("Error fetching match data:", error);
+      }
+    };
+
+    fetchMatchData();
+  }, [state.user?.id]);
+
+  // Call handleClientNotif() when close notification div
+  useEffect(() => {
+    if (!menuNotifOpen) {
+      handleClientNotif();
+    }
+  }, [menuNotifOpen]);
 
   return (
     <div className="flex flex-col">
@@ -110,14 +151,28 @@ export function NavBar() {
           {isAuthenticated && (
             <button
               type="button"
-              className="flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
+              className="relative flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
+              onBlur={handleClientNotif}
               onClick={() => {
                 if (menuOpen) setMenuOpen(false);
                 if (menuChatOpen) setMenuChatOpen(false);
-                setMenuNotifOpen(!menuNotifOpen);
+
+                // Toggle notification menu
+                setMenuNotifOpen((prev) => !prev);
+
+                if (!menuNotifOpen) {
+                  handleServerNotif();
+                }
               }}
             >
               <HiBell className="size-5" />
+
+              {/* Unread count */}
+              {unreadCount > 0 && (
+                <div className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-primary-400 text-xs font-bold text-utility-primary">
+                  <p>{unreadCount}</p>
+                </div>
+              )}
             </button>
           )}
 
@@ -184,7 +239,7 @@ export function NavBar() {
 
                     {/* Unread count */}
                     {unreadCount > 0 && (
-                      <div className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-primary-400 text-xs text-utility-primary">
+                      <div className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-primary-400 text-xs font-bold text-utility-primary">
                         <p>{unreadCount}</p>
                       </div>
                     )}
@@ -313,7 +368,7 @@ export function NavBar() {
                   >
                     <li>
                       <Link
-                        href="#"
+                        href="/packages"
                         className="mx-2 mt-2 flex items-center justify-center rounded-full bg-gradient-to-r from-[#742138] to-[#A878BF] py-3 font-semibold text-utility-primary hover:!text-fourth-300 focus:text-utility-primary active:!text-fourth-400"
                       >
                         <BsStars className="size-5 text-[#F3B984]" />
@@ -321,14 +376,14 @@ export function NavBar() {
                       </Link>
                     </li>
 
-                    {menuList.map((list, index) => {
+                    {filteredMenuList.map((list, index) => {
                       const ListImg = list.logo;
 
                       return (
                         <li key={list.name}>
                           <Link
                             href={list.path}
-                            className={`group mx-1 flex items-center gap-3 rounded-lg px-3 py-2 font-semibold text-fourth-700 hover:!bg-fourth-100 focus:bg-utility-primary focus:!text-fourth-700 active:!bg-fourth-200 ${index === 0 && "mt-2"} ${index === menuList.length - 1 && "mb-2"}`}
+                            className={`group mx-1 flex items-center gap-3 rounded-lg px-3 py-2 font-semibold text-fourth-700 hover:!bg-fourth-100 focus:bg-utility-primary focus:!text-fourth-700 active:!bg-fourth-200 ${index === 0 && "mt-2"} ${index === filteredMenuList.length - 1 && "mb-1"}`}
                           >
                             <ListImg className="size-5 text-primary-100 transition-colors duration-200 group-hover:text-primary-200" />
                             {list.name}
@@ -374,7 +429,7 @@ export function NavBar() {
                 </Link>
               </li>
 
-              {menuList.map((list) => {
+              {filteredMenuList.map((list) => {
                 const ListImg = list.logo;
 
                 return (
@@ -532,11 +587,7 @@ export function NavBar() {
       {menuChatOpen && (
         <div className="fixed inset-0 z-40 mt-16 min-h-0 bg-utility-primary lg:hidden">
           <div className="flex h-full min-h-0 w-full flex-col gap-3 overflow-y-auto">
-            <LeftSidebar
-              type={"mobile"}
-              menuChatOpen={menuChatOpen}
-              setMenuChatOpen={setMenuChatOpen}
-            />
+            <LeftSidebar type="mobile" setMenuChatOpen={setMenuChatOpen} />
           </div>
         </div>
       )}

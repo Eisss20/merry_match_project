@@ -11,6 +11,7 @@ import LeftSidebar from "@/components/matches/LeftSidebar";
 import MessageSection from "@/components/chat/MessageSection";
 import TypingBar from "@/components/chat/TypingBar";
 import ImageModal from "@/components/chat/ImageModal";
+import LoadingMerry from "@/components/custom-loading/LoadingMerry";
 
 import { useChat } from "@/contexts/socket/ChatContext";
 
@@ -30,7 +31,7 @@ export default function Chat() {
   }, [isAuthenticated, state.loading, router]);
 
   if (state.loading || !isAuthenticated) {
-    return null;
+    return <LoadingMerry />;
   }
 
   return (
@@ -49,7 +50,7 @@ export default function Chat() {
               <button
                 type="button"
                 onClick={() => {
-                  router.push("/");
+                  router.push("/matches");
                 }}
               >
                 <IoIosArrowBack className="size-6 text-fourth-700 transition-colors duration-300 hover:text-fourth-600" />

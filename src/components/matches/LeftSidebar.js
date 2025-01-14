@@ -13,7 +13,11 @@ import "swiper/css";
 import { useSocketConnection } from "@/contexts/socket/SocketConnectionContext";
 import { useNotifications } from "@/contexts/socket/NotificationContext";
 
-const MatchesSwiper = ({ matchesList, setMenuChatOpen }) => {
+const MatchesSwiper = ({
+  matchesList,
+  setMenuChatOpen = () => {},
+  type = "desktop",
+}) => {
   const router = useRouter();
 
   return (
@@ -24,7 +28,7 @@ const MatchesSwiper = ({ matchesList, setMenuChatOpen }) => {
             <div
               className="group relative aspect-square w-20 min-w-20 cursor-pointer"
               onClick={() => {
-                setMenuChatOpen(false);
+                if (type === "mobile") setMenuChatOpen(false);
                 router.push(`/chat/${match.chat_room_id}`);
               }}
             >
@@ -65,7 +69,10 @@ const MatchesSwiper = ({ matchesList, setMenuChatOpen }) => {
   );
 };
 
-export default function LeftSidebar({ type = "desktop", setMenuChatOpen }) {
+export default function LeftSidebar({
+  setMenuChatOpen = () => {},
+  type = "desktop",
+}) {
   const router = useRouter();
   const { id: chatRoomId } = router.query;
 
@@ -81,7 +88,7 @@ export default function LeftSidebar({ type = "desktop", setMenuChatOpen }) {
           type="button"
           className={`flex w-full flex-col items-center gap-4 rounded-xl border bg-fourth-100 px-3 py-6 transition-colors duration-300 hover:bg-fourth-200 ${!chatRoomId && "border-second-500"}`}
           onClick={() => {
-            setMenuChatOpen(false);
+            if (type === "mobile") setMenuChatOpen(false);
             router.push("/matches");
           }}
         >
@@ -116,6 +123,7 @@ export default function LeftSidebar({ type = "desktop", setMenuChatOpen }) {
             <MatchesSwiper
               matchesList={matchesList}
               setMenuChatOpen={setMenuChatOpen}
+              type="mobile"
             />
           )}
         </div>
@@ -156,7 +164,7 @@ export default function LeftSidebar({ type = "desktop", setMenuChatOpen }) {
                     key={index}
                     className={`flex w-full cursor-pointer items-center gap-4 rounded-2xl border p-3 transition-colors duration-300 hover:bg-fourth-100 ${chatRoomId === chat.chat_room_id ? "border-second-500 bg-fourth-100" : "border-transparent"} `}
                     onClick={() => {
-                      setMenuChatOpen(false);
+                      if (type === "mobile") setMenuChatOpen(false);
                       router.push(`/chat/${chat.chat_room_id}`);
                     }}
                   >
