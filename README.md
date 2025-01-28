@@ -7,6 +7,10 @@
   <i>Merry Match is a next-generation online dating platform that helps users connect, discover matches, and build meaningful relationships. Whether looking for a serious relationship, expanding social circles, or meeting locals while traveling, Merry Match offers a seamless and engaging experience.</i>
 </p>
 
+<p align="center">
+  ❤️ <a href="https://merry-match-project.vercel.app" target="_blank"><b>Live Demo</b></a> ❤️
+</p>
+
 
 ## Key Features
 
