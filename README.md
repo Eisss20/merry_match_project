@@ -132,3 +132,11 @@ A live demo of Merry Match is available for users to explore the platform’s fe
 For a detailed view of the database schema, refer to the ERD below:  
 [View ERD](https://lucid.app/lucidchart/73f87045-46c6-43c1-beb6-9a504c9003fc/edit?viewport_loc=-1827%2C1069%2C2994%2C1391%2C0_0&invitationId=inv_f147fc9b-0481-429e-a62a-5fbf7faa4b57)
 
+## 👨‍💻 Developed by
+- [Teehim00](https://github.com/Teehim00)  
+- [Tanagorn-Boy](https://github.com/Tanagorn-Boy)  
+- [sappakit](https://github.com/sappakit) 
+- [TongBud44](https://github.com/TongBud44) 
+- [Eisss20](https://github.com/Eisss20) 
+
+
