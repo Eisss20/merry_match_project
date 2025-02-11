@@ -54,53 +54,6 @@
 - **Handle User Complaints**  
   Admins can review, manage, and take action on user complaints to ensure a safe and respectful platform.
 
-## Demo
-
-A live demo of Merry Match is available for users to explore the platform’s features and functionality.
-
-## This demo image represents the user side of the platform
-
-###  Landing page ### 
-
-![image](https://github.com/user-attachments/assets/3e1b58b9-1aa4-4116-9a61-8b83da508fbe)
-
-###  Registration ### 
-
-![image](https://github.com/user-attachments/assets/73a03de7-df1a-4db2-99c5-3c0ac42cdfe2)
-
-
-###  Matching ### 
-
-![image](https://github.com/user-attachments/assets/28b92cc1-f10d-45b5-86ed-8893c4643646)
-
-
-###  List matching ### 
-
-![image](https://github.com/user-attachments/assets/62aa1c5f-2188-47bd-8209-bce01ed88299)
-
-
-###  Realtime Chat ### 
-![image](https://github.com/user-attachments/assets/95c6a450-bc16-43f0-8ee4-2d35c15639e8)
-
-
-###  Package for subscription ### 
-![image](https://github.com/user-attachments/assets/ab8ed071-9135-4786-b9cd-579ddf72866d)
-
-###  complaint  ### 
-
-![image](https://github.com/user-attachments/assets/9e968660-5816-4948-a7fb-d62d584a895e)
-
-## This demo image represents the admin side of the platform."
-
-###  CRUD Package  ### 
-
-![image](https://github.com/user-attachments/assets/294e6e59-5922-4fd9-8507-5fcd2d6417f0)
-
-###  Monitor complaint  ### 
-
-![image](https://github.com/user-attachments/assets/9efa82ef-82be-415a-adf5-96a2c79a3e98)
-
-
 ## Technology Stack
 
 ### Frontend
