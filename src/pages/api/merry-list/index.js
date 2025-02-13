@@ -44,7 +44,9 @@ export default async function handler(req, res) {
               (
                   SELECT c.chat_room_id
                   FROM chats c
-                  WHERE c.user_other = Matching.user_other
+                  WHERE 
+                    (c.user_master = Matching.user_master AND c.user_other = Matching.user_other)
+                    OR (c.user_master = Matching.user_other AND c.user_other = Matching.user_master)
                   LIMIT 1
               ) AS chat_room_id -- เพิ่มการดึง chat_room_id ของ user_other
           FROM Matching
@@ -58,7 +60,7 @@ export default async function handler(req, res) {
           LEFT JOIN Image_Profiles ON User_Profiles.profile_id = Image_Profiles.profile_id
           WHERE Matching.user_master = $1
           GROUP BY 
-              Matching.user_other, User_Profiles.profile_id, Gender.gender_name, 
+              Matching.user_other, Matching.user_master, User_Profiles.profile_id, Gender.gender_name, 
               SexualPreference.gender_name, Meeting_Interest.meeting_name, 
               Racial_Identity.racial_name, City.city_name, Location.location_name,
               Matching.is_match, Matching.date_match
