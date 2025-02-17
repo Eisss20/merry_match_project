@@ -104,7 +104,7 @@ export default function MessageSection() {
                         <img
                           src={otherUserData?.image_profile}
                           alt=""
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover [overflow-clip-margin:unset]"
                         />
                       )}
                     </div>

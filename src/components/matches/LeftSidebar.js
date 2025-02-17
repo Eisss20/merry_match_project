@@ -31,7 +31,7 @@ const MatchesSwiper = ({
               <img
                 src={match.image_profile}
                 alt=""
-                className="h-full w-full rounded-2xl object-cover transition-opacity duration-300 group-hover:opacity-85"
+                className="h-full w-full rounded-2xl object-cover transition-opacity duration-300 [overflow-clip-margin:unset] group-hover:opacity-85"
               />
 
               <div className="absolute -bottom-1 -right-1">
@@ -168,7 +168,7 @@ export default function LeftSidebar({
                       <img
                         src={chat.image_profile}
                         alt=""
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover [overflow-clip-margin:unset]"
                       />
                     </div>
 

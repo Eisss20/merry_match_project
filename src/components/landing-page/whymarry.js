@@ -7,9 +7,12 @@ import { TiStarOutline } from "react-icons/ti";
 export default function WhyMerrySection() {
   return (
     <>
-      <section id="WhyMerrySection" className="flex flex-col items-center justify-center bg-utility-bg lg:flex-row lg:gap-28">
+      <section
+        id="WhyMerrySection"
+        className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center bg-utility-bg pt-12 lg:flex-row lg:gap-28 lg:pt-24"
+      >
         {/* Left Content */}
-        <article className="max-w-lg p-8 text-white lg:p-8">
+        <article className="w-full p-6 text-white lg:p-8 lg:pl-0">
           <h1 className="mb-6 text-4xl font-extrabold text-second-300 lg:mb-10 lg:text-5xl">
             Why Merry Match?
           </h1>
@@ -31,7 +34,7 @@ export default function WhyMerrySection() {
 
         {/* Right Content */}
         <div className="relative">
-          <figure className="flext flex px-[5rem] py-[10rem] lg:px-[10rem]">
+          <figure className="flex px-[5rem] py-[10rem] lg:px-[10rem]">
             {/* Box 1 */}
             <div className="absolute right-[1.5rem] top-[1.3rem] z-20 flex h-[4.8rem] w-[11rem] items-center justify-between overflow-hidden rounded-badge bg-pink-700 drop-shadow lg:-left-[1.5rem] lg:right-[0rem] lg:top-[0.8rem] lg:h-[5.4rem] lg:w-[12rem]">
               <div className="mb-5 ml-1 flex flex-row items-center justify-center px-4">

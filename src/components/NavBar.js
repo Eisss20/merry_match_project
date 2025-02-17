@@ -133,47 +133,47 @@ export function NavBar() {
         </Link>
 
         {/* Mobile */}
-        <div
-          className={`flex items-center lg:hidden ${isAuthenticated ? "gap-6" : "gap-8"}`}
-        >
-          <button
-            type="button"
-            className="flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
-            onClick={() => {
-              if (menuOpen) setMenuOpen(false);
-              if (menuNotifOpen) setMenuNotifOpen(false);
-              setMenuChatOpen(!menuChatOpen);
-            }}
-          >
-            <AiFillMessage className="size-4" />
-          </button>
-
+        <div className="flex items-center gap-6 lg:hidden">
           {isAuthenticated && (
-            <button
-              type="button"
-              className="relative flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
-              onBlur={handleClientNotif}
-              onClick={() => {
-                if (menuOpen) setMenuOpen(false);
-                if (menuChatOpen) setMenuChatOpen(false);
+            <>
+              <button
+                type="button"
+                className="flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
+                onClick={() => {
+                  if (menuOpen) setMenuOpen(false);
+                  if (menuNotifOpen) setMenuNotifOpen(false);
+                  setMenuChatOpen(!menuChatOpen);
+                }}
+              >
+                <AiFillMessage className="size-4" />
+              </button>
 
-                // Toggle notification menu
-                setMenuNotifOpen((prev) => !prev);
+              <button
+                type="button"
+                className="relative flex size-9 items-center justify-center rounded-full bg-fourth-100 text-primary-200 transition-colors duration-300 hover:bg-fourth-200"
+                onBlur={handleClientNotif}
+                onClick={() => {
+                  if (menuOpen) setMenuOpen(false);
+                  if (menuChatOpen) setMenuChatOpen(false);
 
-                if (!menuNotifOpen) {
-                  handleServerNotif();
-                }
-              }}
-            >
-              <HiBell className="size-5" />
+                  // Toggle notification menu
+                  setMenuNotifOpen((prev) => !prev);
 
-              {/* Unread count */}
-              {unreadCount > 0 && (
-                <div className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-primary-400 text-xs font-bold text-utility-primary">
-                  <p>{unreadCount}</p>
-                </div>
-              )}
-            </button>
+                  if (!menuNotifOpen) {
+                    handleServerNotif();
+                  }
+                }}
+              >
+                <HiBell className="size-5" />
+
+                {/* Unread count */}
+                {unreadCount > 0 && (
+                  <div className="absolute -right-2 -top-2 flex size-6 items-center justify-center rounded-full bg-primary-400 text-xs font-bold text-utility-primary">
+                    <p>{unreadCount}</p>
+                  </div>
+                )}
+              </button>
+            </>
           )}
 
           <button
@@ -353,12 +353,12 @@ export function NavBar() {
                     type="button"
                     tabIndex={0}
                     role="button"
-                    className="relative flex size-11 overflow-hidden rounded-full"
+                    className="aspect-square w-11 overflow-hidden rounded-full"
                   >
                     <img
                       src={state.user?.image_profile[0]}
                       alt="user profile picture"
-                      className="object-cover transition-opacity duration-300 hover:opacity-85"
+                      className="h-full w-full rounded-full object-cover transition-opacity duration-300 [overflow-clip-margin:unset] hover:opacity-85"
                     />
                   </div>
 

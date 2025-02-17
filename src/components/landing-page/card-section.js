@@ -27,21 +27,23 @@ export default function CardSection() {
       {/* renderlists */}
       <div
         id="HowToMerrySection"
-        className="bg-utility-bg p-6 text-white lg:p-0 lg:py-24"
+        className="bg-utility-bg px-6 pb-24 pt-12 text-white lg:p-0 lg:py-36 lg:pt-24"
       >
         <h2 className="mb-8 text-center text-4xl font-extrabold text-second-300">
           How to Merry
         </h2>
-        <figure className="container mx-auto flex flex-col items-center space-y-6 lg:flex-row lg:justify-center lg:gap-5 lg:space-y-0">
+
+        <figure className="container mx-auto flex flex-col space-y-6 lg:flex-row lg:justify-center lg:gap-5 lg:space-y-0">
           {steps.map((step, index) => (
             <div
               key={index}
-              className="flex w-full flex-col items-center rounded-badge bg-second-800 p-10 lg:w-[15rem]"
+              className="flex w-full flex-col items-center justify-start gap-6 rounded-badge bg-second-800 p-8 lg:w-[15rem]"
             >
-              <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-second-600 text-4xl">
+              <div className="flex min-h-24 min-w-24 items-center justify-center rounded-full bg-second-600 text-4xl">
                 <span className="text-center">{step.emoji}</span>
               </div>
-              <article className="mt-5 text-center">
+
+              <article className="text-center">
                 <h3 className="mb-2 text-xl font-semibold">{step.title}</h3>
                 <p className="text-sm text-gray-300">{step.description}</p>
               </article>

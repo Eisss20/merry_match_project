@@ -7,8 +7,8 @@ export default function StartMacthing() {
 
   return (
     <>
-      <section className="mx-auto flex items-center justify-center bg-utility-bg lg:px-16 lg:pb-10">
-        <div className="lg-pb-0 relative w-full max-w-5xl overflow-hidden bg-gradient-to-r from-primary-600 via-utility-third to-purple-500 p-8 pb-28 text-center lg:rounded-badge lg:p-20">
+      <section className="mx-auto flex items-center justify-center bg-utility-bg lg:container lg:px-20 lg:pb-24">
+        <div className="relative w-full max-w-5xl overflow-hidden bg-gradient-to-r from-primary-600 via-utility-third to-purple-500 p-6 pb-28 text-center lg:rounded-badge lg:p-20">
           {/* Decorative Heart - Big (อยู่ข้างหลัง h2) */}
           <div>
             <GoHeartFill className="absolute -left-7 top-4 z-0 h-[140px] w-[151px] -rotate-[20deg] text-primary-300 opacity-30" />
@@ -16,7 +16,7 @@ export default function StartMacthing() {
 
           <h2 className="relative z-10 mb-6 mt-16 text-center text-5xl font-extrabold text-white lg:mt-0 lg:text-4xl">
             Let's start finding <br />
-            and matching someone&nbsp;new
+            and matching someone new
           </h2>
 
           <CustomButton
